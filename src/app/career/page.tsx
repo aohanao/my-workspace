@@ -12,6 +12,7 @@ import {
   Award,
   CheckCircle2,
   TrendingUp,
+  Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { JobApplication, JobStatus } from '@/types'
@@ -116,6 +117,23 @@ export default function CareerPage() {
             <FileSpreadsheet className="w-4 h-4" />
             <span>导入飞书</span>
           </button>
+
+          {/* 清空列表 */}
+          {jobs.length > 0 && (
+            <button
+              onClick={() => {
+                if (confirm(`确定要清空全部 ${jobs.length} 条投递记录吗？清空后可通过飞书重新导入`)) {
+                  StorageService.saveJobs([])
+                  setJobs([])
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
+              title="一键清空所有投递记录"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>清空记录</span>
+            </button>
+          )}
 
           {/* 新增投递 */}
           <button

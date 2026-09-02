@@ -57,10 +57,18 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
     }
   }
 
+  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace')
+
   const handleConfirmImport = () => {
     if (!parsedResult || parsedResult.jobs.length === 0) return
-    const { added } = StorageService.batchAddJobs(parsedResult.jobs)
-    onSuccess(added)
+    
+    if (importMode === 'replace') {
+      StorageService.saveJobs(parsedResult.jobs)
+      onSuccess(parsedResult.jobs.length)
+    } else {
+      const { added } = StorageService.batchAddJobs(parsedResult.jobs)
+      onSuccess(added)
+    }
     onClose()
   }
 
@@ -247,11 +255,34 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
 
         {/* 底部按钮 */}
         {parsedResult && (
-          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-white/[0.08] bg-white/[0.02] flex items-center justify-between gap-2">
-            <span className="text-[11px] text-zinc-500 truncate">
-              确认后将立即合并写入云端数据库与看板
-            </span>
-            <div className="flex items-center gap-2 shrink-0">
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-white/[0.08] bg-white/[0.02] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-zinc-400">导入方式：</span>
+              <button
+                type="button"
+                onClick={() => setImportMode('replace')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                  importMode === 'replace'
+                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 font-semibold'
+                    : 'bg-white/[0.03] text-zinc-400 border-white/[0.06]'
+                }`}
+              >
+                覆盖替换全部 (清理旧数据)
+              </button>
+              <button
+                type="button"
+                onClick={() => setImportMode('append')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                  importMode === 'append'
+                    ? 'bg-blue-500/15 text-blue-300 border-blue-500/30 font-semibold'
+                    : 'bg-white/[0.03] text-zinc-400 border-white/[0.06]'
+                }`}
+              >
+                追加合并
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               <button
                 onClick={onClose}
                 className="px-3.5 py-1.5 rounded-xl text-xs text-zinc-400 hover:text-white"
@@ -262,7 +293,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 onClick={handleConfirmImport}
                 className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-semibold linear-btn-primary shadow-lg shadow-blue-500/20"
               >
-                <span>确认导入 ({parsedResult.successCount}条)</span>
+                <span>{importMode === 'replace' ? '全新覆盖导入' : '追加导入'} ({parsedResult.successCount}条)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
