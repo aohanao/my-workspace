@@ -48,9 +48,8 @@ export default function ResearchPage() {
 
   useEffect(() => {
     loadAll()
-    const handleUpdate = () => loadAll()
-    window.addEventListener('workspace-data-updated', handleUpdate)
-    return () => window.removeEventListener('workspace-data-updated', handleUpdate)
+    window.addEventListener('workspace-data-updated', loadAll)
+    return () => window.removeEventListener('workspace-data-updated', loadAll)
   }, [])
 
   const totalCurrentWords = thesis.chapters.reduce((acc, ch) => acc + (ch.currentWords || 0), 0)
@@ -112,14 +111,14 @@ export default function ResearchPage() {
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <GraduationCap className="w-5 h-5" />
             </div>
-            <span>科研与硕士毕业管理</span>
+            <span>硕士毕业管理</span>
           </h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            论文写作 · 模型训练实验 · 项目工程 · 毕业关键节点
+          <p className="text-xs text-zinc-400 mt-1 truncate max-w-2xl">
+            《钻爆法隧道全工序机械化施工智能配置方法及系统研究》· 论文撰写与节点把控
           </p>
         </div>
 
-        {/* 4 大子版块切换 Tab (支持移动端平滑横向滑动) */}
+        {/* 4 大子版块切换 Tab */}
         <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06] overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveTab('thesis')}
@@ -130,7 +129,7 @@ export default function ResearchPage() {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-            <span>1. 论文写作</span>
+            <span>1. 论文撰写</span>
           </button>
           <button
             onClick={() => setActiveTab('models')}
@@ -141,7 +140,7 @@ export default function ResearchPage() {
             }`}
           >
             <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-            <span>2. 模型训练</span>
+            <span>2. 模拟与算法</span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
@@ -152,7 +151,7 @@ export default function ResearchPage() {
             }`}
           >
             <Code2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>3. 项目开发</span>
+            <span>3. 系统工程</span>
           </button>
           <button
             onClick={() => setActiveTab('milestones')}
@@ -163,12 +162,12 @@ export default function ResearchPage() {
             }`}
           >
             <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
-            <span>4. 进度管理</span>
+            <span>4. 毕业节点</span>
           </button>
         </div>
       </div>
 
-      {/* ===================== 板块 1: 论文写作 ===================== */}
+      {/* ===================== 板块 1: 论文撰写 ===================== */}
       {activeTab === 'thesis' && (
         <div className="space-y-4 sm:space-y-6">
           {/* 论文总体进展卡片 */}
@@ -176,11 +175,11 @@ export default function ResearchPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
-                  硕士学位论文课题
+                  西南交通大学 硕士学位论文开题课题
                 </span>
                 <h2 className="text-sm sm:text-base font-semibold text-white mt-2.5 leading-snug">{thesis.title}</h2>
                 <div className="flex items-center gap-3 sm:gap-4 text-xs text-zinc-400 mt-2 flex-wrap">
-                  <span>盲审节点: <strong className="text-zinc-200">{thesis.blindReviewDate}</strong></span>
+                  <span>初稿节点: <strong className="text-zinc-200">{thesis.blindReviewDate}</strong></span>
                   <span>正式答辩: <strong className="text-zinc-200">{thesis.defenseDate}</strong></span>
                 </div>
               </div>
@@ -237,7 +236,7 @@ export default function ResearchPage() {
                   {/* 字数微调 */}
                   <div className="flex items-center justify-between text-xs pt-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-zinc-400 text-[11px]">字数:</span>
+                      <span className="text-zinc-400 text-[11px]">当前字数:</span>
                       <input
                         type="number"
                         value={ch.currentWords}
@@ -269,13 +268,13 @@ export default function ResearchPage() {
         </div>
       )}
 
-      {/* ===================== 板块 2: 模型训练 ===================== */}
+      {/* ===================== 板块 2: 模拟与算法 ===================== */}
       {activeTab === 'models' && (
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-xs sm:text-sm text-white">模型训练与实验台账</h3>
-              <p className="text-xs text-zinc-400">记录超参数、Checkpoint 与评测指标对比</p>
+              <h3 className="font-semibold text-xs sm:text-sm text-white">模型算法与数值仿真台账</h3>
+              <p className="text-xs text-zinc-400">记录超参数、力学约束与评测指标对比</p>
             </div>
             <button
               onClick={() => setIsAddExpOpen(true)}
@@ -332,7 +331,7 @@ export default function ResearchPage() {
                   <input
                     type="text"
                     required
-                    placeholder="模型名称 (如: Qwen-2.5-7B-DPO-v1)"
+                    placeholder="模型/仿真名称 (如: Physics-Informed-NN-v1)"
                     value={newExp.modelName}
                     onChange={(e) => setNewExp({ ...newExp, modelName: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
@@ -347,7 +346,7 @@ export default function ResearchPage() {
                     />
                     <input
                       type="text"
-                      placeholder="数据集"
+                      placeholder="数据集 / 仿真工况"
                       value={newExp.dataset}
                       onChange={(e) => setNewExp({ ...newExp, dataset: e.target.value })}
                       className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white"
@@ -355,14 +354,14 @@ export default function ResearchPage() {
                   </div>
                   <input
                     type="text"
-                    placeholder="超参数 (lr, epoch, batch 等)"
+                    placeholder="超参数 (lr, epoch, 网格尺寸等)"
                     value={newExp.hyperparameters}
                     onChange={(e) => setNewExp({ ...newExp, hyperparameters: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono"
                   />
                   <input
                     type="text"
-                    placeholder="核心指标 (Acc, Loss 等)"
+                    placeholder="核心指标 (Accuracy, Loss, 误差等)"
                     value={newExp.metrics}
                     onChange={(e) => setNewExp({ ...newExp, metrics: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono"
@@ -389,7 +388,7 @@ export default function ResearchPage() {
         </div>
       )}
 
-      {/* ===================== 板块 3: 项目开发 ===================== */}
+      {/* ===================== 板块 3: 系统工程 ===================== */}
       {activeTab === 'projects' && (
         <div className="space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -447,12 +446,12 @@ export default function ResearchPage() {
         </div>
       )}
 
-      {/* ===================== 板块 4: 进度管理 ===================== */}
+      {/* ===================== 板块 4: 毕业节点 ===================== */}
       {activeTab === 'milestones' && (
         <div className="space-y-4 sm:space-y-6">
           <div className="p-4 sm:p-6 rounded-2xl linear-card">
-            <h3 className="font-semibold text-xs sm:text-sm text-white mb-1">硕士研究生毕业全周期里程碑</h3>
-            <p className="text-xs text-zinc-400 mb-5 sm:mb-6">关键节点与时间轴</p>
+            <h3 className="font-semibold text-xs sm:text-sm text-white mb-1">西南交通大学 硕士毕业关键时间轴</h3>
+            <p className="text-xs text-zinc-400 mb-5 sm:mb-6">全周期里程碑与倒计时</p>
 
             <div className="relative border-l border-white/[0.1] ml-3 sm:ml-4 space-y-4 sm:space-y-6 py-2">
               {milestones.map((ms) => {

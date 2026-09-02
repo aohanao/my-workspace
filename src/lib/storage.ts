@@ -28,17 +28,17 @@ import {
 import { getSupabase, isSupabaseConfigured } from './supabase'
 
 export const STORAGE_KEYS = {
-  JOBS: 'workspace_jobs_v1',
-  THESIS: 'workspace_thesis_v1',
-  MODELS: 'workspace_models_v1',
-  PROJECTS: 'workspace_projects_v1',
-  MILESTONES: 'workspace_milestones_v1',
-  LEETCODE: 'workspace_leetcode_v1',
-  FLASHCARDS: 'workspace_flashcards_v1',
-  TOP3: 'workspace_top3_v1',
-  HABITS: 'workspace_habits_v1',
-  NOTES: 'workspace_notes_v1',
-  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v1',
+  JOBS: 'workspace_jobs_v2',
+  THESIS: 'workspace_thesis_v2',
+  MODELS: 'workspace_models_v2',
+  PROJECTS: 'workspace_projects_v2',
+  MILESTONES: 'workspace_milestones_v2',
+  LEETCODE: 'workspace_leetcode_v2',
+  FLASHCARDS: 'workspace_flashcards_v2',
+  TOP3: 'workspace_top3_v2',
+  HABITS: 'workspace_habits_v2',
+  NOTES: 'workspace_notes_v2',
+  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v2',
 }
 
 export type CloudSyncStatus = 'unconfigured' | 'syncing' | 'synced' | 'error'
@@ -275,7 +275,7 @@ export const StorageService = {
   // 全量备份与恢复
   exportAllData: () => {
     return {
-      version: '1.0',
+      version: '2.0',
       exportDate: new Date().toISOString(),
       jobs: StorageService.getJobs(),
       thesis: StorageService.getThesis(),

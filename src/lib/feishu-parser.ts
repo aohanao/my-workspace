@@ -55,7 +55,7 @@ const STATUS_MAP: Record<string, JobStatus> = {
   '意向书': 'offer',
   '录用': 'offer',
   '带薪实习': 'offer',
-  '已OC': 'offer',
+  '已oc': 'offer',
   'oc': 'offer',
   '已发offer': 'offer',
 
@@ -75,15 +75,20 @@ const STATUS_MAP: Record<string, JobStatus> = {
 function normalizeHeader(header: string): string {
   const clean = header.trim().toLowerCase().replace(/[\s_—\-]/g, '')
   
-  if (/公司|企业|单位|雇主|company/i.test(clean)) return 'company'
+  if (/投递公司|公司|企业|单位|雇主|company/i.test(clean)) return 'company'
+  if (/^职位$|^具体职位$|^应聘职位$/i.test(clean)) return 'role'
+  if (/类型与岗位|投递类型|岗位类别|招聘类型/i.test(clean)) return 'roleCategory'
   if (/岗位|职位|方向|role|position|job/i.test(clean)) return 'role'
   if (/部门|事业群|业务线|dept|department/i.test(clean)) return 'department'
-  if (/城市|地点|base|location|地区/i.test(clean)) return 'location'
-  if (/状态|进度|阶段|status|stage|流程/i.test(clean)) return 'status'
-  if (/投递日|投递时间|申请日|applydate|date/i.test(clean)) return 'applyDate'
+  if (/base|城市|地点|工作地|base地|location|地区/i.test(clean)) return 'location'
+  if (/投递状态|当前状态|流程状态/i.test(clean)) return 'status'
+  if (/^状态$|^进度$|当前进度|阶段|stage/i.test(clean)) return 'subStatus'
+  if (/投递日|投递时间|申请日|日期|applydate|date/i.test(clean)) return 'applyDate'
   if (/薪资|待遇|薪酬|总包|salary|package/i.test(clean)) return 'salary'
-  if (/链接|官网|投递网址|url|link/i.test(clean)) return 'jobUrl'
+  if (/官网|链接|投递网址|url|link|招聘网站/i.test(clean)) return 'jobUrl'
   if (/渠道|来源|内推|source|referral/i.test(clean)) return 'source'
+  if (/优先级|priority/i.test(clean)) return 'priority'
+  if (/行业|所属行业|industry/i.test(clean)) return 'industry'
   if (/面试时间|面试日程|interview/i.test(clean)) return 'interviewTime'
   if (/备注|复盘|面经|总结|note|notes|remark/i.test(clean)) return 'notes'
   
@@ -96,7 +101,7 @@ function parseStatus(rawStatus: string | undefined): JobStatus {
   const text = rawStatus.trim().toLowerCase()
   
   for (const [key, val] of Object.entries(STATUS_MAP)) {
-    if (text.includes(key.toLowerCase())) {
+    if (text === key.toLowerCase() || text.includes(key.toLowerCase())) {
       return val
     }
   }
@@ -121,7 +126,7 @@ function parseDate(rawDate: any): string {
   }
 
   const str = String(rawDate).trim()
-  // 匹配常见的 2024-09-01, 2024/9/1, 9.1, 9月1日
+  // 匹配常见的 2026/08/31, 2026-08-31, 2026.08.31, 2026年8月31日
   const matchFull = str.match(/(\d{4})[.\-\/年](\d{1,2})[.\-\/月](\d{1,2})/)
   if (matchFull) {
     const y = matchFull[1]
@@ -150,7 +155,6 @@ export function parseFeishuClipboardText(rawText: string): FeishuImportResult {
     return { total: 0, successCount: 0, failedCount: 0, jobs: [], unmatchedHeaders: [] }
   }
 
-  // 使用 PapaParse 解析（自动判断 TSV/CSV）
   const parsed = Papa.parse<string[]>(trimmed, {
     delimiter: trimmed.includes('\t') ? '\t' : ',',
     skipEmptyLines: true,
@@ -186,11 +190,11 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
     return { total: 0, successCount: 0, failedCount: 0, jobs: [], unmatchedHeaders: [] }
   }
 
-  // 1. 寻找表头行（包含“公司”或“岗位”字样的行，默认第 0 行）
+  // 1. 寻找表头行（包含“公司”或“岗位”或“职位”字样的行，默认第 0 行）
   let headerRowIndex = 0
   for (let i = 0; i < Math.min(matrix.length, 5); i++) {
     const rowStr = (matrix[i] || []).join(' ')
-    if (/公司|岗位|职位|状态|进度/i.test(rowStr)) {
+    if (/公司|岗位|职位|状态|base/i.test(rowStr)) {
       headerRowIndex = i
       break
     }
@@ -203,14 +207,14 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
   rawHeaders.forEach((h, colIndex) => {
     if (!h) return
     const normalized = normalizeHeader(String(h))
-    if (['company', 'role', 'department', 'location', 'status', 'applyDate', 'salary', 'jobUrl', 'source', 'notes', 'interviewTime'].includes(normalized)) {
+    if (['company', 'role', 'roleCategory', 'department', 'location', 'status', 'subStatus', 'applyDate', 'salary', 'jobUrl', 'source', 'notes', 'priority', 'industry', 'interviewTime'].includes(normalized)) {
       headerMap[colIndex] = normalized
     } else {
       unmatchedHeaders.push(String(h))
     }
   })
 
-  // 如果连公司列都没识别到，按常见列序兜底：0:公司, 1:岗位, 2:地点, 3:状态, 4:日期
+  // 兜底策略
   const hasCompany = Object.values(headerMap).includes('company')
   if (!hasCompany && rawHeaders.length > 0) {
     headerMap[0] = 'company'
@@ -232,7 +236,7 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
     const item: Record<string, any> = {}
     row.forEach((cell, colIndex) => {
       const field = headerMap[colIndex]
-      if (field) {
+      if (field && cell !== undefined && cell !== null) {
         item[field] = cell
       }
     })
@@ -243,23 +247,51 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
       continue
     }
 
-    const role = item.role ? String(item.role).trim() : '算法工程师/软件开发'
-    const status = parseStatus(item.status)
+    // 职位：优先取具体的 'role'，次之取 'roleCategory'
+    const role = item.role
+      ? String(item.role).trim()
+      : item.roleCategory
+      ? String(item.roleCategory).trim()
+      : '研发岗位'
+
+    // 部门/分类：如果同时有 role 和 roleCategory，roleCategory 设为部门或标签
+    const department = item.department
+      ? String(item.department).trim()
+      : item.roleCategory && item.role
+      ? String(item.roleCategory).trim()
+      : undefined
+
+    // 状态：如果存在更具体的 subStatus (例如 "笔试") 则优先匹配 subStatus，否则取 status ("已投递")
+    const status = item.subStatus
+      ? parseStatus(String(item.subStatus))
+      : parseStatus(item.status ? String(item.status) : undefined)
+
     const applyDate = parseDate(item.applyDate)
     const location = item.location ? String(item.location).trim() : undefined
-    const department = item.department ? String(item.department).trim() : undefined
     const salary = item.salary ? String(item.salary).trim() : undefined
     const jobUrl = item.jobUrl ? String(item.jobUrl).trim() : undefined
     const source = item.source ? String(item.source).trim() : undefined
-    const notes = item.notes ? String(item.notes).trim() : undefined
+    
+    // 汇总备注信息
+    const noteParts: string[] = []
+    if (item.notes) noteParts.push(String(item.notes).trim())
+    if (item.industry) noteParts.push(`行业: ${String(item.industry).trim()}`)
+    const notes = noteParts.length > 0 ? noteParts.join(' | ') : undefined
 
-    const interviews = item.interviewTime ? [{
-      id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      round: status === 'interview2' ? '二面' : status === 'hr' ? 'HR面' : '一面',
-      date: parseDate(item.interviewTime),
-      questions: [],
-      feedback: '从飞书导入记录',
-    }] : []
+    // 标签
+    const tags: string[] = []
+    if (item.priority) tags.push(`优先级:${String(item.priority).trim()}`)
+    if (item.industry) tags.push(String(item.industry).trim())
+
+    const interviews = (status === 'assessment' || status === 'interview1' || status === 'interview2' || status === 'hr')
+      ? [{
+          id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          round: status === 'assessment' ? '笔试测评' : status === 'interview2' ? '二面' : status === 'hr' ? 'HR面' : '一面',
+          date: applyDate,
+          questions: [],
+          feedback: '从飞书表格同步',
+        }]
+      : []
 
     const job: JobApplication = {
       id: `job-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -275,7 +307,7 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
       notes,
       interviews,
       updatedAt: new Date().toISOString(),
-      tags: [],
+      tags,
     }
 
     jobs.push(job)

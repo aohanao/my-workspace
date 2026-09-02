@@ -8,12 +8,9 @@ import {
   GraduationCap,
   Brain,
   CheckCircle2,
-  Plus,
   ArrowRight,
   TrendingUp,
-  Award,
   Layers,
-  Sparkles,
   CalendarDays,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -35,15 +32,15 @@ export default function DashboardPage() {
   const [habits, setHabits] = useState<HabitItem[]>([])
   const [newTop3Text, setNewTop3Text] = useState('')
 
-  useEffect(() => {
-    const loadData = () => {
-      setJobs(StorageService.getJobs())
-      setThesis(StorageService.getThesis())
-      setTop3(StorageService.getTop3())
-      setLeetcode(StorageService.getLeetCode())
-      setHabits(StorageService.getHabits())
-    }
+  const loadData = () => {
+    setJobs(StorageService.getJobs())
+    setThesis(StorageService.getThesis())
+    setTop3(StorageService.getTop3())
+    setLeetcode(StorageService.getLeetCode())
+    setHabits(StorageService.getHabits())
+  }
 
+  useEffect(() => {
     loadData()
     window.addEventListener('workspace-data-updated', loadData)
     return () => window.removeEventListener('workspace-data-updated', loadData)
@@ -90,23 +87,19 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      {/* 顶部 Hero 横幅 */}
-      <div className="linear-card p-4 sm:p-6 md:p-8 rounded-2xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 relative z-10">
+      {/* 顶部 Hero 横幅 - 精炼风格 */}
+      <div className="linear-card p-4 sm:p-6 md:p-7 rounded-2xl relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium mb-2.5 sm:mb-3 border border-blue-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-              <span>多线程攻坚中枢</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">
-              毕业科研推进 · 秋招求职转化 · 系统复盘
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5">
+              <span>控制中枢</span>
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 sm:mt-2 max-w-xl leading-relaxed">
-              聚焦核心路径，量化各阶段推进指标，保持从容专注的节奏。
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 max-w-xl leading-relaxed">
+              秋招求职推进与硕士毕业进度总览 · 保持专注与节奏
             </p>
           </div>
 
-          {/* 双核心倒计时卡片 (手机端自适应双列) */}
+          {/* 双核心倒计时卡片 */}
           <div className="grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:gap-3 shrink-0 w-full lg:w-auto">
             {/* 秋招倒计时 */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/[0.08] text-center sm:min-w-[130px]">
@@ -119,10 +112,10 @@ export default function DashboardPage() {
               <span className="text-[10px] text-zinc-500 block mt-0.5">{WORKSPACE_DEADLINES.careerSprint.replaceAll('-', '.')}</span>
             </div>
 
-            {/* 盲审送审倒计时 */}
+            {/* 论文初稿送审倒计时 */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/[0.08] text-center sm:min-w-[130px]">
               <span className="text-[11px] font-medium text-indigo-400 block mb-1">
-                论文盲审送审
+                论文初稿完成
               </span>
               <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight">
                 {thesisCountdown.days} <span className="text-xs font-normal text-zinc-500">天</span>
@@ -140,20 +133,20 @@ export default function DashboardPage() {
             <CalendarDays className="w-4 h-4 text-blue-400" />
             今日行动
           </h2>
-          <span className="text-[11px] text-zinc-500">按临近程度整理</span>
+          <span className="text-[11px] text-zinc-500">临近事项整理</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
           <Link href="/" className="p-3 rounded-xl border border-white/[0.06] hover:border-white/[0.14] bg-white/[0.02] transition-colors">
             <p className="text-[11px] text-zinc-500 mb-1.5">优先任务</p>
             {openTasks.length > 0 ? openTasks.map((item) => (
               <p key={item.id} className="text-xs text-zinc-200 truncate leading-6">{item.text}</p>
-            )) : <p className="text-xs text-zinc-500">今天的三件事已完成</p>}
+            )) : <p className="text-xs text-zinc-500">今日三件事已完成</p>}
           </Link>
           <Link href="/study" className="p-3 rounded-xl border border-white/[0.06] hover:border-blue-500/40 bg-white/[0.02] transition-colors">
             <p className="text-[11px] text-zinc-500 mb-1.5">到期复习</p>
             {dueReviews.length > 0 ? dueReviews.map((item) => (
               <p key={item.id} className="text-xs text-zinc-200 truncate leading-6">#{item.number} {item.title}</p>
-            )) : <p className="text-xs text-zinc-500">没有到期复习</p>}
+            )) : <p className="text-xs text-zinc-500">暂无到期复习题目</p>}
           </Link>
           <Link href="/career" className="p-3 rounded-xl border border-white/[0.06] hover:border-amber-500/40 bg-white/[0.02] transition-colors sm:col-span-2 md:col-span-1">
             <p className="text-[11px] text-zinc-500 mb-1.5">近期面试</p>
@@ -171,7 +164,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2 tracking-tight">
               <Flame className="w-4 h-4 text-amber-400" />
-              今日核心三件事 (Daily Top 3 Focus)
+              今日核心三件事 (Daily Top 3)
             </h3>
             <span className="text-[11px] text-zinc-500">最重要的事项</span>
           </div>
@@ -330,7 +323,7 @@ export default function DashboardPage() {
             })}
 
             {activeInterviews.length === 0 && (
-              <p className="text-xs text-zinc-500 py-6 text-center">暂无待面试记录</p>
+              <p className="text-xs text-zinc-500 py-6 text-center">暂无待面试记录（可在秋招管家导入或添加）</p>
             )}
           </div>
         </div>
@@ -343,7 +336,7 @@ export default function DashboardPage() {
               学位论文章节进展
             </h3>
             <Link href="/research" className="text-xs text-indigo-400 hover:underline">
-              进入科研模块
+              进入毕业管理
             </Link>
           </div>
 

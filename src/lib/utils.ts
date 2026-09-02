@@ -16,8 +16,9 @@ export function formatDate(dateStr: string): string {
 }
 
 export const WORKSPACE_DEADLINES = {
-  careerSprint: '2026-10-31',
-  blindReview: '2027-03-15',
+  careerSprint: '2026-11-20',
+  blindReview: '2027-02-04',
+  defense: '2027-05-20',
 } as const
 
 export function getLocalDateKey(date = new Date()): string {

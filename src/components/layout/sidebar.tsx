@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { href: '/', label: '控制中枢', sub: 'Overview', icon: LayoutDashboard },
   { href: '/career', label: '秋招求职管家', sub: 'Pipeline', icon: Briefcase },
   { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3, highlight: true },
-  { href: '/research', label: '科研与硕士毕业', sub: 'Research & Thesis', icon: GraduationCap },
+  { href: '/research', label: '硕士毕业管理', sub: 'Thesis', icon: GraduationCap },
   { href: '/study', label: '知识与算法复盘', sub: 'Study & LeetCode', icon: Brain },
   { href: '/life', label: '生活与习惯管理', sub: 'Life & Habits', icon: Smile },
 ]
@@ -56,7 +56,11 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
 
     updateSyncStatus()
     window.addEventListener('workspace-sync-status', updateSyncStatus)
-    return () => window.removeEventListener('workspace-sync-status', updateSyncStatus)
+    window.addEventListener('workspace-data-updated', updateSyncStatus)
+    return () => {
+      window.removeEventListener('workspace-sync-status', updateSyncStatus)
+      window.removeEventListener('workspace-data-updated', updateSyncStatus)
+    }
   }, [])
 
   const handleManualSync = async () => {
