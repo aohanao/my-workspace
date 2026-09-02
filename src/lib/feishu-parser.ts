@@ -126,27 +126,50 @@ function parseDate(rawDate: any): string {
 
 // 判断是否是日期格式
 function isDateString(str: string): boolean {
+  if (!str) return false
   return /(\d{4}[.\-\/年]\d{1,2}[.\-\/月]\d{1,2})|(\d{1,2}[.\-\/月]\d{1,2})/.test(str)
 }
 
 // 表头字段归一化识别
 function normalizeHeader(header: string): string {
-  const clean = header.trim().toLowerCase().replace(/[\s_—\-🔒A=:=☑☐]/g, '')
+  const clean = header.trim().toLowerCase().replace(/[\s_—\-🔒A=:=☑☐\d+]/g, '')
   
-  if (/投递公司|公司|企业|单位|雇主|company/i.test(clean)) return 'company'
+  if (/^投递公司$|^公司$|^企业$|^单位$|^雇主$|^company$/i.test(clean)) return 'company'
   if (/^优先级$|^priority$/i.test(clean)) return 'priority'
-  if (/投递日|投递时间|申请日|日期|applydate|date/i.test(clean)) return 'applyDate'
-  if (/投递状态|当前状态|流程状态/i.test(clean)) return 'applyStatus'
-  if (/类型与岗位|投递类型|岗位类别|招聘类型|分类/i.test(clean)) return 'category'
-  if (/base|城市|地点|工作地|base地|location|地区/i.test(clean)) return 'location'
-  if (/^职位$|^具体职位$|^应聘职位$|岗位|职位|方向|role|position|job/i.test(clean)) return 'role'
-  if (/行业|所属行业|industry/i.test(clean)) return 'industry'
-  if (/官网|链接|投递网址|url|link|招聘网站|招聘频道/i.test(clean)) return 'jobUrl'
-  if (/^状态$|^进度$|当前进度|阶段|stage|进展/i.test(clean)) return 'status'
-  if (/备注|复盘|面经|总结|note|notes|remark/i.test(clean)) return 'notes'
-  if (/薪资|待遇|薪酬|总包|salary/i.test(clean)) return 'salary'
+  if (/^投递日|^投递时间|^申请日|^日期|^applydate|^date/i.test(clean)) return 'applyDate'
+  if (/^投递状态|^当前状态|^流程状态/i.test(clean)) return 'applyStatus'
+  if (/^类型与岗位|^投递类型|^岗位类别|^招聘类型|^分类/i.test(clean)) return 'category'
+  if (/^base|^城市|^地点|^工作地|^base地|^location|^地区/i.test(clean)) return 'location'
+  if (/^职位$|^具体职位$|^应聘职位$|^岗位$|^方向$|^role$|^position$/i.test(clean)) return 'role'
+  if (/^行业$|^所属行业$|^industry$/i.test(clean)) return 'industry'
+  if (/^官网$|^链接$|^投递网址$|^url$|^link$|^招聘网站$|^招聘频道/i.test(clean)) return 'jobUrl'
+  if (/^状态$|^进度$|^当前进度|^阶段|^stage|^进展/i.test(clean)) return 'status'
+  if (/^备注$|^复盘$|^面经$|^总结$|^note|^notes|^remark/i.test(clean)) return 'notes'
+  if (/^薪资$|^待遇$|^薪酬$|^总包$|^salary/i.test(clean)) return 'salary'
   
   return clean
+}
+
+/**
+ * 判断一行是否为真正的表头（需要满足多个表头关键词匹配且无日期）
+ */
+function isRealHeaderRow(row: any[]): boolean {
+  if (!row || row.length === 0) return false
+  const cells = row.map((c) => (c ? String(c).trim() : ''))
+  
+  // 如果行内包含明确日期（如 2026/08/31），则绝不是表头
+  if (cells.some((c) => isDateString(c))) return false
+
+  let matchHeaderCount = 0
+  for (const c of cells) {
+    const norm = normalizeHeader(c)
+    if (['company', 'priority', 'applyDate', 'applyStatus', 'category', 'location', 'role', 'industry', 'jobUrl', 'status', 'notes'].includes(norm)) {
+      matchHeaderCount++
+    }
+  }
+
+  // 必须匹配至少 2 个标准表头名
+  return matchHeaderCount >= 2
 }
 
 /**
@@ -171,7 +194,6 @@ function parseSingleRow(
   // 3. 去除可能存在的首列复选框或序号列（如: ☑, ☐, ::, 1, 2）
   let cleanCells = [...cells]
   if (cleanCells.length > 1 && (/^[☑☐::\s\d]+$/.test(cleanCells[0]) || cleanCells[0] === '')) {
-    // 若第一列是纯序号或勾选框，且第二列看起来是公司名，则剔除第一列
     if (cleanCells[1] && !isDateString(cleanCells[1])) {
       cleanCells.shift()
     }
@@ -245,7 +267,6 @@ function parseSingleRow(
     if (cleanCells[6]) {
       result.role = cleanCells[6]
     } else {
-      // 寻找包含"开发/算法/工程/专家/PM/产品/技术/Agent"的文本
       const roleCell = cleanCells.find((c) => /开发|算法|工程|技术|产品|研发|Agent|大模型|前端|后端/i.test(c) && c !== result.category)
       result.role = roleCell || result.category || '研发岗位'
     }
@@ -364,14 +385,13 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
     return { total: 0, successCount: 0, failedCount: 0, jobs: [], unmatchedHeaders: [] }
   }
 
-  // 1. 寻找表头行
+  // 1. 精确判定表头行
   let headerRowIndex = -1
   let headerMap: Record<number, string> | null = null
   const unmatchedHeaders: string[] = []
 
-  for (let i = 0; i < Math.min(matrix.length, 5); i++) {
-    const rowStr = (matrix[i] || []).join(' ')
-    if (/投递公司|公司|岗位|职位|优先级|base/i.test(rowStr) && !/条记录/.test(rowStr)) {
+  for (let i = 0; i < Math.min(matrix.length, 3); i++) {
+    if (isRealHeaderRow(matrix[i])) {
       headerRowIndex = i
       headerMap = {}
       const rawHeaders = matrix[i] || []
