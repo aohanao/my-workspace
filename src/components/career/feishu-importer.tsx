@@ -9,6 +9,7 @@ import {
   X,
   Sparkles,
   ArrowRight,
+  Globe,
 } from 'lucide-react'
 import { parseFeishuClipboardText, parseFeishuExcelFile } from '@/lib/feishu-parser'
 import { FeishuImportResult } from '@/types'
@@ -65,7 +66,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#10131d] border border-white/[0.1] w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-[#10131d] border border-white/[0.1] w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         {/* 头部 */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -74,13 +75,13 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold text-white text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 truncate">
-                智能导入飞书 / Excel 投递记录
-                <span className="text-[10px] bg-blue-500/10 text-blue-400 font-normal px-2 py-0.5 rounded-full border border-blue-500/20 hidden sm:inline">
-                  自动识别
+                智能导入飞书多维表格
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-normal px-2 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline">
+                  全 11 字段对齐
                 </span>
               </h3>
               <p className="text-[11px] sm:text-xs text-zinc-400 truncate">
-                支持直接在飞书表格框选复制并粘贴
+                直接在飞书表格中全选复制（Ctrl+C）并粘贴到此处，算法自动消除错位
               </p>
             </div>
           </div>
@@ -126,13 +127,13 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
               <textarea
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder={`👉 打开飞书电子表格，框选秋招记录（含表头：公司 | 岗位 | 状态 | 日期 | Base | 薪资 | 备注）\n按下 Ctrl+C 复制后直接粘贴到这里...`}
-                rows={7}
+                placeholder={`👉 打开您的飞书秋招多维表格：\n1. 框选记录（可带表头或不带表头，包含：投递公司 | 优先级 | 投递日期 | 投递状态 | 类型与岗位 | base地 | 职位 | 行业 | 官网 | 备注 | 状态）\n2. 按下 Ctrl+C 复制后直接粘贴到这里\n3. 点击下方「开始智能识别」`}
+                rows={8}
                 className="w-full text-xs font-mono p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500 placeholder:text-zinc-600 resize-none leading-relaxed"
               />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <p className="text-[11px] text-zinc-500">
-                  算法会自动进行语义模糊识别并智能对齐字段。
+                  ⚡ 智能消除分组折叠行与复选框干扰，严格对齐 11 列数据。
                 </p>
                 <button
                   onClick={handleParsePaste}
@@ -163,18 +164,18 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 <UploadCloud className="w-6 h-6" />
               </div>
               <p className="text-xs font-medium text-white text-center">点击选择或拖拽 Excel / CSV 文件</p>
-              <p className="text-[11px] text-zinc-500 mt-1">支持 .xlsx, .xls, .csv 格式</p>
+              <p className="text-[11px] text-zinc-500 mt-1">支持从飞书导出的 .xlsx / .csv</p>
             </div>
           )}
 
-          {/* 解析结果预览 */}
+          {/* 解析结果全字段实时核对预览 */}
           {parsedResult && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                   <h4 className="text-xs font-semibold text-white">
-                    成功识别 {parsedResult.successCount} 条求职记录
+                    已精准识别 {parsedResult.successCount} 条求职记录（11 字段完整对应）
                   </h4>
                 </div>
                 <button
@@ -185,33 +186,55 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 </button>
               </div>
 
-              {/* 预览表格 */}
-              <div className="border border-white/[0.08] rounded-xl overflow-hidden max-h-56 overflow-y-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-white/[0.03] text-zinc-400 sticky top-0 font-medium border-b border-white/[0.06]">
+              {/* 11 列对齐核对预览表格 */}
+              <div className="border border-white/[0.08] rounded-xl overflow-hidden max-h-64 overflow-y-auto overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse min-w-[850px]">
+                  <thead className="bg-white/[0.03] text-zinc-400 sticky top-0 font-medium border-b border-white/[0.06] text-[11px]">
                     <tr>
-                      <th className="p-2.5">公司</th>
-                      <th className="p-2.5">岗位</th>
-                      <th className="p-2.5">识别状态</th>
+                      <th className="p-2.5 pl-3">公司</th>
+                      <th className="p-2.5">优先级</th>
                       <th className="p-2.5">投递日期</th>
-                      <th className="p-2.5">城市</th>
-                      <th className="p-2.5">薪资/备注</th>
+                      <th className="p-2.5">投递状态</th>
+                      <th className="p-2.5">类型与岗位</th>
+                      <th className="p-2.5">base地</th>
+                      <th className="p-2.5">职位</th>
+                      <th className="p-2.5">行业</th>
+                      <th className="p-2.5">官网</th>
+                      <th className="p-2.5">状态/进展</th>
+                      <th className="p-2.5 pr-3">备注</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
                     {parsedResult.jobs.map((job, idx) => (
                       <tr key={idx} className="hover:bg-white/[0.02]">
-                        <td className="p-2.5 font-medium text-white">{job.company}</td>
-                        <td className="p-2.5 text-zinc-300">{job.role}</td>
-                        <td className="p-2.5">
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <td className="p-2.5 pl-3 font-semibold text-white whitespace-nowrap">{job.company}</td>
+                        <td className="p-2.5 whitespace-nowrap">
+                          {job.priority ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
+                              {job.priority}
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="p-2.5 text-zinc-400 font-mono whitespace-nowrap">{job.applyDate}</td>
+                        <td className="p-2.5 text-zinc-300 whitespace-nowrap">{job.applyStatus}</td>
+                        <td className="p-2.5 text-zinc-400 whitespace-nowrap">{job.category || '-'}</td>
+                        <td className="p-2.5 text-zinc-300 whitespace-nowrap">{job.location || '-'}</td>
+                        <td className="p-2.5 font-medium text-white max-w-[160px] truncate" title={job.role}>
+                          {job.role}
+                        </td>
+                        <td className="p-2.5 text-zinc-400 max-w-[100px] truncate">{job.industry || '-'}</td>
+                        <td className="p-2.5 whitespace-nowrap">
+                          {job.jobUrl ? (
+                            <span className="text-blue-400 text-[11px] truncate max-w-[80px] inline-block">{job.jobUrl}</span>
+                          ) : '-'}
+                        </td>
+                        <td className="p-2.5 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
                             {job.status}
                           </span>
                         </td>
-                        <td className="p-2.5 text-zinc-400 font-mono">{job.applyDate}</td>
-                        <td className="p-2.5 text-zinc-400">{job.location || '-'}</td>
-                        <td className="p-2.5 text-zinc-400 truncate max-w-[140px]">
-                          {job.salary || job.notes || '-'}
+                        <td className="p-2.5 pr-3 text-zinc-400 truncate max-w-[120px] text-[11px]" title={job.notes}>
+                          {job.notes || '-'}
                         </td>
                       </tr>
                     ))}
@@ -226,7 +249,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
         {parsedResult && (
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-white/[0.08] bg-white/[0.02] flex items-center justify-between gap-2">
             <span className="text-[11px] text-zinc-500 truncate">
-              合并至本地与云端看板
+              确认后将立即合并写入云端数据库与看板
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <button
@@ -237,7 +260,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
               </button>
               <button
                 onClick={handleConfirmImport}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold linear-btn-primary"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-semibold linear-btn-primary shadow-lg shadow-blue-500/20"
               >
                 <span>确认导入 ({parsedResult.successCount}条)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
