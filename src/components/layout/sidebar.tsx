@@ -148,8 +148,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                     'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all group relative border',
                     isActive
                       ? 'bg-white/[0.08] text-white border-white/[0.1] shadow-sm font-semibold'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border-transparent',
-                    item.highlight && !isActive && 'text-blue-400 bg-blue-500/[0.03]'
+                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border-transparent'
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -163,13 +162,6 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                       <span className="tracking-tight">{item.label}</span>
                     </div>
                   </div>
-
-                  {item.highlight && !isActive && (
-                    <span className="flex h-1.5 w-1.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
-                    </span>
-                  )}
                 </Link>
               )
             })}
