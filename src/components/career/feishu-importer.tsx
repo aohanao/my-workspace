@@ -9,7 +9,6 @@ import {
   X,
   Sparkles,
   ArrowRight,
-  Globe,
 } from 'lucide-react'
 import { parseFeishuClipboardText, parseFeishuExcelFile } from '@/lib/feishu-parser'
 import { FeishuImportResult } from '@/types'
@@ -22,10 +21,12 @@ interface Props {
 }
 
 export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
+  // 所有 Hooks 声明在最顶部，确保遵循 React Hook 规范
   const [activeTab, setActiveTab] = useState<'paste' | 'file'>('paste')
   const [pasteText, setPasteText] = useState('')
   const [parsedResult, setParsedResult] = useState<FeishuImportResult | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!isOpen) return null
@@ -56,8 +57,6 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
       setIsProcessing(false)
     }
   }
-
-  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace')
 
   const handleConfirmImport = () => {
     if (!parsedResult || parsedResult.jobs.length === 0) return
