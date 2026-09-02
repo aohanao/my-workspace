@@ -32,11 +32,19 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
   if (!isOpen) return null
 
   const handleParsePaste = () => {
-    if (!pasteText.trim()) return
+    const text = pasteText.trim()
+    if (!text) {
+      alert('请先粘贴飞书表格内容')
+      return
+    }
     setIsProcessing(true)
     try {
-      const res = parseFeishuClipboardText(pasteText)
-      setParsedResult(res)
+      const res = parseFeishuClipboardText(text)
+      if (res.total === 0) {
+        alert('未能从粘贴内容中识别到有效的求职记录，请检查是否完整复制了表格行')
+      } else {
+        setParsedResult(res)
+      }
     } catch (e) {
       alert('解析失败，请检查粘贴的内容格式')
     } finally {
