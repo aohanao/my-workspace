@@ -154,8 +154,8 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 </p>
                 <button
                   onClick={handleParsePaste}
-                  disabled={!pasteText.trim() || isProcessing}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 linear-btn-primary text-xs rounded-xl disabled:opacity-50"
+                  disabled={isProcessing}
+                  className="flex items-center justify-center gap-1.5 px-5 py-2.5 linear-btn-primary text-xs font-semibold rounded-xl disabled:opacity-50 shadow-md shadow-blue-500/20 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>开始智能识别</span>
