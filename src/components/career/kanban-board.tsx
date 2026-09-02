@@ -73,11 +73,24 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                           {job.role}
                         </p>
                       </div>
-                      {job.department && (
-                        <span className="text-[10px] bg-white/[0.04] px-1.5 py-0.5 rounded text-zinc-400 shrink-0 max-w-[80px] truncate border border-white/[0.05]">
-                          {job.department}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {job.priority && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border ${
+                            job.priority === '高'
+                              ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                              : job.priority === '中'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          }`}>
+                            {job.priority}
+                          </span>
+                        )}
+                        {(job.category || job.department) && (
+                          <span className="text-[10px] bg-white/[0.04] px-1.5 py-0.5 rounded text-zinc-400 max-w-[80px] truncate border border-white/[0.05]">
+                            {job.category || job.department}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* 城市与薪资 */}

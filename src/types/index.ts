@@ -27,6 +27,7 @@ export interface JobApplication {
   applyDate: string        // 投递日期 (YYYY-MM-DD)
   applyStatus?: string     // 投递状态 (已投递 / 待投递 / 未投)
   category?: string        // 类型与岗位 (秋招 研发 / 算法 / 软件)
+  department?: string      // 部门 / 类别
   location?: string        // base地 (广州 / 深圳 / 北京 / 成都)
   role: string             // 职位 (如 AI Agent技术研发工程师)
   industry?: string        // 行业 (互联网/科技 / 智能建造)
