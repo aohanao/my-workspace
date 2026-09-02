@@ -28,11 +28,12 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [importMode, setImportMode] = useState<'replace' | 'append'>('replace')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   if (!isOpen) return null
 
   const handleParsePaste = () => {
-    const text = pasteText.trim()
+    const text = (pasteText.trim() || textAreaRef.current?.value || '').trim()
     if (!text) {
       alert('请先粘贴飞书表格内容')
       return
@@ -140,6 +141,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
           {activeTab === 'paste' && !parsedResult && (
             <div className="space-y-3">
               <textarea
+                ref={textAreaRef}
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
                 placeholder={`👉 打开您的飞书秋招多维表格：\n1. 框选记录（可带表头或不带表头，包含：投递公司 | 优先级 | 投递日期 | 投递状态 | 类型与岗位 | base地 | 职位 | 行业 | 官网 | 备注 | 状态）\n2. 按下 Ctrl+C 复制后直接粘贴到这里\n3. 点击下方「开始智能识别」`}
