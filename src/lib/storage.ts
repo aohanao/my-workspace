@@ -28,17 +28,17 @@ import {
 import { getSupabase, isSupabaseConfigured } from './supabase'
 
 export const STORAGE_KEYS = {
-  JOBS: 'workspace_jobs_v2',
-  THESIS: 'workspace_thesis_v2',
-  MODELS: 'workspace_models_v2',
-  PROJECTS: 'workspace_projects_v2',
-  MILESTONES: 'workspace_milestones_v2',
-  LEETCODE: 'workspace_leetcode_v2',
-  FLASHCARDS: 'workspace_flashcards_v2',
-  TOP3: 'workspace_top3_v2',
-  HABITS: 'workspace_habits_v2',
-  NOTES: 'workspace_notes_v2',
-  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v2',
+  JOBS: 'workspace_jobs_v3',
+  THESIS: 'workspace_thesis_v3',
+  MODELS: 'workspace_models_v3',
+  PROJECTS: 'workspace_projects_v3',
+  MILESTONES: 'workspace_milestones_v3',
+  LEETCODE: 'workspace_leetcode_v3',
+  FLASHCARDS: 'workspace_flashcards_v3',
+  TOP3: 'workspace_top3_v3',
+  HABITS: 'workspace_habits_v3',
+  NOTES: 'workspace_notes_v3',
+  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v3',
 }
 
 export type CloudSyncStatus = 'unconfigured' | 'syncing' | 'synced' | 'error'

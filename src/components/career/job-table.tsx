@@ -2,48 +2,58 @@
 
 import { useState } from 'react'
 import { JobApplication, JobStatus } from '@/types'
-import { Search, Filter, Download, ExternalLink, MessageSquare, Clock } from 'lucide-react'
+import { Search, Download, ExternalLink, Edit3, Trash2, Globe } from 'lucide-react'
 
 interface Props {
   jobs: JobApplication[]
   onSelectJob: (job: JobApplication) => void
+  onDeleteJob?: (id: string) => void
 }
 
 const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
-  wishlist: { label: '意向备战', badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' },
-  applied: { label: '已投递', badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-  assessment: { label: '笔试/测评', badge: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
-  interview1: { label: '技术一面', badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  interview2: { label: '技术二面', badge: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-  hr: { label: 'HR面', badge: 'bg-pink-500/10 text-pink-600 dark:text-pink-400' },
-  offer: { label: 'Offer 🎉', badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold' },
-  rejected: { label: '已归档', badge: 'bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+  wishlist: { label: '意向准备', badge: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+  applied: { label: '已投递', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  assessment: { label: '笔试/测评', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  interview1: { label: '技术一面', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  interview2: { label: '技术二面', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+  hr: { label: 'HR面/谈薪', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+  offer: { label: '已获 Offer 🎉', badge: 'bg-emerald-500/15 text-emerald-400 font-bold border-emerald-500/30' },
+  rejected: { label: '流程终止', badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
 }
 
-export function JobTable({ jobs, onSelectJob }: Props) {
+export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [priorityFilter, setPriorityFilter] = useState<string>('all')
 
   const filtered = jobs.filter((j) => {
     const matchesSearch =
       j.company.toLowerCase().includes(search.toLowerCase()) ||
       j.role.toLowerCase().includes(search.toLowerCase()) ||
+      (j.category && j.category.toLowerCase().includes(search.toLowerCase())) ||
       (j.location && j.location.toLowerCase().includes(search.toLowerCase())) ||
+      (j.industry && j.industry.toLowerCase().includes(search.toLowerCase())) ||
       (j.notes && j.notes.toLowerCase().includes(search.toLowerCase()))
+    
     const matchesStatus = statusFilter === 'all' || j.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesPriority = priorityFilter === 'all' || j.priority === priorityFilter
+
+    return matchesSearch && matchesStatus && matchesPriority
   })
 
   const exportCSV = () => {
-    const headers = ['公司', '岗位', '部门', '状态', '投递日期', '城市', '薪资', '备注']
+    const headers = ['投递公司', '优先级', '投递日期', '投递状态', '类型与岗位', 'base地', '职位', '行业', '官网', '当前阶段', '备注']
     const rows = filtered.map((j) => [
       `"${j.company}"`,
-      `"${j.role}"`,
-      `"${j.department || ''}"`,
-      `"${STATUS_LABELS[j.status]?.label || j.status}"`,
+      `"${j.priority || ''}"`,
       `"${j.applyDate}"`,
+      `"${j.applyStatus || '已投递'}"`,
+      `"${j.category || ''}"`,
       `"${j.location || ''}"`,
-      `"${j.salary || ''}"`,
+      `"${j.role}"`,
+      `"${j.industry || ''}"`,
+      `"${j.jobUrl || ''}"`,
+      `"${STATUS_LABELS[j.status]?.label || j.status}"`,
       `"${(j.notes || '').replace(/"/g, '""')}"`,
     ])
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
@@ -51,48 +61,61 @@ export function JobTable({ jobs, onSelectJob }: Props) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `秋招投递数据导出-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `秋招投递数据-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
 
   return (
     <div className="space-y-4">
-      {/* 搜索与筛选工具条 */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-3.5 rounded-2xl border border-border">
-        <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+      {/* 搜索与多维筛选工具条 */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl linear-card">
+        <div className="flex items-center gap-2 w-full md:w-auto flex-1 max-w-md">
           <div className="relative w-full">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜索公司、岗位、城市、面经考点..."
-              className="w-full pl-9 pr-3 py-2 text-xs bg-muted/60 border border-border rounded-xl text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="搜索公司、职位、类型、Base地、行业、备注..."
+              className="w-full pl-9 pr-3.5 py-2 text-xs bg-black/40 border border-white/[0.08] rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
+          {/* 优先级筛选 */}
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-white focus:outline-none"
+          >
+            <option value="all" className="bg-[#10131d]">全部优先级</option>
+            <option value="高" className="bg-[#10131d]">高优先级</option>
+            <option value="中" className="bg-[#10131d]">中优先级</option>
+            <option value="低" className="bg-[#10131d]">低优先级</option>
+          </select>
+
+          {/* 状态筛选 */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-muted/60 border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+            className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-white focus:outline-none font-medium"
           >
-            <option value="all">全部阶段 ({jobs.length})</option>
-            <option value="wishlist">意向准备</option>
-            <option value="applied">已投递</option>
-            <option value="assessment">笔试/测评</option>
-            <option value="interview1">技术一面</option>
-            <option value="interview2">技术二面</option>
-            <option value="hr">HR面</option>
-            <option value="offer">已获 Offer</option>
-            <option value="rejected">流程终止</option>
+            <option value="all" className="bg-[#10131d]">全部状态 ({jobs.length})</option>
+            <option value="wishlist" className="bg-[#10131d]">意向准备</option>
+            <option value="applied" className="bg-[#10131d]">已投递</option>
+            <option value="assessment" className="bg-[#10131d]">笔试/测评</option>
+            <option value="interview1" className="bg-[#10131d]">技术一面</option>
+            <option value="interview2" className="bg-[#10131d]">技术二面</option>
+            <option value="hr" className="bg-[#10131d]">HR面/终面</option>
+            <option value="offer" className="bg-[#10131d]">已获 Offer</option>
+            <option value="rejected" className="bg-[#10131d]">流程终止</option>
           </select>
 
           <button
             onClick={exportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground rounded-xl border border-border transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl border border-white/[0.08] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             <span>导出 CSV</span>
@@ -100,89 +123,158 @@ export function JobTable({ jobs, onSelectJob }: Props) {
         </div>
       </div>
 
-      {/* 表格容器 */}
-      <div className="border border-border rounded-2xl bg-card overflow-hidden shadow-sm">
+      {/* 完整对齐飞书表头的表格容器 */}
+      <div className="border border-white/[0.08] rounded-2xl overflow-hidden linear-card">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-muted/50 text-muted-foreground border-b border-border font-semibold">
+          <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+            <thead className="bg-white/[0.03] text-zinc-400 border-b border-white/[0.08] font-semibold text-[11px]">
               <tr>
-                <th className="p-3.5">公司名称</th>
-                <th className="p-3.5">应聘岗位</th>
-                <th className="p-3.5">当前状态</th>
-                <th className="p-3.5">城市/Base</th>
+                <th className="p-3.5 pl-4">投递公司</th>
+                <th className="p-3.5">优先级</th>
                 <th className="p-3.5">投递日期</th>
-                <th className="p-3.5">薪资待遇</th>
-                <th className="p-3.5">最新面试/复盘</th>
-                <th className="p-3.5 text-right">操作</th>
+                <th className="p-3.5">投递状态</th>
+                <th className="p-3.5">类型与岗位</th>
+                <th className="p-3.5">base地</th>
+                <th className="p-3.5">职位</th>
+                <th className="p-3.5">行业</th>
+                <th className="p-3.5">官网</th>
+                <th className="p-3.5">状态/进展</th>
+                <th className="p-3.5">备注</th>
+                <th className="p-3.5 pr-4 text-right">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y divide-white/[0.05]">
               {filtered.map((job) => {
-                const latestInterview = job.interviews?.[job.interviews.length - 1]
-                const st = STATUS_LABELS[job.status] || { label: job.status, badge: 'bg-muted text-foreground' }
+                const statusMeta = STATUS_LABELS[job.status] || STATUS_LABELS.applied
 
                 return (
                   <tr
                     key={job.id}
                     onClick={() => onSelectJob(job)}
-                    className="hover:bg-muted/40 transition-colors cursor-pointer group"
+                    className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
                   >
-                    <td className="p-3.5 font-bold text-foreground group-hover:text-primary transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
-                          {job.company.substring(0, 1)}
-                        </div>
-                        <div>
-                          <div>{job.company}</div>
-                          {job.department && (
-                            <div className="text-[10px] text-muted-foreground font-normal">{job.department}</div>
-                          )}
-                        </div>
-                      </div>
+                    {/* 投递公司 */}
+                    <td className="p-3.5 pl-4 font-semibold text-white whitespace-nowrap">
+                      {job.company}
                     </td>
-                    <td className="p-3.5 font-medium text-foreground">{job.role}</td>
-                    <td className="p-3.5">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${st.badge}`}>
-                        {st.label}
-                      </span>
-                    </td>
-                    <td className="p-3.5 text-muted-foreground">{job.location || '-'}</td>
-                    <td className="p-3.5 text-muted-foreground font-mono">{job.applyDate}</td>
-                    <td className="p-3.5 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
-                      {job.salary || '-'}
-                    </td>
-                    <td className="p-3.5 text-muted-foreground">
-                      {latestInterview ? (
-                        <div className="flex items-center gap-1.5 text-xs text-foreground">
-                          <Clock className="w-3.5 h-3.5 text-amber-500" />
-                          <span>{latestInterview.round} ({latestInterview.date})</span>
-                        </div>
+
+                    {/* 优先级 */}
+                    <td className="p-3.5 whitespace-nowrap">
+                      {job.priority ? (
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-medium border ${
+                          job.priority === '高'
+                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            : job.priority === '中'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                        }`}>
+                          {job.priority}
+                        </span>
                       ) : (
-                        <span className="text-muted-foreground/60">-</span>
+                        <span className="text-zinc-600">-</span>
                       )}
                     </td>
-                    <td className="p-3.5 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onSelectJob(job)
-                        }}
-                        className="px-2.5 py-1 text-xs text-primary font-semibold hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        编辑复盘
-                      </button>
+
+                    {/* 投递日期 */}
+                    <td className="p-3.5 font-mono text-zinc-400 whitespace-nowrap">
+                      {job.applyDate}
+                    </td>
+
+                    {/* 投递状态 */}
+                    <td className="p-3.5 text-zinc-300 whitespace-nowrap">
+                      {job.applyStatus || '已投递'}
+                    </td>
+
+                    {/* 类型与岗位 */}
+                    <td className="p-3.5 text-zinc-400 whitespace-nowrap">
+                      {job.category || '-'}
+                    </td>
+
+                    {/* base地 */}
+                    <td className="p-3.5 text-zinc-300 whitespace-nowrap">
+                      {job.location || '-'}
+                    </td>
+
+                    {/* 职位 */}
+                    <td className="p-3.5 font-medium text-white max-w-[180px] truncate" title={job.role}>
+                      {job.role}
+                    </td>
+
+                    {/* 行业 */}
+                    <td className="p-3.5 text-zinc-400 max-w-[120px] truncate" title={job.industry}>
+                      {job.industry || '-'}
+                    </td>
+
+                    {/* 官网 */}
+                    <td className="p-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      {job.jobUrl ? (
+                        <a
+                          href={job.jobUrl.startsWith('http') ? job.jobUrl : `https://${job.jobUrl}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 hover:underline"
+                        >
+                          <Globe className="w-3 h-3" />
+                          <span>访问</span>
+                        </a>
+                      ) : (
+                        <span className="text-zinc-600">-</span>
+                      )}
+                    </td>
+
+                    {/* 状态 / 进展 */}
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${statusMeta.badge}`}>
+                        {statusMeta.label}
+                      </span>
+                    </td>
+
+                    {/* 备注 */}
+                    <td className="p-3.5 text-zinc-400 max-w-[180px] truncate text-[11px]" title={job.notes}>
+                      {job.notes || '-'}
+                    </td>
+
+                    {/* 操作 */}
+                    <td className="p-3.5 pr-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => onSelectJob(job)}
+                          className="p-1 text-zinc-400 hover:text-white hover:bg-white/[0.08] rounded-lg transition-colors"
+                          title="编辑详情"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        {onDeleteJob && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`确定删除 ${job.company} 的投递记录吗？`)) {
+                                onDeleteJob(job.id)
+                              }
+                            }}
+                            className="p-1 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.08] rounded-lg transition-colors"
+                            title="删除记录"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
               })}
+
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={12} className="p-12 text-center text-zinc-500">
+                    <p className="text-sm">暂无投递记录</p>
+                    <p className="text-xs mt-1 text-zinc-600">
+                      点击右上角「飞书表格导入」一键导入您的求职表格，或点击「新增投递」
+                    </p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-
-          {filtered.length === 0 && (
-            <div className="py-12 text-center text-xs text-muted-foreground">
-              未找到匹配的求职投递记录
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ import { CloudConfigModal } from './cloud-config-modal'
 const NAV_ITEMS = [
   { href: '/', label: '控制中枢', sub: 'Overview', icon: LayoutDashboard },
   { href: '/career', label: '秋招求职管家', sub: 'Pipeline', icon: Briefcase },
-  { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3, highlight: true },
+  { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3 },
   { href: '/research', label: '硕士毕业管理', sub: 'Thesis', icon: GraduationCap },
   { href: '/study', label: '知识与算法复盘', sub: 'Study & LeetCode', icon: Brain },
   { href: '/life', label: '生活与习惯管理', sub: 'Life & Habits', icon: Smile },

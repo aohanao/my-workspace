@@ -10,6 +10,7 @@ import {
   Plus,
   CheckCircle2,
   Clock,
+  Layers,
 } from 'lucide-react'
 import {
   ThesisInfo,
@@ -35,8 +36,8 @@ export default function ResearchPage() {
     taskType: '',
     dataset: '',
     hyperparameters: '',
-    metrics: '',
-    status: 'training',
+    metrics: '待运行',
+    status: 'not_started',
   })
 
   const loadAll = () => {
@@ -69,11 +70,11 @@ export default function ResearchPage() {
     const expItem: ModelExperiment = {
       id: `exp-${Date.now()}`,
       modelName: newExp.modelName || 'Custom-Model',
-      taskType: newExp.taskType || '科研评测',
-      dataset: newExp.dataset || '默认数据集',
-      hyperparameters: newExp.hyperparameters || 'lr: 2e-5',
-      metrics: newExp.metrics || 'Loss: 0.2',
-      status: (newExp.status as any) || 'completed',
+      taskType: newExp.taskType || '科研模拟',
+      dataset: newExp.dataset || '工程数据集',
+      hyperparameters: newExp.hyperparameters || 'lr: 1e-4',
+      metrics: newExp.metrics || '待运行',
+      status: (newExp.status as any) || 'not_started',
       date: getLocalDateKey(),
       notes: newExp.notes || '',
     }
@@ -81,7 +82,7 @@ export default function ResearchPage() {
     setModels(updated)
     StorageService.saveModels(updated)
     setIsAddExpOpen(false)
-    setNewExp({ modelName: '', taskType: '', dataset: '', hyperparameters: '', metrics: '', status: 'training' })
+    setNewExp({ modelName: '', taskType: '', dataset: '', hyperparameters: '', metrics: '待运行', status: 'not_started' })
   }
 
   const handleToggleMilestone = (id: string) => {
@@ -114,54 +115,54 @@ export default function ResearchPage() {
             <span>硕士毕业管理</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1 truncate max-w-2xl">
-            《钻爆法隧道全工序机械化施工智能配置方法及系统研究》· 论文撰写与节点把控
+            《钻爆法隧道全工序机械化施工智能配置方法及系统研究》· 课题推进与节点把控
           </p>
         </div>
 
-        {/* 4 大子版块切换 Tab */}
+        {/* 4 大子版块切换 Tab (统一纯净质感，无刺眼高亮) */}
         <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06] overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveTab('thesis')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'thesis'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-white/[0.1]'
+                : 'text-zinc-400 hover:text-white border border-transparent'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+            <BookOpen className="w-3.5 h-3.5" />
             <span>1. 论文撰写</span>
           </button>
           <button
             onClick={() => setActiveTab('models')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'models'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-white/[0.1]'
+                : 'text-zinc-400 hover:text-white border border-transparent'
             }`}
           >
-            <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+            <Cpu className="w-3.5 h-3.5" />
             <span>2. 模拟与算法</span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'projects'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-white/[0.1]'
+                : 'text-zinc-400 hover:text-white border border-transparent'
             }`}
           >
-            <Code2 className="w-3.5 h-3.5 text-blue-400" />
+            <Code2 className="w-3.5 h-3.5" />
             <span>3. 系统工程</span>
           </button>
           <button
             onClick={() => setActiveTab('milestones')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'milestones'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-white/[0.1]'
+                : 'text-zinc-400 hover:text-white border border-transparent'
             }`}
           >
-            <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
+            <CalendarDays className="w-3.5 h-3.5" />
             <span>4. 毕业节点</span>
           </button>
         </div>
@@ -225,7 +226,7 @@ export default function ResearchPage() {
                       onChange={(e) => handleUpdateChapter(ch.id, { status: e.target.value as any })}
                       className="text-[11px] font-medium bg-white/[0.04] px-2 py-1 rounded-lg border border-white/[0.08] text-white focus:outline-none shrink-0"
                     >
-                      <option value="not_started" className="bg-[#10131d]">未开始</option>
+                      <option value="not_started" className="bg-[#10131d]">未开始 (0%)</option>
                       <option value="in_progress" className="bg-[#10131d]">撰写中</option>
                       <option value="drafted" className="bg-[#10131d]">初稿</option>
                       <option value="revised" className="bg-[#10131d]">已修改</option>
@@ -273,15 +274,15 @@ export default function ResearchPage() {
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-xs sm:text-sm text-white">模型算法与数值仿真台账</h3>
-              <p className="text-xs text-zinc-400">记录超参数、力学约束与评测指标对比</p>
+              <h3 className="font-semibold text-xs sm:text-sm text-white">力学模拟与算法台账</h3>
+              <p className="text-xs text-zinc-400">记录超参数、物理力学约束与评测结果（目前处于开题规划阶段，待启动）</p>
             </div>
             <button
               onClick={() => setIsAddExpOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl linear-btn-primary text-xs"
             >
               <Plus className="w-4 h-4" />
-              <span>新建实验</span>
+              <span>新建实验/模拟</span>
             </button>
           </div>
 
@@ -294,9 +295,9 @@ export default function ResearchPage() {
                       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                       : exp.status === 'training'
                       ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                      : 'bg-rose-500/10 text-rose-400'
+                      : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
                   }`}>
-                    {exp.status}
+                    {exp.status === 'not_started' ? '未开始 / 规划中' : exp.status}
                   </span>
                   <span className="text-[10px] text-zinc-500 font-mono">{exp.date}</span>
                 </div>
@@ -310,7 +311,7 @@ export default function ResearchPage() {
                   <div className="text-zinc-500 text-[10px]">PARAMS:</div>
                   <div className="text-zinc-300 truncate text-[11px]">{exp.hyperparameters}</div>
                   <div className="text-zinc-500 text-[10px] pt-1">METRICS:</div>
-                  <div className="text-emerald-400 font-semibold text-[11px]">{exp.metrics}</div>
+                  <div className="text-zinc-400 font-medium text-[11px]">{exp.metrics}</div>
                 </div>
 
                 {exp.notes && (
@@ -326,7 +327,7 @@ export default function ResearchPage() {
           {isAddExpOpen && (
             <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
               <div className="bg-[#10131d] border border-white/[0.1] w-full max-w-lg rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
-                <h3 className="font-semibold text-sm text-white">录入新实验</h3>
+                <h3 className="font-semibold text-sm text-white">录入新模拟/算法</h3>
                 <form onSubmit={handleSaveExp} className="space-y-3 text-xs">
                   <input
                     type="text"
@@ -361,7 +362,7 @@ export default function ResearchPage() {
                   />
                   <input
                     type="text"
-                    placeholder="核心指标 (Accuracy, Loss, 误差等)"
+                    placeholder="核心指标 (如: 待运行 / Accuracy / MAE)"
                     value={newExp.metrics}
                     onChange={(e) => setNewExp({ ...newExp, metrics: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono"
@@ -421,7 +422,7 @@ export default function ResearchPage() {
                 </div>
 
                 <div className="space-y-2 pt-2 border-t border-white/[0.06]">
-                  <p className="text-xs font-medium text-zinc-300">任务清单：</p>
+                  <p className="text-xs font-medium text-zinc-300">系统开发任务清单 (0 进度待办)：</p>
                   {proj.tasks.map((task) => (
                     <div
                       key={task.id}

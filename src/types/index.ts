@@ -19,19 +19,23 @@ export interface InterviewRecord {
   rating?: number
 }
 
+// 完整对齐飞书表格字段体系
 export interface JobApplication {
   id: string
-  company: string
-  role: string
-  department?: string
-  location?: string
-  applyDate: string
-  status: JobStatus
-  salary?: string
-  jobUrl?: string
-  source?: string
+  company: string          // 投递公司
+  priority?: string        // 优先级 (高 / 中 / 低)
+  applyDate: string        // 投递日期 (YYYY-MM-DD)
+  applyStatus?: string     // 投递状态 (已投递 / 待投递 / 未投)
+  category?: string        // 类型与岗位 (秋招 研发 / 算法 / 软件)
+  location?: string        // base地 (广州 / 深圳 / 北京 / 成都)
+  role: string             // 职位 (如 AI Agent技术研发工程师)
+  industry?: string        // 行业 (互联网/科技 / 智能建造)
+  jobUrl?: string          // 官网 (投递网址链接)
+  status: JobStatus        // 状态 / 当前进展 (笔试 / 一面 / 二面 / HR / Offer / 淘汰)
+  notes?: string           // 备注
+  salary?: string          // 薪资 / 待遇
+  source?: string          // 来源渠道
   interviews?: InterviewRecord[]
-  notes?: string
   updatedAt: string
   tags?: string[]
 }
@@ -68,8 +72,8 @@ export interface ModelExperiment {
   taskType: string
   dataset: string
   hyperparameters: string
-  metrics: string // e.g. "Acc: 89.2%, Loss: 0.12, F1: 0.88"
-  status: 'training' | 'completed' | 'failed' | 'aborted'
+  metrics: string // e.g. "待运行"
+  status: 'not_started' | 'training' | 'completed' | 'failed' | 'aborted'
   date: string
   notes?: string
 }
@@ -115,7 +119,7 @@ export interface KnowledgeFlashcard {
   lastReviewDate: string
 }
 
-// 日常生活
+// 日常生活与周计划打卡
 export interface DailyTop3Item {
   id: string
   text: string
@@ -123,11 +127,21 @@ export interface DailyTop3Item {
   category?: 'research' | 'career' | 'study' | 'life'
 }
 
+export interface WeeklyMatrixCategory {
+  category: string
+  color?: string
+  items: {
+    name: string
+    checks: Record<string, boolean> // '周一' | '周二' | '周三' ... -> boolean
+  }[]
+}
+
 export interface HabitItem {
   id: string
   name: string
   color: string
   icon: string
+  category?: string
   logs: Record<string, boolean> // YYYY-MM-DD -> true
 }
 
