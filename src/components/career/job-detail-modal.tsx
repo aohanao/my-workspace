@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   X,
   Building2,
@@ -36,11 +36,19 @@ const STATUS_OPTIONS: { value: JobStatus; label: string; color: string }[] = [
 ]
 
 export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props) {
-  if (!isOpen || !job) return null
-
-  const [formData, setFormData] = useState<JobApplication>({ ...job })
+  const [formData, setFormData] = useState<JobApplication | null>(job)
   const [newQuestion, setNewQuestion] = useState('')
   const [activeInterviewIndex, setActiveInterviewIndex] = useState<number>(0)
+
+  useEffect(() => {
+    if (job) {
+      setFormData(job)
+      setActiveInterviewIndex(0)
+    }
+  }, [job])
+
+  // 严格在所有 Hooks 之后做条件判断
+  if (!isOpen || !job || !formData) return null
 
   const handleStatusChange = (status: JobStatus) => {
     setFormData({ ...formData, status, updatedAt: new Date().toISOString() })
