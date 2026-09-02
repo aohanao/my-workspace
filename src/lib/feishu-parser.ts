@@ -191,12 +191,13 @@ function parseSingleRow(
     return null
   }
 
-  // 3. 去除可能存在的首列复选框或序号列（如: ☑, ☐, ::, 1, 2）
+  // 3. 去除可能存在的首列复选框或空列（如: ☑, ☐, ::）
   let cleanCells = [...cells]
-  if (cleanCells.length > 1 && (/^[☑☐::\s\d]+$/.test(cleanCells[0]) || cleanCells[0] === '')) {
-    if (cleanCells[1] && !isDateString(cleanCells[1])) {
-      cleanCells.shift()
-    }
+  if (cleanCells.length > 1 && (/^[☑☐::\s]+$/.test(cleanCells[0]) || cleanCells[0] === '')) {
+    cleanCells.shift()
+  } else if (cleanCells.length > 2 && /^\d{1,2}$/.test(cleanCells[0]) && !/^[高中低]$/.test(cleanCells[1]) && !isDateString(cleanCells[1])) {
+    // 只有当第0列是个位数序号（如 1, 2）且第1列不是优先级时才剔除
+    cleanCells.shift()
   }
 
   const result: Partial<JobApplication> = {
