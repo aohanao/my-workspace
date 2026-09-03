@@ -109,6 +109,10 @@ export interface LeetCodeItem {
   nextReview: string
   reviewStage: number // 艾宾浩斯复习轮次 0,1,2,3,4,5
   notes?: string
+  code?: string // 完整答案代码
+  solutionExplanation?: string // 详细题解思路
+  timeComplexity?: string // 时间复杂度 如 O(n)
+  spaceComplexity?: string // 空间复杂度 如 O(1)
 }
 
 export interface KnowledgeFlashcard {
@@ -126,6 +130,15 @@ export interface DailyTop3Item {
   text: string
   done: boolean
   category?: 'research' | 'career' | 'study' | 'life'
+}
+
+export interface TimeBlockItem {
+  id: string
+  period: 'morning' | 'afternoon' | 'evening'
+  periodLabel: string
+  timeRange: string
+  title: string
+  tasks: { time: string; activity: string }[]
 }
 
 export interface WeeklyMatrixCategory {
@@ -159,3 +172,4 @@ export interface QuickCaptureNote {
   createdAt: string
   tags?: string[]
 }
+

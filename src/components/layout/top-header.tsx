@@ -114,20 +114,29 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           </button>
 
           {/* 秋招倒计时 */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-xs text-zinc-300">
-            <Clock className="w-3.5 h-3.5 text-blue-400" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-white/[0.08] text-xs text-zinc-300">
+            <Clock className="w-3.5 h-3.5 text-cyan-400" />
             <span className="text-zinc-400 font-normal hidden md:inline">秋招冲刺:</span>
             <span className="font-mono font-semibold text-white">
-              {careerDays.days} <span className="text-[10px] font-normal text-zinc-500">天</span>
+              {careerDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
+            </span>
+          </div>
+
+          {/* 12月硕士中期考核倒计时 */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-amber-400/90 font-normal">12月中期:</span>
+            <span className="font-mono font-bold text-amber-200">
+              {getDaysLeft(WORKSPACE_DEADLINES.midTerm).days} <span className="text-[11px] font-normal text-amber-400/60">天</span>
             </span>
           </div>
 
           {/* 论文初稿倒计时 */}
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-xs text-zinc-300">
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-white/[0.08] text-xs text-zinc-300">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="text-zinc-400 font-normal">论文初稿:</span>
+            <span className="text-zinc-400 font-normal">初稿完成:</span>
             <span className="font-mono font-semibold text-white">
-              {thesisDays.days} <span className="text-[10px] font-normal text-zinc-500">天</span>
+              {thesisDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
             </span>
           </div>
 

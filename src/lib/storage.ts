@@ -12,6 +12,7 @@ import {
   HabitItem,
   QuickCaptureNote,
   EnergyMoodLog,
+  TimeBlockItem,
 } from '@/types'
 import {
   INITIAL_JOBS,
@@ -24,21 +25,23 @@ import {
   INITIAL_TOP3,
   INITIAL_HABITS,
   INITIAL_NOTES,
+  INITIAL_TIMEBLOCKS,
 } from './sample-data'
 import { getSupabase, isSupabaseConfigured } from './supabase'
 
 export const STORAGE_KEYS = {
-  JOBS: 'workspace_jobs_v3',
-  THESIS: 'workspace_thesis_v3',
-  MODELS: 'workspace_models_v3',
-  PROJECTS: 'workspace_projects_v3',
-  MILESTONES: 'workspace_milestones_v3',
-  LEETCODE: 'workspace_leetcode_v3',
-  FLASHCARDS: 'workspace_flashcards_v3',
-  TOP3: 'workspace_top3_v3',
-  HABITS: 'workspace_habits_v3',
-  NOTES: 'workspace_notes_v3',
-  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v3',
+  JOBS: 'workspace_jobs_v4',
+  THESIS: 'workspace_thesis_v4',
+  MODELS: 'workspace_models_v4',
+  PROJECTS: 'workspace_projects_v4',
+  MILESTONES: 'workspace_milestones_v4',
+  LEETCODE: 'workspace_leetcode_v4',
+  FLASHCARDS: 'workspace_flashcards_v4',
+  TOP3: 'workspace_top3_v4',
+  HABITS: 'workspace_habits_v4',
+  NOTES: 'workspace_notes_v4',
+  ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v4',
+  TIMEBLOCKS: 'workspace_timeblocks_v4',
 }
 
 export type CloudSyncStatus = 'unconfigured' | 'syncing' | 'synced' | 'error'
@@ -59,7 +62,18 @@ function getItem<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback
   try {
     const item = localStorage.getItem(key)
-    return item ? JSON.parse(item) : fallback
+    if (item) return JSON.parse(item)
+
+    // 平滑兼容迁移：若 v4 为空且是 jobs/notes，检查是否有 v3 数据
+    if (key.endsWith('_v4')) {
+      const oldKey = key.replace('_v4', '_v3')
+      const oldItem = localStorage.getItem(oldKey)
+      if (oldItem && (key === STORAGE_KEYS.JOBS || key === STORAGE_KEYS.NOTES)) {
+        return JSON.parse(oldItem)
+      }
+    }
+
+    return fallback
   } catch (e) {
     console.error(`Error reading ${key} from localStorage`, e)
     return fallback
@@ -189,6 +203,7 @@ export const StorageService = {
         { key: STORAGE_KEYS.HABITS, value: StorageService.getHabits() },
         { key: STORAGE_KEYS.NOTES, value: StorageService.getNotes() },
         { key: STORAGE_KEYS.ENERGY_MOOD_LOGS, value: StorageService.getEnergyMoodLogs() },
+        { key: STORAGE_KEYS.TIMEBLOCKS, value: StorageService.getTimeBlocks() },
       ]
 
       const { error } = await supabase.from('workspace_storage').upsert(
@@ -266,6 +281,9 @@ export const StorageService = {
   getHabits: (): HabitItem[] => getItem(STORAGE_KEYS.HABITS, INITIAL_HABITS),
   saveHabits: (habits: HabitItem[]) => setItem(STORAGE_KEYS.HABITS, habits),
 
+  getTimeBlocks: (): TimeBlockItem[] => getItem(STORAGE_KEYS.TIMEBLOCKS, INITIAL_TIMEBLOCKS),
+  saveTimeBlocks: (blocks: TimeBlockItem[]) => setItem(STORAGE_KEYS.TIMEBLOCKS, blocks),
+
   getNotes: (): QuickCaptureNote[] => getItem(STORAGE_KEYS.NOTES, INITIAL_NOTES),
   saveNotes: (notes: QuickCaptureNote[]) => setItem(STORAGE_KEYS.NOTES, notes),
 
@@ -275,7 +293,7 @@ export const StorageService = {
   // 全量备份与恢复
   exportAllData: () => {
     return {
-      version: '2.0',
+      version: '3.0',
       exportDate: new Date().toISOString(),
       jobs: StorageService.getJobs(),
       thesis: StorageService.getThesis(),
@@ -286,6 +304,7 @@ export const StorageService = {
       flashcards: StorageService.getFlashcards(),
       top3: StorageService.getTop3(),
       habits: StorageService.getHabits(),
+      timeBlocks: StorageService.getTimeBlocks(),
       notes: StorageService.getNotes(),
       energyMoodLogs: StorageService.getEnergyMoodLogs(),
     }
@@ -301,6 +320,7 @@ export const StorageService = {
     if (data.flashcards) StorageService.saveFlashcards(data.flashcards)
     if (data.top3) StorageService.saveTop3(data.top3)
     if (data.habits) StorageService.saveHabits(data.habits)
+    if (data.timeBlocks) StorageService.saveTimeBlocks(data.timeBlocks)
     if (data.notes) StorageService.saveNotes(data.notes)
     if (data.energyMoodLogs) StorageService.saveEnergyMoodLogs(data.energyMoodLogs)
 

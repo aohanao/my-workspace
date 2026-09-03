@@ -17,6 +17,7 @@ export function formatDate(dateStr: string): string {
 
 export const WORKSPACE_DEADLINES = {
   careerSprint: '2026-11-20',
+  midTerm: '2026-12-20',
   blindReview: '2027-02-04',
   defense: '2027-05-20',
 } as const
