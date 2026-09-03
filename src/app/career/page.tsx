@@ -89,7 +89,7 @@ export default function CareerPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <Briefcase className="w-5 h-5" />
             </div>
             <span>秋招求职管家</span>
@@ -103,16 +103,16 @@ export default function CareerPage() {
           {/* 大屏跳转 */}
           <Link
             href="/career/analytics"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white text-xs font-medium border border-white/[0.08] transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white text-xs font-medium border border-white/[0.08] transition-all"
           >
-            <BarChart3 className="w-4 h-4 text-blue-400" />
+            <BarChart3 className="w-4 h-4 text-emerald-400" />
             <span>量化大屏</span>
           </Link>
 
           {/* 飞书导入 */}
           <button
             onClick={() => setIsImporterOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-medium border border-emerald-500/20 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs font-medium border border-white/[0.08] transition-colors"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>导入飞书</span>
@@ -127,7 +127,7 @@ export default function CareerPage() {
                   setJobs([])
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
               title="一键清空所有投递记录"
             >
               <Trash2 className="w-4 h-4" />
@@ -138,7 +138,7 @@ export default function CareerPage() {
           {/* 新增投递 */}
           <button
             onClick={handleCreateNew}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl linear-btn-primary text-xs"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full linear-btn-primary text-xs font-semibold"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>添加投递</span>

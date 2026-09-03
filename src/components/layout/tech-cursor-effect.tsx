@@ -18,7 +18,7 @@ export function TechCursorEffect() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
 
     let animationFrameId: number
@@ -30,9 +30,9 @@ export function TechCursorEffect() {
       width = canvas.width = window.innerWidth
       height = canvas.height = window.innerHeight
     }
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize, { passive: true })
 
-    // 鼠标坐标跟踪（带大惯性平滑阻尼，像流体一样跟随）
+    // 鼠标坐标跟踪（敏捷、丝滑的高响应跟随，避免在复杂 DOM 页面中迟滞）
     const mouse = {
       x: width / 2,
       y: height / 2,
@@ -41,13 +41,13 @@ export function TechCursorEffect() {
       active: false,
     }
 
-    // 大片雾化气溶胶烟雾节点池
+    // 大片雾化气溶胶烟雾节点池（限制在 14 个以内以保证极致 60fps）
     const fogPuffs: FogPuff[] = []
     let lastPuffX = width / 2
     let lastPuffY = height / 2
     let breathPhase = 0
 
-    // DeepSeek 高级深色电影级冷雾调色板（大片柔和极光幽蓝与深空墨雾）
+    // DeepSeek 高级深色电影级冷雾调色板（深海蓝极光、暗夜墨蓝、冰川幽光）
     const FOG_PALETTE = [
       'rgba(30, 58, 110, ',   // 深海蓝极光雾
       'rgba(24, 43, 82, ',    // 暗夜墨蓝
@@ -60,29 +60,28 @@ export function TechCursorEffect() {
       mouse.targetX = e.clientX
       mouse.targetY = e.clientY
 
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
+      // 注意：绝对不要在 mousemove 中调用 document.documentElement.style.setProperty
+      // 否则在秋招表格等大 DOM 页面会导致每帧重排重绘，造成极度严重的掉帧与光影延迟！
 
       const dist = Math.hypot(e.clientX - lastPuffX, e.clientY - lastPuffY)
 
-      // 仅在移动一段距离时释放大片雾化烟圈
-      if (dist > 18) {
+      // 仅在位移超过 24px 时轻量生成大尺寸柔和光雾
+      if (dist > 24) {
         const color = FOG_PALETTE[Math.floor(Math.random() * FOG_PALETTE.length)]
-        // 生成大尺寸柔和光雾
         fogPuffs.push({
           x: e.clientX,
           y: e.clientY,
-          radius: Math.random() * 80 + 160, // 半径 160px ~ 240px 大片弥散
-          alpha: 0.09,                      // 低饱和极其克制的微光
+          radius: Math.random() * 60 + 150, // 半径 150px ~ 210px 柔和弥散
+          alpha: 0.08,                      // 低饱和深邃微光
           life: 0,
-          maxLife: 45,                      // 缓慢消散
+          maxLife: 35,                      // 优雅消散
           colorStop: color,
         })
         lastPuffX = e.clientX
         lastPuffY = e.clientY
       }
 
-      if (fogPuffs.length > 28) {
+      if (fogPuffs.length > 14) {
         fogPuffs.shift()
       }
     }
@@ -96,11 +95,12 @@ export function TechCursorEffect() {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height)
-      breathPhase += 0.02
+      breathPhase += 0.025
 
-      // 平滑阻尼插值
-      mouse.x += (mouse.targetX - mouse.x) * 0.12
-      mouse.y += (mouse.targetY - mouse.y) * 0.12
+      // 敏捷快速的插值系数 (0.35)，彻底解决在秋招页面移动很慢的痛点，全站统一极致丝滑
+      const lerpSpeed = 0.35
+      mouse.x += (mouse.targetX - mouse.x) * lerpSpeed
+      mouse.y += (mouse.targetY - mouse.y) * lerpSpeed
 
       // 1. 绘制历史移动留下的大片雾化气溶胶极光 (Soft Volumetric Fog Trail)
       for (let i = fogPuffs.length - 1; i >= 0; i--) {
@@ -114,10 +114,10 @@ export function TechCursorEffect() {
           continue
         }
 
-        const rad = puff.radius * (1 + progress * 0.35)
+        const rad = puff.radius * (1 + progress * 0.25)
         const g = ctx.createRadialGradient(puff.x, puff.y, 0, puff.x, puff.y, rad)
         g.addColorStop(0, `${puff.colorStop}${currentAlpha})`)
-        g.addColorStop(0.5, `${puff.colorStop}${currentAlpha * 0.35})`)
+        g.addColorStop(0.55, `${puff.colorStop}${currentAlpha * 0.3})`)
         g.addColorStop(1, 'transparent')
 
         ctx.fillStyle = g
@@ -128,8 +128,8 @@ export function TechCursorEffect() {
 
       // 2. 鼠标主焦点处的大片深邃星云光晕 (Atmospheric Ambient Nebula Glow)
       if (mouse.active) {
-        const breathe = Math.sin(breathPhase) * 20
-        const mainRadius = 320 + breathe // 300px~340px 大片环境雾光
+        const breathe = Math.sin(breathPhase) * 15
+        const mainRadius = 290 + breathe // 大片环境雾光
         const nebulaGrad = ctx.createRadialGradient(
           mouse.x,
           mouse.y,
@@ -138,9 +138,9 @@ export function TechCursorEffect() {
           mouse.y,
           mainRadius
         )
-        nebulaGrad.addColorStop(0, 'rgba(45, 75, 140, 0.07)')
-        nebulaGrad.addColorStop(0.4, 'rgba(30, 50, 95, 0.04)')
-        nebulaGrad.addColorStop(0.8, 'rgba(15, 25, 50, 0.015)')
+        nebulaGrad.addColorStop(0, 'rgba(45, 75, 140, 0.065)')
+        nebulaGrad.addColorStop(0.4, 'rgba(30, 50, 95, 0.035)')
+        nebulaGrad.addColorStop(0.8, 'rgba(15, 25, 50, 0.012)')
         nebulaGrad.addColorStop(1, 'transparent')
 
         ctx.fillStyle = nebulaGrad
@@ -148,13 +148,13 @@ export function TechCursorEffect() {
         ctx.arc(mouse.x, mouse.y, mainRadius, 0, Math.PI * 2)
         ctx.fill()
 
-        // 极细微弱的中心环境微光点（直观感知焦点，不产生刺眼卡通线）
-        const coreGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 45)
-        coreGrad.addColorStop(0, 'rgba(180, 210, 255, 0.08)')
+        // 柔和的中心微光晕
+        const coreGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 40)
+        coreGrad.addColorStop(0, 'rgba(180, 210, 255, 0.06)')
         coreGrad.addColorStop(1, 'transparent')
         ctx.fillStyle = coreGrad
         ctx.beginPath()
-        ctx.arc(mouse.x, mouse.y, 45, 0, Math.PI * 2)
+        ctx.arc(mouse.x, mouse.y, 40, 0, Math.PI * 2)
         ctx.fill()
       }
 
@@ -174,8 +174,12 @@ export function TechCursorEffect() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-10 transition-opacity duration-500"
-      style={{ opacity: 0.95 }}
+      className="pointer-events-none fixed inset-0 z-10 will-change-transform"
+      style={{
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+        contain: 'strict',
+      }}
       aria-hidden="true"
     />
   )
