@@ -229,7 +229,7 @@ export default function ResearchPage() {
             <span>硕士毕业管理</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1 truncate max-w-2xl">
-            《钻爆法隧道全工序机械化施工智能配置方法及系统研究》· 全程可编辑定制
+            《钻爆法隧道全工序机械化施工智能配置方法及系统研究》
           </p>
         </div>
 
@@ -277,7 +277,7 @@ export default function ResearchPage() {
             }`}
           >
             <CalendarDays className="w-4 h-4 text-cyan-400" />
-            <span>4. 毕业节点 (12月中期)</span>
+            <span>4. 毕业节点</span>
           </button>
         </div>
       </div>
@@ -290,7 +290,7 @@ export default function ResearchPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
-                  西南交通大学 · 导师张志强教授
+                  西南交通大学
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{thesis.title}</h2>
                 <div className="flex items-center gap-3 sm:gap-6 text-xs text-zinc-400 flex-wrap">
@@ -854,7 +854,7 @@ export default function ResearchPage() {
                   西南交通大学 硕士毕业全周期里程碑时间轴
                 </h3>
                 <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                  开题已过 · 中期考核定于 2026 年 12 月份 · 所有节点均可自由修改与增补
+                  全周期里程碑时间轴与毕业考核进度把控
                 </p>
               </div>
 

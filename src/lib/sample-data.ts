@@ -15,7 +15,7 @@ import {
 // 初始秋招投递数据：清空，等待用户导入真实飞书表格或手动添加
 export const INITIAL_JOBS: JobApplication[] = []
 
-// 硕士学位论文真实信息（来自西南交通大学开题报告：梅傲寒 - 导师张志强教授）
+// 硕士学位论文真实信息（来自西南交通大学开题报告：梅傲寒）
 export const INITIAL_THESIS: ThesisInfo = {
   title: '钻爆法隧道全工序机械化施工智能配置方法及系统研究',
   blindReviewDate: '2027-02-04',
@@ -152,7 +152,7 @@ export const INITIAL_MILESTONES: MilestoneItem[] = [
     targetDate: '2027-02-04',
     completed: false,
     category: '预答辩',
-    notes: '完成全部 6 个章节初稿撰写，交付张志强导师一审并修改。',
+    notes: '完成全部 6 个章节初稿撰写，交付导师一审并修改。',
   },
   {
     id: 'ms-5',
@@ -933,7 +933,7 @@ export const INITIAL_TIMEBLOCKS: TimeBlockItem[] = [
 export const INITIAL_NOTES: QuickCaptureNote[] = [
   {
     id: 'note-1',
-    content: '导师张志强教授指导要点：硕士论文核心是构建高维非线性映射神经网络，找到地质参数、围岩等级与支护参数及结构安全性之间的本质对应关系，并在机械化大系统中落地。',
+    content: '导师指导要点：硕士论文核心是构建高维非线性映射神经网络，找到地质参数、围岩等级与支护参数及结构安全性之间的本质对应关系，并在机械化大系统中落地。',
     createdAt: '2026-09-02 10:00',
     tags: ['导师意见', '核心算法'],
   },
