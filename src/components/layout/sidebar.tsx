@@ -108,19 +108,19 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className="w-64 h-screen border-r border-cyan-500/15 bg-[#060912]/95 backdrop-blur-2xl flex flex-col justify-between select-none z-30 transition-all duration-300">
+      <aside className="w-64 h-screen border-r border-white/[0.08] bg-[#07090e]/95 backdrop-blur-2xl flex flex-col justify-between select-none z-30 transition-all duration-300">
         <div className="overflow-y-auto flex-1">
-          {/* Logo 区域 */}
+          {/* Logo 区域 (DeepSeek 极简 AI 纯白与深空钛金质感) */}
           <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 group" onClick={onClose}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/25 border border-white/20 group-hover:scale-105 transition-transform">
-                <Layers className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center shadow-lg shadow-white/10 border border-white/40 group-hover:scale-105 transition-transform">
+                <Layers className="w-5 h-5 text-black stroke-[2.2]" />
               </div>
               <div>
                 <h1 className="font-bold text-sm sm:text-base tracking-tight text-white flex items-center gap-1.5 font-sans">
-                  Workspace <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono border border-cyan-500/30">PRO</span>
+                  Workspace <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/[0.08] text-zinc-300 font-mono border border-white/[0.12]">AI OS</span>
                 </h1>
-                <p className="text-xs text-zinc-400 font-normal">Academic & Career OS</p>
+                <p className="text-xs text-zinc-400 font-normal">Academic & Career Studio</p>
               </div>
             </Link>
 
@@ -146,9 +146,9 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    'flex items-center justify-between px-3.5 py-3 rounded-xl text-xs sm:text-sm font-medium transition-all group relative border',
+                    'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all group relative border',
                     isActive
-                      ? 'bg-cyan-500/10 text-white border-cyan-500/30 shadow-[0_0_15px_-3px_rgba(6,182,212,0.15)] font-semibold'
+                      ? 'bg-white/[0.1] text-white border-white/[0.14] shadow-sm font-semibold'
                       : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04] border-transparent'
                   )}
                 >
@@ -156,7 +156,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                     <Icon
                       className={cn(
                         'w-4 h-4 transition-transform group-hover:scale-110',
-                        isActive ? 'text-cyan-400' : 'text-zinc-400 group-hover:text-zinc-200'
+                        isActive ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'
                       )}
                     />
                     <div>
@@ -165,7 +165,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                   </div>
 
                   {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                   )}
                 </Link>
               )
@@ -174,7 +174,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
         </div>
 
         {/* 底部功能区：Supabase 云端状态与数据备份 */}
-        <div className="p-3 border-t border-white/[0.06] space-y-2.5 shrink-0 bg-[#060912]">
+        <div className="p-3 border-t border-white/[0.06] space-y-2.5 shrink-0 bg-[#07090e]">
           {/* 云端同步卡片 */}
           <div
             onClick={() => setIsConfigModalOpen(true)}
@@ -184,7 +184,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
               <div className="flex items-center gap-2">
                 {syncInfo.isConfigured ? (
                   syncInfo.status === 'syncing' ? (
-                    <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                    <RefreshCw className="w-3.5 h-3.5 text-zinc-300 animate-spin" />
                   ) : syncInfo.status === 'error' ? (
                     <span className="w-2 h-2 rounded-full bg-rose-400" />
                   ) : (
@@ -214,7 +214,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                     }}
                     disabled={isSyncing}
                     title="立即同步到云端"
-                    className="p-1 rounded text-zinc-400 hover:text-cyan-400 hover:bg-white/[0.05] transition-colors"
+                    className="p-1 rounded text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                   >
                     <RefreshCw className={cn('w-3 h-3', isSyncing && 'animate-spin')} />
                   </button>
@@ -232,7 +232,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
             </p>
           </div>
 
-          {/* 导入 / 导出 */}
+          {/* 导入 / 导出 胶囊按钮 */}
           <div className="flex items-center gap-2">
             <input
               type="file"
@@ -244,7 +244,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
             <button
               onClick={() => fileInputRef.current?.click()}
               title="恢复数据"
-              className="flex-1 py-1.5 px-2 rounded-lg text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
+              className="flex-1 py-1.5 px-2 rounded-full text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.08] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>导入备份</span>
@@ -252,7 +252,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
             <button
               onClick={handleExportData}
               title="导出备份"
-              className="flex-1 py-1.5 px-2 rounded-lg text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
+              className="flex-1 py-1.5 px-2 rounded-full text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.08] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
             >
               <Download className="w-3.5 h-3.5" />
               <span>导出 JSON</span>

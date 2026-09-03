@@ -154,9 +154,9 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
       </div>
 
       {/* ===================== 二级终端视窗 (Sub-Window Terminal) ===================== */}
-      <div className={`sub-window-terminal rounded-2xl overflow-hidden flex flex-col relative transition-all border border-cyan-500/20 ${isFullscreen ? 'flex-1 min-h-0' : 'h-[580px]'}`}>
+      <div className={`sub-window-terminal rounded-2xl overflow-hidden flex flex-col relative transition-all border border-white/[0.1] ${isFullscreen ? 'flex-1 min-h-0' : 'h-[580px]'}`}>
         {/* 视窗标题栏与控制台 (Sub-window Header) */}
-        <div className="px-4 py-2.5 bg-[#0a0d18]/90 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 select-none">
+        <div className="px-4 py-2.5 bg-[#090d16]/95 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 select-none">
           <div className="flex items-center gap-3">
             {/* 拟物终端小红绿点 */}
             <div className="flex items-center gap-1.5">
@@ -166,11 +166,11 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
             </div>
 
             <div className="flex items-center gap-2">
-              <TableIcon className="w-3.5 h-3.5 text-cyan-400" />
+              <TableIcon className="w-3.5 h-3.5 text-zinc-300" />
               <span className="text-xs sm:text-sm font-semibold text-white tracking-tight font-mono">
                 [ 投递清单二级视窗 // JOB_PIPELINE_CONSOLE ]
               </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 font-mono border border-cyan-500/25">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1]">
                 已展示 {filtered.length} / 共 {jobs.length} 岗位
               </span>
             </div>
@@ -181,7 +181,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
             <button
               onClick={() => handleScrollToEdge('left')}
               title="滑动到最左侧首列"
-              className="px-2.5 py-1 rounded-lg text-xs text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-full text-xs text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors flex items-center gap-1"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">首列</span>
@@ -189,7 +189,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
             <button
               onClick={() => handleScrollToEdge('right')}
               title="滑动到最右侧流程与操作"
-              className="px-2.5 py-1 rounded-lg text-xs text-cyan-400 hover:text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-full text-xs text-white bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.15] transition-colors flex items-center gap-1"
             >
               <span className="hidden sm:inline">右滑看全标题</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -199,9 +199,9 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
               title={isFullscreen ? '还原窗口' : '全屏展开二级视窗'}
-              className="p-1.5 rounded-lg text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-colors ml-1"
+              className="p-1.5 rounded-full text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-colors ml-1"
             >
-              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-cyan-400" /> : <Maximize2 className="w-3.5 h-3.5 text-zinc-400" />}
+              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-zinc-400" />}
             </button>
           </div>
         </div>
@@ -389,7 +389,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="h-1.5 w-24 sm:w-36 bg-black/40 rounded-full overflow-hidden border border-white/[0.08]">
-              <div className="h-full bg-cyan-500/60 rounded-full w-2/3" />
+              <div className="h-full bg-white/40 rounded-full w-2/3" />
             </div>
             <button
               onClick={() => handleScrollHorizontally(220)}

@@ -204,7 +204,7 @@ export default function LifePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <Smile className="w-5 h-5" />
             </div>
             <span>生活与习惯管理</span>
@@ -216,7 +216,7 @@ export default function LifePage() {
 
         <button
           onClick={() => setIsAddHabitOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl linear-btn-primary text-xs sm:text-sm font-medium shrink-0 self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-4 py-2 linear-btn-primary text-xs sm:text-sm font-semibold shrink-0 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>新增打卡项目</span>
@@ -224,10 +224,10 @@ export default function LifePage() {
       </div>
 
       {/* 1. 周计划时间块结构 (Time-Blocking) —— 支持全方位自定义修改 */}
-      <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20">
+      <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
           <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 tracking-tight">
-            <Clock className="w-4 h-4 text-cyan-400" />
+            <Clock className="w-4 h-4 text-zinc-300" />
             结构化作息时间块 (Time-Blocking)
           </h3>
           <span className="text-xs text-zinc-400">点击各时段右上角图标可随时编辑修改活动安排</span>
@@ -235,15 +235,15 @@ export default function LifePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
           {timeBlocks.map((block) => (
-            <div key={block.id} className="p-4 rounded-xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-cyan-500/30 transition-colors">
+            <div key={block.id} className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/[0.14] transition-colors">
               <div>
                 <div className="flex items-center justify-between font-bold mb-1.5">
-                  <span className="text-cyan-400">{block.periodLabel}</span>
+                  <span className="text-white">{block.periodLabel}</span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-mono text-zinc-400">{block.timeRange}</span>
                     <button
                       onClick={() => setEditingTimeBlock(block)}
-                      className="p-1 rounded text-zinc-400 hover:text-cyan-300 transition-colors"
+                      className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
                       title="编辑此时段规划"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -254,8 +254,8 @@ export default function LifePage() {
 
                 <div className="space-y-2">
                   {block.tasks.map((task, tIdx) => (
-                    <div key={tIdx} className="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-1">
-                      <div className="flex justify-between text-[11px] text-cyan-400/80 font-mono font-medium">
+                    <div key={tIdx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-1">
+                      <div className="flex justify-between text-[11px] text-zinc-400 font-mono font-medium">
                         <span>{task.time}</span>
                       </div>
                       <div className="text-xs sm:text-sm text-zinc-200 leading-snug">
@@ -271,16 +271,16 @@ export default function LifePage() {
       </div>
 
       {/* 2. 日常任务矩阵与 7 天打卡表格 */}
-      <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20">
+      <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
           <div>
             <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
-              <Flame className="w-4 h-4 text-emerald-400" />
+              <Flame className="w-4 h-4 text-zinc-300" />
               日常任务打卡矩阵 (Habit Matrix)
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">点击方格打卡 / 点击编辑图标随时修改名称与所属分类</p>
           </div>
-          <span className="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/25">
+          <span className="text-xs font-mono text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
             共 {habits.length} 项习惯
           </span>
         </div>

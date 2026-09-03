@@ -4,140 +4,157 @@
 
 @layer base {
   :root {
-    --background: 224 35% 4%;
-    --foreground: 214 32% 94%;
-    --card: 224 30% 7%;
-    --card-foreground: 214 32% 94%;
-    --popover: 224 30% 7%;
-    --popover-foreground: 214 32% 94%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --background: 222 47% 4%;
+    --foreground: 210 20% 98%;
+    --card: 222 40% 6%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 40% 6%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 222 47% 6%;
     --secondary: 220 20% 12%;
-    --secondary-foreground: 214 32% 94%;
+    --secondary-foreground: 210 20% 98%;
     --muted: 220 20% 12%;
     --muted-foreground: 217 19% 65%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 20% 16%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 15%;
-    --input: 220 20% 15%;
-    --ring: 199 89% 48%;
-    --radius: 0.85rem;
+    --border: 220 20% 14%;
+    --input: 220 20% 14%;
+    --ring: 210 20% 80%;
+    --radius: 1rem;
   }
 }
 
-/* 沉浸式暗核科技底色、低饱和度冷色微光与点阵矩阵 */
+/* DeepSeek 同款高级深色背景：大片柔和雾化极光与细腻点阵 */
 html {
   font-size: 14.5px;
 }
 
 body {
-  color: #e2e8f0;
-  background-color: #06080e;
+  color: #f1f5f9;
+  background-color: #07090e;
   background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -25%, rgba(56, 189, 248, 0.08), transparent),
-    radial-gradient(ellipse 70% 40% at 90% 10%, rgba(99, 102, 241, 0.05), transparent),
-    radial-gradient(ellipse 60% 30% at 10% 20%, rgba(20, 184, 166, 0.04), transparent),
-    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.02) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+    radial-gradient(ellipse 100% 65% at 50% -15%, rgba(35, 65, 125, 0.18), transparent 70%),
+    radial-gradient(ellipse 80% 45% at 85% 15%, rgba(20, 40, 85, 0.15), transparent 60%),
+    radial-gradient(ellipse 65% 35% at 15% 30%, rgba(25, 45, 95, 0.12), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px;
   background-attachment: fixed;
   font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 赛博玻璃拟态科技卡片与极细微光边界 */
+/* DeepSeek 高级 AI 客户端毛玻璃卡片质感 */
 .linear-card, .tech-glass {
-  background: rgba(9, 13, 22, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(13, 17, 26, 0.72);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: 
     inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-    0 4px 24px -1px rgba(0, 0, 0, 0.65);
+    0 16px 40px -8px rgba(0, 0, 0, 0.65);
+  border-radius: 1.15rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .linear-card:hover, .tech-glass:hover {
-  background: rgba(13, 19, 32, 0.78);
-  border-color: rgba(56, 189, 248, 0.22);
+  background: rgba(16, 21, 33, 0.82);
+  border-color: rgba(255, 255, 255, 0.14);
   box-shadow: 
     inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
-    0 10px 32px -4px rgba(0, 0, 0, 0.75),
-    0 0 24px -4px rgba(56, 189, 248, 0.1);
+    0 20px 48px -10px rgba(0, 0, 0, 0.75);
 }
 
-/* 二级终端视窗样式 (Sub-Window Terminal) */
+/* 二级终端视窗样式 (DeepSeek 桌面终端视窗) */
 .sub-window-terminal {
-  background: rgba(7, 10, 17, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(10, 13, 20, 0.92);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.15rem;
   box-shadow: 
     inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-    0 12px 36px -6px rgba(0, 0, 0, 0.8),
-    0 0 20px -2px rgba(6, 182, 212, 0.08);
+    0 24px 60px -12px rgba(0, 0, 0, 0.85);
 }
 
-/* 高级科技发光按钮 (低饱和度冰青微蓝) */
+/* DeepSeek 同款高级纯白/珍珠胶囊按钮 (彻底告别卡通高饱和蓝) */
 .linear-btn-primary {
-  background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: #0b0f19;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-    0 2px 10px rgba(2, 132, 199, 0.35);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .linear-btn-primary:hover {
-  background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 100%);
-  box-shadow: 
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
-    0 4px 16px rgba(14, 165, 233, 0.5);
+  background: #f1f5f9;
   transform: translateY(-1px);
+  box-shadow: 
+    0 4px 18px rgba(0, 0, 0, 0.4),
+    0 0 28px rgba(255, 255, 255, 0.25);
 }
 
-/* 科技感二级按钮 */
+.linear-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* DeepSeek 高级暗色半透明胶囊按钮 (次级操作) */
 .linear-btn-secondary {
-  background: rgba(255, 255, 255, 0.04);
-  color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.18s ease;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
 }
 
 .linear-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border-color: rgba(56, 189, 248, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 科技感代码块与字体排版 */
+/* 优雅的高级深色标签徽章 (Pill Badges) */
+.deepseek-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+}
+
+/* 代码字体 */
 pre, code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* 细腻极简低饱和科技滚动条 */
+/* 极致平滑深灰极简滚动条 */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 9999px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.45);
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  background: rgba(255, 255, 255, 0.25);
 }

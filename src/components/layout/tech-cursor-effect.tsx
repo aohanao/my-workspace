@@ -2,25 +2,14 @@
 
 import { useEffect, useRef } from 'react'
 
-interface Particle {
+interface FogPuff {
   x: number
   y: number
-  vx: number
-  vy: number
-  size: number
+  radius: number
   alpha: number
-  life: number
   maxLife: number
-  color: string
-  rotation: number
-  rotSpeed: number
-  shape: 'circle' | 'diamond' | 'cross'
-}
-
-interface PathPoint {
-  x: number
-  y: number
-  time: number
+  life: number
+  colorStop: string
 }
 
 export function TechCursorEffect() {
@@ -43,29 +32,27 @@ export function TechCursorEffect() {
     }
     window.addEventListener('resize', handleResize)
 
-    // 鼠标坐标跟踪（带平滑插值）
+    // 鼠标坐标跟踪（带大惯性平滑阻尼，像流体一样跟随）
     const mouse = {
       x: width / 2,
       y: height / 2,
       targetX: width / 2,
       targetY: height / 2,
-      speed: 0,
       active: false,
     }
 
-    const pathPoints: PathPoint[] = []
-    const particles: Particle[] = []
-    let lastX = width / 2
-    let lastY = height / 2
-    let pulseAngle = 0
+    // 大片雾化气溶胶烟雾节点池
+    const fogPuffs: FogPuff[] = []
+    let lastPuffX = width / 2
+    let lastPuffY = height / 2
+    let breathPhase = 0
 
-    // 深色高级感配色调色板（暗夜电磁紫、深邃冰蓝青、黑曜微光）
-    const THEME_COLORS = [
-      'rgba(99, 102, 241, ',   // 靛紫 (Indigo)
-      'rgba(147, 51, 234, ',   // 电磁紫 (Purple)
-      'rgba(14, 165, 233, ',   // 极深冰青 (Deep Cyan)
-      'rgba(59, 130, 246, ',   // 深海冷蓝 (Royal Blue)
-      'rgba(129, 140, 248, ',  // 幽光紫蓝 (Soft Glow)
+    // DeepSeek 高级深色电影级冷雾调色板（大片柔和极光幽蓝与深空墨雾）
+    const FOG_PALETTE = [
+      'rgba(30, 58, 110, ',   // 深海蓝极光雾
+      'rgba(24, 43, 82, ',    // 暗夜墨蓝
+      'rgba(40, 70, 130, ',   // 幽光冰雾
+      'rgba(50, 60, 95, ',    // 钛灰紫烟
     ]
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -76,44 +63,27 @@ export function TechCursorEffect() {
       document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
       document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
 
-      const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY)
-      mouse.speed = dist
+      const dist = Math.hypot(e.clientX - lastPuffX, e.clientY - lastPuffY)
 
-      // 记录轨迹平滑点
-      pathPoints.push({ x: e.clientX, y: e.clientY, time: Date.now() })
-      if (pathPoints.length > 24) {
-        pathPoints.shift()
-      }
-
-      // 移动时爆发具有冲击力的多重粒子（更夸张、更酷炫的动力学发射）
-      const count = Math.min(6, Math.max(2, Math.floor(dist / 6)))
-      for (let i = 0; i < count; i++) {
-        const colorPrefix = THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)]
-        const angle = Math.random() * Math.PI * 2
-        const spd = Math.random() * 2.2 + 0.5
-        const shapes: ('circle' | 'diamond' | 'cross')[] = ['circle', 'diamond', 'cross']
-
-        particles.push({
-          x: e.clientX + (Math.random() - 0.5) * 8,
-          y: e.clientY + (Math.random() - 0.5) * 8,
-          vx: Math.cos(angle) * spd + (e.clientX - lastX) * 0.08,
-          vy: Math.sin(angle) * spd + (e.clientY - lastY) * 0.08,
-          size: Math.random() * 3.5 + 1.2,
-          alpha: 0.8,
+      // 仅在移动一段距离时释放大片雾化烟圈
+      if (dist > 18) {
+        const color = FOG_PALETTE[Math.floor(Math.random() * FOG_PALETTE.length)]
+        // 生成大尺寸柔和光雾
+        fogPuffs.push({
+          x: e.clientX,
+          y: e.clientY,
+          radius: Math.random() * 80 + 160, // 半径 160px ~ 240px 大片弥散
+          alpha: 0.09,                      // 低饱和极其克制的微光
           life: 0,
-          maxLife: Math.floor(Math.random() * 25 + 20),
-          color: colorPrefix,
-          rotation: Math.random() * Math.PI,
-          rotSpeed: (Math.random() - 0.5) * 0.15,
-          shape: shapes[Math.floor(Math.random() * shapes.length)],
+          maxLife: 45,                      // 缓慢消散
+          colorStop: color,
         })
+        lastPuffX = e.clientX
+        lastPuffY = e.clientY
       }
 
-      lastX = e.clientX
-      lastY = e.clientY
-
-      if (particles.length > 70) {
-        particles.splice(0, particles.length - 70)
+      if (fogPuffs.length > 28) {
+        fogPuffs.shift()
       }
     }
 
@@ -126,137 +96,66 @@ export function TechCursorEffect() {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height)
+      breathPhase += 0.02
 
-      // 鼠标插值跟随
-      mouse.x += (mouse.targetX - mouse.x) * 0.22
-      mouse.y += (mouse.targetY - mouse.y) * 0.22
-      pulseAngle += 0.04
+      // 平滑阻尼插值
+      mouse.x += (mouse.targetX - mouse.x) * 0.12
+      mouse.y += (mouse.targetY - mouse.y) * 0.12
 
-      // 1. 核心深色聚光晕 (深色低饱和、高级紫蓝暗核光芒)
+      // 1. 绘制历史移动留下的大片雾化气溶胶极光 (Soft Volumetric Fog Trail)
+      for (let i = fogPuffs.length - 1; i >= 0; i--) {
+        const puff = fogPuffs[i]
+        puff.life++
+        const progress = puff.life / puff.maxLife
+        const currentAlpha = puff.alpha * (1 - progress)
+
+        if (puff.life >= puff.maxLife || currentAlpha <= 0) {
+          fogPuffs.splice(i, 1)
+          continue
+        }
+
+        const rad = puff.radius * (1 + progress * 0.35)
+        const g = ctx.createRadialGradient(puff.x, puff.y, 0, puff.x, puff.y, rad)
+        g.addColorStop(0, `${puff.colorStop}${currentAlpha})`)
+        g.addColorStop(0.5, `${puff.colorStop}${currentAlpha * 0.35})`)
+        g.addColorStop(1, 'transparent')
+
+        ctx.fillStyle = g
+        ctx.beginPath()
+        ctx.arc(puff.x, puff.y, rad, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      // 2. 鼠标主焦点处的大片深邃星云光晕 (Atmospheric Ambient Nebula Glow)
       if (mouse.active) {
-        const coreGradient = ctx.createRadialGradient(
+        const breathe = Math.sin(breathPhase) * 20
+        const mainRadius = 320 + breathe // 300px~340px 大片环境雾光
+        const nebulaGrad = ctx.createRadialGradient(
           mouse.x,
           mouse.y,
           0,
           mouse.x,
           mouse.y,
-          280
+          mainRadius
         )
-        coreGradient.addColorStop(0, 'rgba(79, 70, 229, 0.08)')
-        coreGradient.addColorStop(0.3, 'rgba(99, 102, 241, 0.04)')
-        coreGradient.addColorStop(0.65, 'rgba(14, 165, 233, 0.02)')
-        coreGradient.addColorStop(1, 'transparent')
+        nebulaGrad.addColorStop(0, 'rgba(45, 75, 140, 0.07)')
+        nebulaGrad.addColorStop(0.4, 'rgba(30, 50, 95, 0.04)')
+        nebulaGrad.addColorStop(0.8, 'rgba(15, 25, 50, 0.015)')
+        nebulaGrad.addColorStop(1, 'transparent')
 
-        ctx.fillStyle = coreGradient
-        ctx.fillRect(0, 0, width, height)
-
-        // 夸张的科技力场光环（双层同心脉冲刻度环与 HUD 旋转射线）
-        ctx.save()
-        ctx.translate(mouse.x, mouse.y)
-
-        // 内环脉冲
-        const ringSize = 14 + Math.sin(pulseAngle * 2) * 2.5
-        ctx.strokeStyle = 'rgba(99, 102, 241, 0.35)'
-        ctx.lineWidth = 1.2
+        ctx.fillStyle = nebulaGrad
         ctx.beginPath()
-        ctx.arc(0, 0, ringSize, 0, Math.PI * 2)
-        ctx.stroke()
+        ctx.arc(mouse.x, mouse.y, mainRadius, 0, Math.PI * 2)
+        ctx.fill()
 
-        // 外环 HUD 刻度微线
-        ctx.rotate(pulseAngle)
-        ctx.strokeStyle = 'rgba(147, 51, 234, 0.25)'
-        ctx.lineWidth = 1
-        for (let i = 0; i < 4; i++) {
-          ctx.beginPath()
-          ctx.arc(0, 0, ringSize + 8, i * Math.PI / 2 + 0.15, (i + 1) * Math.PI / 2 - 0.15)
-          ctx.stroke()
-        }
-
-        // 十字极光准星
-        ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)'
+        // 极细微弱的中心环境微光点（直观感知焦点，不产生刺眼卡通线）
+        const coreGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 45)
+        coreGrad.addColorStop(0, 'rgba(180, 210, 255, 0.08)')
+        coreGrad.addColorStop(1, 'transparent')
+        ctx.fillStyle = coreGrad
         ctx.beginPath()
-        ctx.moveTo(-6, 0); ctx.lineTo(6, 0)
-        ctx.moveTo(0, -6); ctx.lineTo(0, 6)
-        ctx.stroke()
-
-        ctx.restore()
-      }
-
-      // 2. 酷炫的流光拖尾带 (Plasma Ribbon Trail - 夸张连续光束)
-      if (pathPoints.length > 2) {
-        ctx.save()
-        for (let i = 1; i < pathPoints.length; i++) {
-          const p1 = pathPoints[i - 1]
-          const p2 = pathPoints[i]
-          const progress = i / pathPoints.length
-          const alpha = progress * 0.45
-          const width = progress * 3.5 + 0.5
-
-          ctx.beginPath()
-          ctx.moveTo(p1.x, p1.y)
-          ctx.lineTo(p2.x, p2.y)
-          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`
-          ctx.lineWidth = width
-          ctx.lineCap = 'round'
-          ctx.shadowColor = 'rgba(147, 51, 234, 0.6)'
-          ctx.shadowBlur = 8
-          ctx.stroke()
-        }
-        ctx.restore()
-      }
-
-      // 3. 动态科技粒子渲染 (粒子包含旋转几何菱形与星芒)
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]
-        p.life++
-        p.x += p.vx
-        p.y += p.vy
-        p.vx *= 0.95
-        p.vy *= 0.95
-        p.rotation += p.rotSpeed
-
-        const lifeRatio = 1 - p.life / p.maxLife
-        p.alpha = Math.max(0, lifeRatio * 0.85)
-
-        if (p.life >= p.maxLife || p.alpha <= 0) {
-          particles.splice(i, 1)
-          continue
-        }
-
-        ctx.save()
-        ctx.translate(p.x, p.y)
-        ctx.rotate(p.rotation)
-        ctx.fillStyle = `${p.color}${p.alpha})`
-        ctx.shadowColor = `${p.color}0.7)`
-        ctx.shadowBlur = 10
-
-        const s = p.size * lifeRatio
-
-        if (p.shape === 'diamond') {
-          // 科技菱形
-          ctx.beginPath()
-          ctx.moveTo(0, -s * 1.5)
-          ctx.lineTo(s, 0)
-          ctx.moveTo(0, s * 1.5)
-          ctx.lineTo(-s, 0)
-          ctx.closePath()
-          ctx.fill()
-        } else if (p.shape === 'cross') {
-          // 科技十字星芒
-          ctx.lineWidth = 1.2
-          ctx.strokeStyle = `${p.color}${p.alpha})`
-          ctx.beginPath()
-          ctx.moveTo(-s * 1.6, 0); ctx.lineTo(s * 1.6, 0)
-          ctx.moveTo(0, -s * 1.6); ctx.lineTo(0, s * 1.6)
-          ctx.stroke()
-        } else {
-          // 能量光球
-          ctx.beginPath()
-          ctx.arc(0, 0, s, 0, Math.PI * 2)
-          ctx.fill()
-        }
-
-        ctx.restore()
+        ctx.arc(mouse.x, mouse.y, 45, 0, Math.PI * 2)
+        ctx.fill()
       }
 
       animationFrameId = requestAnimationFrame(render)
@@ -275,7 +174,7 @@ export function TechCursorEffect() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-20 transition-opacity duration-300"
+      className="pointer-events-none fixed inset-0 z-10 transition-opacity duration-500"
       style={{ opacity: 0.95 }}
       aria-hidden="true"
     />

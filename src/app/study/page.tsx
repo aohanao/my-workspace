@@ -229,7 +229,7 @@ export default function StudyPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <Brain className="w-5 h-5" />
             </div>
             <span>知识与算法复盘中心</span>
@@ -239,27 +239,27 @@ export default function StudyPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-white/[0.03] p-1.5 rounded-xl border border-white/[0.08] self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 bg-white/[0.03] p-1 rounded-full border border-white/[0.08] self-start sm:self-auto">
           <button
             onClick={() => setActiveTab('leetcode')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
               activeTab === 'leetcode'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Code2 className="w-4 h-4 text-cyan-400" />
+            <Code2 className="w-4 h-4" />
             <span>LeetCode 算法题库 ({leetcodeList.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('flashcards')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
               activeTab === 'flashcards'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-purple-400" />
+            <Sparkles className="w-4 h-4" />
             <span>八股与系统记忆卡 ({flashcards.length})</span>
           </button>
         </div>

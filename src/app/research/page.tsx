@@ -223,7 +223,7 @@ export default function ResearchPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <GraduationCap className="w-5 h-5" />
             </div>
             <span>硕士毕业管理</span>
@@ -234,49 +234,49 @@ export default function ResearchPage() {
         </div>
 
         {/* 4 大子版块切换 Tab */}
-        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06] overflow-x-auto max-w-full">
+        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/[0.08] overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveTab('thesis')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'thesis'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <BookOpen className="w-4 h-4 text-cyan-400" />
+            <BookOpen className="w-4 h-4" />
             <span>1. 论文撰写</span>
           </button>
           <button
             onClick={() => setActiveTab('models')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'models'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Network className="w-4 h-4 text-cyan-400" />
+            <Network className="w-4 h-4" />
             <span>2. 映射神经网络算法</span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'projects'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Code2 className="w-4 h-4 text-cyan-400" />
+            <Code2 className="w-4 h-4" />
             <span>3. 机械化施工大系统</span>
           </button>
           <button
             onClick={() => setActiveTab('milestones')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'milestones'
-                ? 'bg-white/[0.08] text-white font-semibold shadow-sm border border-cyan-500/30'
-                : 'text-zinc-400 hover:text-white border border-transparent'
+                ? 'bg-white text-black font-semibold shadow-md'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <CalendarDays className="w-4 h-4 text-cyan-400" />
+            <CalendarDays className="w-4 h-4" />
             <span>4. 毕业节点</span>
           </button>
         </div>
@@ -289,13 +289,13 @@ export default function ResearchPage() {
           <div className="p-5 sm:p-6 rounded-2xl linear-card">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
                   西南交通大学
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{thesis.title}</h2>
                 <div className="flex items-center gap-3 sm:gap-6 text-xs text-zinc-400 flex-wrap">
-                  <span>初稿完成送审: <strong className="text-cyan-300 font-mono">{thesis.blindReviewDate}</strong></span>
-                  <span>正式答辩节点: <strong className="text-cyan-300 font-mono">{thesis.defenseDate}</strong></span>
+                  <span>初稿完成送审: <strong className="text-white font-mono">{thesis.blindReviewDate}</strong></span>
+                  <span>正式答辩节点: <strong className="text-white font-mono">{thesis.defenseDate}</strong></span>
                 </div>
               </div>
 
@@ -306,16 +306,16 @@ export default function ResearchPage() {
                     {totalCurrentWords.toLocaleString()} <span className="text-xs font-normal text-zinc-500">/ {totalTargetWords.toLocaleString()} 字</span>
                   </p>
                 </div>
-                <div className="w-14 h-14 rounded-full bg-cyan-500/10 border-2 border-cyan-500 flex items-center justify-center font-bold font-mono text-sm text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+                <div className="w-14 h-14 rounded-full bg-white/[0.06] border-2 border-white/80 flex items-center justify-center font-bold font-mono text-sm text-white shadow-lg">
                   {overallProgress}%
                 </div>
               </div>
             </div>
 
             {/* 总体进度条 */}
-            <div className="w-full bg-black/40 rounded-full h-2 mt-5 overflow-hidden border border-white/[0.08]">
+            <div className="w-full bg-black/40 rounded-full h-1.5 mt-5 overflow-hidden border border-white/[0.08]">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-500"
+                className="h-full bg-white rounded-full transition-all duration-500"
                 style={{ width: `${overallProgress}%` }}
               />
             </div>
@@ -504,11 +504,11 @@ export default function ResearchPage() {
           {/* 算法卡片列表 */}
           <div className="grid grid-cols-1 gap-4">
             {models.map((exp) => (
-              <div key={exp.id} className="p-5 sm:p-6 rounded-2xl linear-card space-y-4 border border-cyan-500/20">
+              <div key={exp.id} className="p-5 sm:p-6 rounded-2xl linear-card space-y-4 border border-white/[0.08]">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 font-mono border border-cyan-500/25 uppercase">
+                    <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+                    <span className="text-xs font-medium px-3 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1] uppercase">
                       {exp.status === 'not_started' ? '规划启动阶段' : exp.status}
                     </span>
                     <span className="text-xs text-zinc-500 font-mono">登记日期: {exp.date}</span>
@@ -517,7 +517,7 @@ export default function ResearchPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setEditingExp(exp)}
-                      className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.08] transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-full border border-white/[0.08] transition-colors"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>编辑算法</span>
@@ -534,7 +534,7 @@ export default function ResearchPage() {
 
                 <div>
                   <h4 className="font-bold text-base sm:text-lg text-white">{exp.modelName}</h4>
-                  <p className="text-xs sm:text-sm text-cyan-400/90 mt-1">
+                  <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                     任务类型: {exp.taskType}
                   </p>
                 </div>
@@ -551,7 +551,7 @@ export default function ResearchPage() {
                   </div>
                   <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] space-y-1">
                     <div className="text-zinc-500 font-mono text-xs">TARGET METRICS / 评价指标:</div>
-                    <div className="text-cyan-300 font-mono font-semibold text-xs leading-relaxed">{exp.metrics}</div>
+                    <div className="text-white font-mono font-semibold text-xs leading-relaxed">{exp.metrics}</div>
                   </div>
                 </div>
 

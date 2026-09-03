@@ -9,9 +9,7 @@ import {
   BatteryCharging,
   Smile,
   Plus,
-  CheckCircle2,
   Trash2,
-  Sparkles,
   Save,
   Check,
 } from 'lucide-react'
@@ -39,7 +37,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
   const [tasks, setTasks] = useState<DailyTop3Item[]>([])
   const [newTaskText, setNewTaskText] = useState('')
 
-  // 全局数据索引（按日期标记点）
+  // 全局数据索引
   const [energyLogs, setEnergyLogs] = useState<EnergyMoodLog[]>([])
 
   useEffect(() => {
@@ -89,7 +87,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
     e.preventDefault()
     if (!newTaskText.trim()) return
     const newItem: DailyTop3Item = {
-      id: `top-${Date.now()}`,
+      id: `task-${Date.now()}`,
       text: newTaskText.trim(),
       done: false,
     }
@@ -114,9 +112,9 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
   if (!isOpen) return null
 
   // 生成当月网格
-  const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay() // 0 is Sunday
+  const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay()
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-  const offset = (firstDayOfWeek + 6) % 7 // 转成周一为 0
+  const offset = (firstDayOfWeek + 6) % 7
 
   const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate()
   const days = []
@@ -142,7 +140,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
     })
   }
 
-  // 下月余白补齐 35 或 42 格
+  // 下月余白补齐
   const remaining = (7 - (days.length % 7)) % 7
   for (let i = 1; i <= remaining; i++) {
     days.push({
@@ -178,24 +176,24 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
   const todayStr = getLocalDateKey()
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-      <div className="bg-[#090d18] border border-cyan-500/30 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] animate-in fade-in zoom-in-95">
-        {/* 左侧：科技月历网格 */}
-        <div className="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-white/[0.08] flex-1 flex flex-col justify-between select-none">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5">
+      <div className="bg-[#0b0e17] border border-white/[0.12] w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] animate-in fade-in zoom-in-95">
+        {/* 左侧：DeepSeek 极简月历网格 */}
+        <div className="p-5 sm:p-7 border-b md:border-b-0 md:border-r border-white/[0.08] flex-1 flex flex-col justify-between select-none">
           <div>
             {/* 月历标题与切换 */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-cyan-400" />
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <CalendarIcon className="w-5 h-5 text-white" />
                 <h3 className="font-bold text-base sm:text-lg text-white font-mono">
                   {currentYear}年 · {monthNames[currentMonth]}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors"
+                  className="p-1.5 rounded-full text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.06] transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -206,13 +204,13 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                     setCurrentMonth(now.getMonth())
                     handleSelectDate(todayStr)
                   }}
-                  className="px-2.5 py-1 text-xs rounded-lg text-cyan-400 hover:text-cyan-200 bg-cyan-500/10 border border-cyan-500/25"
+                  className="px-3 py-1 text-xs rounded-full text-white bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] transition-colors"
                 >
                   今天
                 </button>
                 <button
                   onClick={handleNextMonth}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors"
+                  className="p-1.5 rounded-full text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.06] transition-colors"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -220,24 +218,24 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
             </div>
 
             {/* 星期行 */}
-            <div className="grid grid-cols-7 text-center text-xs font-semibold text-zinc-400 mb-2 font-mono">
+            <div className="grid grid-cols-7 text-center text-xs font-semibold text-zinc-500 mb-2.5 font-mono">
               <div>一</div>
               <div>二</div>
               <div>三</div>
               <div>四</div>
               <div>五</div>
-              <div className="text-cyan-400/80">六</div>
-              <div className="text-rose-400/80">日</div>
+              <div className="text-zinc-300">六</div>
+              <div className="text-zinc-300">日</div>
             </div>
 
             {/* 日期格子网格 */}
-            <div className="grid grid-cols-7 gap-1.5 text-xs sm:text-sm">
+            <div className="grid grid-cols-7 gap-2 text-xs sm:text-sm">
               {days.map((item, idx) => {
                 if (item.monthOffset !== 0) {
                   return (
                     <div
                       key={idx}
-                      className="h-10 sm:h-12 rounded-xl flex items-center justify-center text-zinc-600 font-mono opacity-30"
+                      className="h-10 sm:h-12 rounded-xl flex items-center justify-center text-zinc-700 font-mono opacity-30"
                     >
                       {item.day}
                     </div>
@@ -252,18 +250,17 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                   <button
                     key={idx}
                     onClick={() => handleSelectDate(item.dateStr)}
-                    className={`h-10 sm:h-12 rounded-xl flex flex-col items-center justify-center font-mono font-medium transition-all relative border ${
+                    className={`h-10 sm:h-12 rounded-2xl flex flex-col items-center justify-center font-mono font-medium transition-all relative border ${
                       isSelected
-                        ? 'bg-cyan-500/20 text-white border-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.3)] font-bold scale-105 z-10'
+                        ? 'bg-white text-black border-white shadow-lg font-bold scale-105 z-10'
                         : isToday
-                        ? 'bg-white/[0.06] text-cyan-300 border-cyan-500/40 font-bold'
-                        : 'bg-black/30 text-zinc-300 border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.12]'
+                        ? 'bg-white/[0.08] text-white border-white/40 font-bold'
+                        : 'bg-black/40 text-zinc-300 border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.15]'
                     }`}
                   >
                     <span>{item.day}</span>
-                    {/* 心情状态指示小点 */}
                     {hasMoodLog && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5 shadow-[0_0_4px_rgba(251,191,36,0.8)]" />
+                      <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-black' : 'bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]'}`} />
                     )}
                   </button>
                 )
@@ -273,26 +270,26 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
 
           <div className="pt-4 text-xs text-zinc-400 flex items-center justify-between border-t border-white/[0.06] mt-4">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.8)]" />
-              <span>有状态/心情记录</span>
+              <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
+              <span>当日有状态记录</span>
             </div>
-            <span className="text-zinc-500 font-mono">CALENDAR_VIEW</span>
+            <span className="text-zinc-500 font-mono text-[11px]">CALENDAR · DEEPSEEK OS</span>
           </div>
         </div>
 
         {/* 右侧：选中日期的状态心情与待办录入面板 */}
-        <div className="p-5 sm:p-6 w-full md:w-[380px] bg-black/40 flex flex-col justify-between space-y-4 overflow-y-auto">
+        <div className="p-5 sm:p-7 w-full md:w-[380px] bg-black/40 flex flex-col justify-between space-y-4 overflow-y-auto">
           <div className="space-y-4">
             {/* 顶栏：选中日期标题与关闭按钮 */}
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
               <div>
-                <span className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider block">SELECTED DATE</span>
+                <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">SELECTED DATE</span>
                 <h4 className="font-bold text-base sm:text-lg text-white font-mono">{selectedDate}</h4>
               </div>
 
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                className="p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
                 title="关闭日历"
               >
                 <X className="w-5 h-5" />
@@ -300,10 +297,10 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
             </div>
 
             {/* 1. 心情与精力评定 */}
-            <div className="space-y-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-xs">
+            <div className="space-y-3 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.07] text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-white flex items-center gap-1.5">
-                  <Smile className="w-4 h-4 text-cyan-400" />
+                  <Smile className="w-4 h-4 text-zinc-300" />
                   当日状态与精力记录
                 </span>
                 {moodSaved && (
@@ -316,7 +313,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
               <div>
                 <div className="flex justify-between mb-1 text-zinc-300">
                   <span>⚡ 精力等级:</span>
-                  <span className="font-mono font-bold text-cyan-400">{energy} / 5</span>
+                  <span className="font-mono font-bold text-white">{energy} / 5</span>
                 </div>
                 <input
                   type="range"
@@ -324,14 +321,14 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                   max="5"
                   value={energy}
                   onChange={(e) => setEnergy(Number(e.target.value))}
-                  className="w-full accent-cyan-500 cursor-pointer"
+                  className="w-full accent-white cursor-pointer"
                 />
               </div>
 
               <div>
                 <div className="flex justify-between mb-1 text-zinc-300">
                   <span>😊 心情指数:</span>
-                  <span className="font-mono font-bold text-blue-400">{mood} / 5</span>
+                  <span className="font-mono font-bold text-white">{mood} / 5</span>
                 </div>
                 <input
                   type="range"
@@ -339,7 +336,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                   max="5"
                   value={mood}
                   onChange={(e) => setMood(Number(e.target.value))}
-                  className="w-full accent-blue-500 cursor-pointer"
+                  className="w-full accent-white cursor-pointer"
                 />
               </div>
 
@@ -349,13 +346,13 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                   value={journal}
                   onChange={(e) => setJournal(e.target.value)}
                   placeholder="记录今日心得感悟、随笔..."
-                  className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500 resize-none text-xs"
+                  className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-white/30 resize-none text-xs"
                 />
               </div>
 
               <button
                 onClick={handleSaveMood}
-                className="w-full py-1.5 rounded-xl linear-btn-primary font-medium text-xs flex items-center justify-center gap-1.5"
+                className="w-full py-2 rounded-full linear-btn-primary font-semibold text-xs flex items-center justify-center gap-1.5"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>保存此日状态记录</span>
@@ -363,7 +360,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
             </div>
 
             {/* 2. 当日待办事项 */}
-            <div className="space-y-2.5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-xs">
+            <div className="space-y-2.5 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.07] text-xs">
               <span className="font-semibold text-white block">
                 📋 核心待办安排 ({tasks.filter((t) => t.done).length}/{tasks.length})
               </span>
@@ -375,11 +372,11 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                   value={newTaskText}
                   onChange={(e) => setNewTaskText(e.target.value)}
                   placeholder="添加任务项..."
-                  className="flex-1 px-3 py-1.5 rounded-xl bg-black/50 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-cyan-500"
+                  className="flex-1 px-3 py-1.5 rounded-full bg-black/50 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-white/30"
                 />
                 <button
                   type="submit"
-                  className="px-3 py-1.5 linear-btn-primary rounded-xl font-medium shrink-0"
+                  className="px-4 py-1.5 linear-btn-primary rounded-full font-semibold shrink-0"
                 >
                   添加
                 </button>
@@ -390,7 +387,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 {tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between gap-2 p-2 rounded-lg bg-black/30 border border-white/[0.04] group hover:border-white/[0.08]"
+                    className="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/30 border border-white/[0.04] group hover:border-white/[0.1]"
                   >
                     <div
                       onClick={() => handleToggleTask(task.id)}
@@ -400,7 +397,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                         type="checkbox"
                         checked={task.done}
                         onChange={() => {}}
-                        className="rounded text-cyan-500 cursor-pointer"
+                        className="rounded text-white cursor-pointer accent-white"
                       />
                       <span className={`truncate text-xs ${task.done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
                         {task.text}
@@ -424,7 +421,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
 
           <button
             onClick={onClose}
-            className="w-full py-2 rounded-xl text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium transition-colors"
+            className="w-full py-2.5 rounded-full text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-medium transition-colors"
           >
             完成并返回工作台
           </button>
