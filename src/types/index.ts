@@ -124,12 +124,15 @@ export interface KnowledgeFlashcard {
   lastReviewDate: string
 }
 
-// 日常生活与周计划打卡
+// 日常生活与待办四象限
+export type TaskPriority = '重急' | '轻急' | '重缓' | '轻缓'
+
 export interface DailyTop3Item {
   id: string
   text: string
   done: boolean
   category?: 'research' | 'career' | 'study' | 'life'
+  priority?: TaskPriority
 }
 
 export interface TimeBlockItem {

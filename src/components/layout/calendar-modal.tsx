@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { StorageService } from '@/lib/storage'
 import { getLocalDateKey } from '@/lib/utils'
-import { DailyTop3Item, EnergyMoodLog } from '@/types'
+import { DailyTop3Item, EnergyMoodLog, TaskPriority } from '@/types'
 
 interface CalendarModalProps {
   isOpen: boolean
@@ -36,6 +36,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
   // 待办列表
   const [tasks, setTasks] = useState<DailyTop3Item[]>([])
   const [newTaskText, setNewTaskText] = useState('')
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('重急')
 
   // 全局数据索引
   const [energyLogs, setEnergyLogs] = useState<EnergyMoodLog[]>([])
@@ -90,6 +91,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
       id: `task-${Date.now()}`,
       text: newTaskText.trim(),
       done: false,
+      priority: newTaskPriority,
     }
     const updated = [...tasks, newItem]
     setTasks(updated)
@@ -366,51 +368,89 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
               </span>
 
               {/* 任务添加 */}
-              <form onSubmit={handleAddTask} className="flex gap-1.5">
-                <input
-                  type="text"
-                  value={newTaskText}
-                  onChange={(e) => setNewTaskText(e.target.value)}
-                  placeholder="添加任务项..."
-                  className="flex-1 px-3 py-1.5 rounded-full bg-black/50 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-white/30"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 linear-btn-primary rounded-full font-semibold shrink-0"
-                >
-                  添加
-                </button>
+              <form onSubmit={handleAddTask} className="space-y-2">
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={newTaskText}
+                    onChange={(e) => setNewTaskText(e.target.value)}
+                    placeholder="添加任务项..."
+                    className="flex-1 px-3 py-1.5 rounded-full bg-black/50 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-white/30"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 linear-btn-primary rounded-full font-semibold shrink-0"
+                  >
+                    添加
+                  </button>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  {(['重急', '重缓', '轻急', '轻缓'] as TaskPriority[]).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setNewTaskPriority(p)}
+                      className={`px-2 py-0.5 rounded-full font-mono transition-all border ${
+                        newTaskPriority === p
+                          ? p === '重急'
+                            ? 'bg-rose-950 text-rose-300 border-rose-600 font-bold'
+                            : p === '重缓'
+                            ? 'bg-amber-950 text-amber-300 border-amber-600 font-bold'
+                            : p === '轻急'
+                            ? 'bg-purple-950 text-purple-300 border-purple-600 font-bold'
+                            : 'bg-zinc-800 text-zinc-300 border-zinc-600 font-bold'
+                          : 'bg-transparent border-white/[0.08] text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
               </form>
 
               {/* 任务列表 */}
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
-                {tasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/30 border border-white/[0.04] group hover:border-white/[0.1]"
-                  >
+                {tasks.map((task) => {
+                  const p = task.priority || '重急'
+                  const pBadge = p === '重急'
+                    ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+                    : p === '重缓'
+                    ? 'bg-amber-950/70 text-amber-300 border-amber-700/50'
+                    : p === '轻急'
+                    ? 'bg-purple-950/70 text-purple-300 border-purple-700/50'
+                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-700/50'
+
+                  return (
                     <div
-                      onClick={() => handleToggleTask(task.id)}
-                      className="flex items-center gap-2 flex-1 cursor-pointer min-w-0"
+                      key={task.id}
+                      className="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/30 border border-white/[0.04] group hover:border-white/[0.1]"
                     >
-                      <input
-                        type="checkbox"
-                        checked={task.done}
-                        onChange={() => {}}
-                        className="rounded text-white cursor-pointer accent-white"
-                      />
-                      <span className={`truncate text-xs ${task.done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
-                        {task.text}
+                      <div
+                        onClick={() => handleToggleTask(task.id)}
+                        className="flex items-center gap-2 flex-1 cursor-pointer min-w-0"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={task.done}
+                          onChange={() => {}}
+                          className="rounded text-white cursor-pointer accent-white"
+                        />
+                        <span className={`truncate text-xs ${task.done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
+                          {task.text}
+                        </span>
+                      </div>
+                      <span className={`px-2 py-0.2 rounded-full text-[10px] font-mono border font-bold shrink-0 ${pBadge}`}>
+                        {p}
                       </span>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-rose-400 transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-rose-400 transition-opacity"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
 
                 {tasks.length === 0 && (
                   <p className="text-zinc-500 py-3 text-center text-xs">暂无待办，输入上方即可添加</p>

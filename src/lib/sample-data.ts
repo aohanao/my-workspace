@@ -803,11 +803,11 @@ export const INITIAL_FLASHCARDS: KnowledgeFlashcard[] = [
   },
 ]
 
-// 每日核心三件事初始项
+// 每日待办四象限初始项
 export const INITIAL_TOP3: DailyTop3Item[] = [
-  { id: 'top-1', text: '梳理地质参数-围岩等级-支护参数-安全性神经网络模型特征输入输出', done: false, category: 'research' },
-  { id: 'top-2', text: '跟进秋招求职管家投递流程并排查面试排期', done: false, category: 'career' },
-  { id: 'top-3', text: '复习 2 道力扣高频题（滑动窗口/双指针）与计算机大模型八股', done: false, category: 'study' },
+  { id: 'top-1', text: '梳理地质参数-围岩等级-支护参数-安全性神经网络模型特征输入输出', done: false, category: 'research', priority: '重急' },
+  { id: 'top-2', text: '跟进秋招求职管家投递流程并排查面试排期', done: false, category: 'career', priority: '轻急' },
+  { id: 'top-3', text: '复习 2 道力扣高频题（滑动窗口/双指针）与计算机大模型八股', done: false, category: 'study', priority: '重缓' },
 ]
 
 // 7 大日常习惯打卡矩阵
