@@ -190,11 +190,13 @@ export function TechCursorEffect() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-10 will-change-transform"
+      className="pointer-events-none fixed inset-0 w-full h-full z-20 will-change-transform"
       style={{
+        width: '100vw',
+        height: '100vh',
+        mixBlendMode: 'screen',
         transform: 'translate3d(0, 0, 0)',
         backfaceVisibility: 'hidden',
-        contain: 'strict',
       }}
       aria-hidden="true"
     />
