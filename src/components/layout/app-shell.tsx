@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div className="min-h-screen flex w-full bg-background text-foreground overflow-hidden relative">
+    <div className="min-h-screen flex w-full bg-transparent text-foreground overflow-hidden relative">
       {/* 科技感鼠标光影跟随与网格粒子 */}
       <TechCursorEffect />
 
