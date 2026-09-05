@@ -70,7 +70,7 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
 
   return (
     <>
-      <header className="h-16 sm:h-18 border-b border-white/[0.08] bg-[#07090e]/85 backdrop-blur-2xl px-4 sm:px-7 flex items-center justify-between sticky top-0 z-30 shrink-0">
+      <header className="h-16 sm:h-18 border-b border-white/[0.08] bg-black/35 backdrop-blur-2xl px-4 sm:px-7 flex items-center justify-between sticky top-0 z-30 shrink-0">
         {/* 左侧：移动端菜单 + 醒目问候与 DeepSeek 胶囊式日历入口 */}
         <div className="flex items-center gap-3.5 min-w-0">
           <button

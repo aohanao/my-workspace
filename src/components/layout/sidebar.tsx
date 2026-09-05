@@ -108,7 +108,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className="w-64 h-screen border-r border-white/[0.08] bg-[#07090e]/95 backdrop-blur-2xl flex flex-col justify-between select-none z-30 transition-all duration-300">
+      <aside className="w-64 h-screen border-r border-white/[0.08] bg-black/40 backdrop-blur-2xl flex flex-col justify-between select-none z-30 transition-all duration-300">
         <div className="overflow-y-auto flex-1">
           {/* Logo 区域 (DeepSeek 极简 AI 纯白与深空钛金质感) */}
           <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
