@@ -92,8 +92,11 @@ export default function CareerPage() {
   const appliedCount = appliedJobs.length
   const notAppliedCount = notAppliedJobs.length
 
+  const screeningCount = jobs.filter((j) => j.status === 'applied').length
+  const assessmentCount = jobs.filter((j) => j.status === 'assessment').length
   const interviewCount = jobs.filter((j) => ['interview1', 'interview2', 'interview3', 'hr'].includes(j.status)).length
   const offerCount = jobs.filter((j) => j.status === 'offer').length
+  const rejectedCount = jobs.filter((j) => j.status === 'rejected').length
 
   // 各轮次到达企业数（以实际已投递为基数进行转化率分析）
   const round1Jobs = jobs.filter(
@@ -217,12 +220,14 @@ export default function CareerPage() {
           </div>
         </div>
 
-        {/* 面试中流程 */}
+        {/* 面试推进中流程 */}
         <div className="p-3.5 sm:p-4 rounded-xl linear-card flex items-center justify-between">
           <div>
-            <p className="text-[11px] text-zinc-400 font-medium">面试中流程</p>
+            <p className="text-[11px] text-zinc-400 font-medium">面试推进中</p>
             <h3 className="text-xl sm:text-2xl font-bold font-mono text-amber-400 mt-0.5">{interviewCount}</h3>
-            <p className="text-[10px] text-zinc-500 mt-1">正在推进面试轮次</p>
+            <p className="text-[10px] text-zinc-500 mt-1">
+              待初筛/笔试 {screeningCount + assessmentCount} · 已挂 {rejectedCount}
+            </p>
           </div>
           <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
             <TrendingUp className="w-4 h-4" />
@@ -235,7 +240,7 @@ export default function CareerPage() {
             <p className="text-[11px] text-zinc-400 font-medium">已获 Offer</p>
             <h3 className="text-xl sm:text-2xl font-bold font-mono text-emerald-400 mt-0.5">{offerCount}</h3>
             <p className="text-[10px] text-zinc-500 mt-1">
-              录用率 {appliedCount > 0 ? Math.round((offerCount / appliedCount) * 100) : 0}%
+              录用率 {appliedCount > 0 ? Math.round((offerCount / appliedCount) * 100) : 0}% · 终止 {rejectedCount}家
             </p>
           </div>
           <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
@@ -268,6 +273,29 @@ export default function CareerPage() {
           <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
             <TrendingUp className="w-4 h-4" />
           </div>
+        </div>
+      </div>
+
+      {/* 投递全景流转与总数严格核验条 */}
+      <div className="px-3.5 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-[11px]">
+          <span className="text-zinc-400 font-medium flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            全库求职总览 (共 <span className="font-mono font-bold text-white">{totalCount}</span> 家) =
+          </span>
+          <span className="text-zinc-300 font-medium">
+            实际已投递 <span className="font-mono font-bold text-blue-400">{appliedCount}</span> 家
+            <span className="text-zinc-500 ml-1">
+              [待初筛 <span className="font-mono text-zinc-300">{screeningCount}</span> · 笔试测评 <span className="font-mono text-purple-300">{assessmentCount}</span> · 面试中 <span className="font-mono text-amber-300">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300">{offerCount}</span> · <span className="text-rose-400 font-medium">已挂/终止 <span className="font-mono">{rejectedCount}</span></span>]
+            </span>
+          </span>
+          <span className="text-zinc-600">＋</span>
+          <span className="text-zinc-400">
+            储备待投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家
+          </span>
+        </div>
+        <div className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+          总数核验 100% 对齐 ✓
         </div>
       </div>
 

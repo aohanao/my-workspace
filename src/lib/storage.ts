@@ -28,6 +28,7 @@ import {
   INITIAL_TIMEBLOCKS,
 } from './sample-data'
 import { getSupabase, isSupabaseConfigured } from './supabase'
+import { normalizeJobStatus } from './feishu-parser'
 
 export const STORAGE_KEYS = {
   JOBS: 'workspace_jobs_v4',
@@ -229,8 +230,26 @@ export const StorageService = {
     }
   },
 
-  // 求职数据
-  getJobs: (): JobApplication[] => getItem(STORAGE_KEYS.JOBS, INITIAL_JOBS),
+  // 求职数据 (自动纠偏已挂与规范化状态)
+  getJobs: (): JobApplication[] => {
+    const list = getItem<JobApplication[]>(STORAGE_KEYS.JOBS, INITIAL_JOBS)
+    return list.map((job) => {
+      let status = job.status
+      if (
+        status !== 'rejected' &&
+        (/挂|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(job.notes || '') ||
+         /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(job.applyStatus || ''))
+      ) {
+        status = 'rejected'
+      } else {
+        status = normalizeJobStatus(status)
+      }
+      return {
+        ...job,
+        status,
+      }
+    })
+  },
   saveJobs: (jobs: JobApplication[]) => setItem(STORAGE_KEYS.JOBS, jobs),
   addJob: (job: JobApplication) => {
     const list = StorageService.getJobs()

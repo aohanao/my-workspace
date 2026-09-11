@@ -89,11 +89,70 @@ export function isJobApplied(job: { status?: JobStatus; applyStatus?: string }):
   return true
 }
 
-// 智能提取状态
-function parseStatus(rawStatus: string | undefined, defaultStatus: JobStatus = 'applied'): JobStatus {
+// 全局状态归一化处理器 (确保任意状态输入均严格映射到 9 种合法状态之一)
+export function normalizeJobStatus(status?: string | null): JobStatus {
+  if (!status) return 'applied'
+  const text = String(status).trim().toLowerCase()
+
+  // 1. 最高优先级：挂 / 淘汰 / 流程终止 / 感谢信 / 未通过 / 不合适
+  if (/挂|淘汰|终止|不合适|感谢信|未通过|不通过|被拒|拒信|fail|reject|已拒绝|归档/i.test(text)) {
+    return 'rejected'
+  }
+
+  // 2. Offer / 录用
+  if (/offer|录用|意向书|已oc|带薪实习|oc/i.test(text)) {
+    return 'offer'
+  }
+
+  // 3. HR面 / 终面
+  if (/hr|终面|人事|谈薪|综合面/i.test(text)) {
+    return 'hr'
+  }
+
+  // 4. 技术三面 / 主管面
+  if (/三面|三轮|主管面|业务面|interview3/i.test(text)) {
+    return 'interview3'
+  }
+
+  // 5. 技术二面 / 交叉面
+  if (/二面|二轮|复面|交叉|interview2/i.test(text)) {
+    return 'interview2'
+  }
+
+  // 6. 技术一面 / 初面
+  if (/一面|一轮|初面|专业面|群面|interview1|interview/i.test(text)) {
+    return 'interview1'
+  }
+
+  // 7. 笔试 / 测评
+  if (/笔试|测评|性格测试|在线测评|做测评|assessment/i.test(text)) {
+    return 'assessment'
+  }
+
+  // 8. 意向 / 未投递
+  if (/意向|准备|未投|待投|想去|未申请|wishlist/i.test(text)) {
+    return 'wishlist'
+  }
+
+  // 9. 已投递 / 初筛
+  if (/已投|初筛|评估|筛选|applied/i.test(text)) {
+    return 'applied'
+  }
+
+  return 'applied'
+}
+
+// 智能提取状态 (优先检测挂与淘汰，杜绝"一面挂"被误当作一面推进)
+export function parseStatus(rawStatus: string | undefined, defaultStatus: JobStatus = 'applied'): JobStatus {
   if (!rawStatus) return defaultStatus
   const text = rawStatus.trim().toLowerCase()
   
+  // 1. 优先检测是否已淘汰或流程终止
+  if (/挂|淘汰|终止|不合适|感谢信|未通过|不通过|被拒|拒信|fail|reject|已拒绝|归档/i.test(text)) {
+    return 'rejected'
+  }
+
+  // 2. 匹配其余状态关键词
   for (const [key, val] of Object.entries(STATUS_MAP)) {
     if (text === key.toLowerCase() || text.includes(key.toLowerCase())) {
       return val
@@ -330,6 +389,19 @@ function parseSingleRow(
     }
   }
 
+  // 6. 全局挂 / 淘汰检测 (若备注、投递状态或整行包含挂了/淘汰/流程终止，强制纠偏为 rejected)
+  const isRejectedRow =
+    /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.notes || '') ||
+    /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.applyStatus || '') ||
+    cleanCells.some((c) => /挂了|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(c))
+
+  if (isRejectedRow) {
+    result.status = 'rejected'
+    if (!isNotYetApplied) {
+      result.applyStatus = '已投递'
+    }
+  }
+
   // 状态与投递状态互锁约束
   if (isNotYetApplied && result.status === 'applied') {
     result.status = 'wishlist'
@@ -349,22 +421,21 @@ function parseSingleRow(
   if (result.industry) tags.push(result.industry)
   if (result.category) tags.push(result.category)
 
-  // 自动生成面试轮次记录（如果是面试或笔试状态）
-  const interviews = (result.status === 'assessment' || result.status === 'interview1' || result.status === 'interview2' || result.status === 'interview3' || result.status === 'hr')
+  // 自动生成面试轮次记录（如果是面试或笔试状态，或者备注提及了轮次）
+  let roundHint = ''
+  if (result.status === 'assessment' || /笔试|测评/i.test(result.notes || '')) roundHint = '笔试测评'
+  else if (result.status === 'interview3' || /三面|主管/i.test(result.notes || '')) roundHint = '技术三面'
+  else if (result.status === 'interview2' || /二面|交叉/i.test(result.notes || '')) roundHint = '技术二面'
+  else if (result.status === 'interview1' || /一面|初面/i.test(result.notes || '')) roundHint = '技术一面'
+  else if (result.status === 'hr' || /hr|终面/i.test(result.notes || '')) roundHint = 'HR面'
+
+  const interviews = roundHint
     ? [{
         id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        round: result.status === 'assessment'
-          ? '笔试测评'
-          : result.status === 'interview3'
-          ? '技术三面'
-          : result.status === 'interview2'
-          ? '技术二面'
-          : result.status === 'hr'
-          ? 'HR面'
-          : '技术一面',
+        round: roundHint,
         date: result.applyDate || getLocalDateKey(),
         questions: [],
-        feedback: '从飞书表格同步',
+        feedback: result.status === 'rejected' ? '流程终止已挂' : '从飞书表格同步',
       }]
     : []
 
