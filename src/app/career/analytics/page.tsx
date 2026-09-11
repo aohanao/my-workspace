@@ -28,13 +28,14 @@ import {
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
 import { isJobApplied } from '@/lib/feishu-parser'
+import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
 
 const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444', '#06b6d4', '#6366f1']
 
 export default function CareerAnalyticsPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [funnelView, setFunnelView] = useState<'overview' | 'rounds'>('overview')
-  const [selectedRoundCard, setSelectedRoundCard] = useState<'all' | 'round1' | 'round2' | 'round3'>('all')
+  const [isConversionModalOpen, setIsConversionModalOpen] = useState(false)
 
   const loadData = () => {
     setJobs(StorageService.getJobs())
@@ -195,61 +196,28 @@ export default function CareerAnalyticsPage() {
           </p>
         </div>
 
-        {/* 约面转化率 (支持点击切换多轮次查看) */}
+        {/* 技术一面转化率 (点击弹窗查看多轮面试全景漏斗) */}
         <div
-          onClick={() => {
-            const sequence: ('all' | 'round1' | 'round2' | 'round3')[] = ['all', 'round1', 'round2', 'round3']
-            const nextIdx = (sequence.indexOf(selectedRoundCard) + 1) % sequence.length
-            setSelectedRoundCard(sequence[nextIdx])
-          }}
-          className="linear-card p-3.5 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 transition-all group select-none"
-          title="点击循环切换：综合约面 / 技术一面 / 技术二面 / 技术三面 转化率"
+          onClick={() => setIsConversionModalOpen(true)}
+          className="linear-card p-3.5 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
+          title="点击弹窗查看一面、二面、三面、终面各阶段全景转化率与企业明细"
         >
           <div className="flex items-center justify-between">
             <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
               <TrendingUp className="w-4 h-4 text-amber-400" />
-              <span>
-                {selectedRoundCard === 'all'
-                  ? '综合约面率'
-                  : selectedRoundCard === 'round1'
-                  ? '技术一面率'
-                  : selectedRoundCard === 'round2'
-                  ? '技术二面率'
-                  : '技术三面率'}
-              </span>
+              <span>技术一面转化率</span>
             </p>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 font-mono">
-              点击切换 ↻
+            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-medium flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5" />
+              各阶段明细 ↗
             </span>
           </div>
           <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">
-              {selectedRoundCard === 'all'
-                ? rateOverview
-                : selectedRoundCard === 'round1'
-                ? rate1
-                : selectedRoundCard === 'round2'
-                ? rate2
-                : rate3}%
-            </span>
-            <span className="text-xs text-zinc-500">
-              {selectedRoundCard === 'all'
-                ? `${round1Jobs.length}家到达`
-                : selectedRoundCard === 'round1'
-                ? `${round1Jobs.length}家进入`
-                : selectedRoundCard === 'round2'
-                ? `${round2Jobs.length}家进入`
-                : `${round3Jobs.length}家进入`}
-            </span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">{rate1}%</span>
+            <span className="text-xs text-zinc-500">({round1Jobs.length}家到达)</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2">
-            {selectedRoundCard === 'all'
-              ? '初筛后进入任意面试流程'
-              : selectedRoundCard === 'round1'
-              ? `一面达标率 (占已投 ${rate1}%)`
-              : selectedRoundCard === 'round2'
-              ? `一面晋级通过率: ${passRate1to2}%`
-              : `二面晋级通过率: ${passRate2to3}%`}
+          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2 group-hover:text-amber-300/80 transition-colors">
+            占已投递 {rate1}% · 点击弹窗查看各阶段转化率
           </p>
         </div>
 
@@ -490,6 +458,13 @@ export default function CareerAnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* 多轮面试转化率全景弹窗 */}
+      <InterviewConversionModal
+        isOpen={isConversionModalOpen}
+        onClose={() => setIsConversionModalOpen(false)}
+        jobs={jobs}
+      />
     </div>
   )
 }
