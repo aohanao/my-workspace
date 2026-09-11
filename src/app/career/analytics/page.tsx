@@ -25,13 +25,16 @@ import {
   Cell,
   CartesianGrid,
 } from 'recharts'
-import { JobApplication } from '@/types'
+import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
+import { isJobApplied } from '@/lib/feishu-parser'
 
-const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444']
+const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444', '#06b6d4', '#6366f1']
 
 export default function CareerAnalyticsPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
+  const [funnelView, setFunnelView] = useState<'overview' | 'rounds'>('overview')
+  const [selectedRoundCard, setSelectedRoundCard] = useState<'all' | 'round1' | 'round2' | 'round3'>('all')
 
   const loadData = () => {
     setJobs(StorageService.getJobs())
@@ -44,29 +47,81 @@ export default function CareerAnalyticsPage() {
     return () => window.removeEventListener('workspace-data-updated', handleUpdate)
   }, [])
 
-  const totalApplied = jobs.length
-  const passScreening = jobs.filter((j) => j.status !== 'applied' && j.status !== 'wishlist').length
-  const reachedInterview = jobs.filter((j) => ['interview1', 'interview2', 'hr', 'offer'].includes(j.status)).length
-  const reachedFinal = jobs.filter((j) => ['interview2', 'hr', 'offer'].includes(j.status)).length
+  // 严格区分实际已投递与未投递
+  const appliedJobs = jobs.filter((j) => isJobApplied(j))
+  const notAppliedJobs = jobs.filter((j) => !isJobApplied(j))
+  const totalApplied = appliedJobs.length
+  const notAppliedCount = notAppliedJobs.length
+
+  const passScreening = jobs.filter((j) => isJobApplied(j) && j.status !== 'applied').length
+
+  // 各轮技术面试到达
+  const round1Jobs = jobs.filter(
+    (j) =>
+      ['interview1', 'interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
+      j.interviews?.some((i) => i.round.includes('一面') || i.round.includes('初面'))
+  )
+  const round2Jobs = jobs.filter(
+    (j) =>
+      ['interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
+      j.interviews?.some((i) => i.round.includes('二面') || i.round.includes('复面') || i.round.includes('交叉'))
+  )
+  const round3Jobs = jobs.filter(
+    (j) =>
+      ['interview3', 'hr', 'offer'].includes(j.status) ||
+      j.interviews?.some((i) => i.round.includes('三面') || i.round.includes('主管') || i.round.includes('业务'))
+  )
+  const reachedFinal = jobs.filter(
+    (j) =>
+      ['hr', 'offer'].includes(j.status) ||
+      j.interviews?.some((i) => i.round.includes('HR') || i.round.includes('终面'))
+  )
   const offers = jobs.filter((j) => j.status === 'offer').length
 
-  const funnelData = [
-    { stage: '总投递企业', count: totalApplied, rate: '100%', fill: '#3b82f6' },
+  const rateOverview = totalApplied ? Math.round((round1Jobs.length / totalApplied) * 100) : 0
+  const rate1 = totalApplied ? Math.round((round1Jobs.length / totalApplied) * 100) : 0
+  const rate2 = totalApplied ? Math.round((round2Jobs.length / totalApplied) * 100) : 0
+  const rate3 = totalApplied ? Math.round((round3Jobs.length / totalApplied) * 100) : 0
+
+  const passRate1to2 = round1Jobs.length > 0 ? Math.round((round2Jobs.length / round1Jobs.length) * 100) : 0
+  const passRate2to3 = round2Jobs.length > 0 ? Math.round((round3Jobs.length / round2Jobs.length) * 100) : 0
+
+  interface FunnelItem {
+    stage: string
+    count: number
+    rate: string
+    detail?: string
+    fill: string
+  }
+
+  // 1. 全流程主漏斗
+  const overviewFunnelData: FunnelItem[] = [
+    { stage: '实际已投递', count: totalApplied, rate: '100%', fill: '#3b82f6' },
     { stage: '初筛/笔试通过', count: passScreening, rate: totalApplied ? `${Math.round((passScreening / totalApplied) * 100)}%` : '0%', fill: '#8b5cf6' },
-    { stage: '技术面试阶段', count: reachedInterview, rate: totalApplied ? `${Math.round((reachedInterview / totalApplied) * 100)}%` : '0%', fill: '#f59e0b' },
-    { stage: '终面 / HR面', count: reachedFinal, rate: totalApplied ? `${Math.round((reachedFinal / totalApplied) * 100)}%` : '0%', fill: '#ec4899' },
-    { stage: '录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', fill: '#10b981' },
+    { stage: '进入技术面试', count: round1Jobs.length, rate: totalApplied ? `${rate1}%` : '0%', fill: '#f59e0b' },
+    { stage: '终面 / HR面', count: reachedFinal.length, rate: totalApplied ? `${Math.round((reachedFinal.length / totalApplied) * 100)}%` : '0%', fill: '#ec4899' },
+    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', fill: '#10b981' },
+  ]
+
+  // 2. 技术面试各轮次细分漏斗 (一面 -> 二面 -> 三面 -> 录用)
+  const roundsFunnelData: FunnelItem[] = [
+    { stage: '实际已投递企业', count: totalApplied, rate: '100%', detail: '基数', fill: '#3b82f6' },
+    { stage: '技术一面到达', count: round1Jobs.length, rate: `${rate1}%`, detail: `占投递 ${rate1}%`, fill: '#f59e0b' },
+    { stage: '技术二面到达', count: round2Jobs.length, rate: `${rate2}%`, detail: `一面通过率 ${passRate1to2}%`, fill: '#f97316' },
+    { stage: '技术三面到达', count: round3Jobs.length, rate: `${rate3}%`, detail: `二面通过率 ${passRate2to3}%`, fill: '#6366f1' },
+    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', detail: '录用', fill: '#10b981' },
   ]
 
   const statusCounts: Record<string, { label: string; count: number }> = {
-    wishlist: { label: '意向备战', count: 0 },
+    wishlist: { label: '意向储备(未投)', count: 0 },
     applied: { label: '已投初筛', count: 0 },
     assessment: { label: '笔试测评', count: 0 },
     interview1: { label: '技术一面', count: 0 },
-    interview2: { label: '二面/终面', count: 0 },
-    hr: { label: 'HR面', count: 0 },
+    interview2: { label: '技术二面', count: 0 },
+    interview3: { label: '技术三面', count: 0 },
+    hr: { label: 'HR面/终面', count: 0 },
     offer: { label: 'Offer', count: 0 },
-    rejected: { label: '已归档', count: 0 },
+    rejected: { label: '流程终止', count: 0 },
   }
 
   jobs.forEach((j) => {
@@ -125,32 +180,80 @@ export default function CareerAnalyticsPage() {
 
       {/* 核心指标统计横幅 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+        {/* 实际已投递企业 */}
         <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
           <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
             <Building2 className="w-4 h-4 text-blue-400" />
-            累计投递企业
+            实际已投递
           </p>
           <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
             <span className="text-2xl sm:text-3xl font-bold font-mono text-white">{totalApplied}</span>
             <span className="text-xs text-zinc-500">家</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-blue-400 mt-1.5 sm:mt-2">覆盖核心梯队</p>
+          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2">
+            储备未投 <span className="font-mono text-amber-400">{notAppliedCount}</span> 家 (共{jobs.length}家)
+          </p>
         </div>
 
-        <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
-          <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-amber-400" />
-            约面转化率
-          </p>
+        {/* 约面转化率 (支持点击切换多轮次查看) */}
+        <div
+          onClick={() => {
+            const sequence: ('all' | 'round1' | 'round2' | 'round3')[] = ['all', 'round1', 'round2', 'round3']
+            const nextIdx = (sequence.indexOf(selectedRoundCard) + 1) % sequence.length
+            setSelectedRoundCard(sequence[nextIdx])
+          }}
+          className="linear-card p-3.5 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 transition-all group select-none"
+          title="点击循环切换：综合约面 / 技术一面 / 技术二面 / 技术三面 转化率"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-amber-400" />
+              <span>
+                {selectedRoundCard === 'all'
+                  ? '综合约面率'
+                  : selectedRoundCard === 'round1'
+                  ? '技术一面率'
+                  : selectedRoundCard === 'round2'
+                  ? '技术二面率'
+                  : '技术三面率'}
+              </span>
+            </p>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 font-mono">
+              点击切换 ↻
+            </span>
+          </div>
           <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
             <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">
-              {totalApplied ? Math.round((reachedInterview / totalApplied) * 100) : 0}%
+              {selectedRoundCard === 'all'
+                ? rateOverview
+                : selectedRoundCard === 'round1'
+                ? rate1
+                : selectedRoundCard === 'round2'
+                ? rate2
+                : rate3}%
             </span>
-            <span className="text-xs text-zinc-500">优秀</span>
+            <span className="text-xs text-zinc-500">
+              {selectedRoundCard === 'all'
+                ? `${round1Jobs.length}家到达`
+                : selectedRoundCard === 'round1'
+                ? `${round1Jobs.length}家进入`
+                : selectedRoundCard === 'round2'
+                ? `${round2Jobs.length}家进入`
+                : `${round3Jobs.length}家进入`}
+            </span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2">行业均值 ~25%</p>
+          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2">
+            {selectedRoundCard === 'all'
+              ? '初筛后进入任意面试流程'
+              : selectedRoundCard === 'round1'
+              ? `一面达标率 (占已投 ${rate1}%)`
+              : selectedRoundCard === 'round2'
+              ? `一面晋级通过率: ${passRate1to2}%`
+              : `二面晋级通过率: ${passRate2to3}%`}
+          </p>
         </div>
 
+        {/* 斩获 Offer */}
         <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
           <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
             <Award className="w-4 h-4 text-emerald-400" />
@@ -160,9 +263,12 @@ export default function CareerAnalyticsPage() {
             <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">{offers}</span>
             <span className="text-xs text-zinc-500">份</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-emerald-400 mt-1.5 sm:mt-2">包含核心意向</p>
+          <p className="text-[10px] sm:text-[11px] text-emerald-400 mt-1.5 sm:mt-2">
+            全投递录用率 {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
+          </p>
         </div>
 
+        {/* 沉淀考点真题 */}
         <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
           <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-indigo-400" />
@@ -181,23 +287,53 @@ export default function CareerAnalyticsPage() {
         {/* 投递转化漏斗柱状图 */}
         <div className="lg:col-span-2 linear-card p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2 border-b border-white/[0.06] pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 border-b border-white/[0.06] pb-3">
               <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-blue-400" />
-                秋招全流程漏斗转化分析
+                <span>秋招全流程漏斗转化分析</span>
               </h3>
-              <span className="text-xs text-zinc-500">转化率统计</span>
+
+              {/* 漏斗视图切换：全流程 vs 技术面试多轮细分 */}
+              <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.08]">
+                <button
+                  onClick={() => setFunnelView('overview')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                    funnelView === 'overview'
+                      ? 'bg-blue-500/20 text-blue-300 font-semibold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  主流程总览
+                </button>
+                <button
+                  onClick={() => setFunnelView('rounds')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                    funnelView === 'rounds'
+                      ? 'bg-indigo-500/20 text-indigo-300 font-semibold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  一面/二面/三面细分
+                </button>
+              </div>
             </div>
             <p className="text-xs text-zinc-400 mb-4 sm:mb-6">
-              量化各环节通过与流失情况，帮助精准定位复盘攻坚方向。
+              {funnelView === 'overview'
+                ? '量化从实际已投递到初筛、技术面试、终面及录用的全流程流转率。'
+                : '专门下钻技术面试各轮次（一面、二面、三面、录用）的到达与晋级通过率。'}
             </p>
           </div>
 
           <div className="space-y-3.5 sm:space-y-4 my-2">
-            {funnelData.map((item, idx) => (
+            {(funnelView === 'overview' ? overviewFunnelData : roundsFunnelData).map((item, idx) => (
               <div key={idx} className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-300 font-medium">{item.stage}</span>
+                  <span className="text-zinc-300 font-medium flex items-center gap-2">
+                    <span>{item.stage}</span>
+                    {item.detail ? (
+                      <span className="text-[10px] text-zinc-500 font-normal">({item.detail})</span>
+                    ) : null}
+                  </span>
                   <div className="flex items-center gap-2 sm:gap-3">
                     <span className="text-zinc-400 font-mono">{item.count} 家</span>
                     <span className="px-2 py-0.5 rounded text-[11px] bg-white/[0.04] font-semibold text-white border border-white/[0.06]">
@@ -219,8 +355,14 @@ export default function CareerAnalyticsPage() {
           </div>
 
           <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-zinc-400 flex-wrap gap-2">
-            <span className="text-[11px]">💡 建议：终面阶段重点复盘系统架构与业务深度</span>
-            <span className="font-mono text-blue-400 font-medium text-xs">总转化率: {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%</span>
+            <span className="text-[11px]">
+              {funnelView === 'overview'
+                ? '💡 建议：一面着手八股算法，二面业务架构，终面系统思考'
+                : `💡 一面通过率 ${passRate1to2}% · 二面通过率 ${passRate2to3}%`}
+            </span>
+            <span className="font-mono text-blue-400 font-medium text-xs">
+              终面录用转化: {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
+            </span>
           </div>
         </div>
 

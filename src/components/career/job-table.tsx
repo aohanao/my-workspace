@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { JobApplication, JobStatus } from '@/types'
+import { isJobApplied } from '@/lib/feishu-parser'
 import {
   Search,
   Download,
@@ -15,33 +16,48 @@ import {
   ChevronRight,
   SlidersHorizontal,
   Table as TableIcon,
+  ArrowUpDown,
+  Sparkles,
 } from 'lucide-react'
 
 interface Props {
   jobs: JobApplication[]
   onSelectJob: (job: JobApplication) => void
   onDeleteJob?: (id: string) => void
+  onUpdateJob?: (job: JobApplication) => void
+  onBatchUpdateJobs?: (jobs: JobApplication[]) => void
 }
 
 const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
-  wishlist: { label: '意向准备', badge: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+  wishlist: { label: '意向备战', badge: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
   applied: { label: '已投递', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   assessment: { label: '笔试/测评', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
   interview1: { label: '技术一面', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
   interview2: { label: '技术二面', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+  interview3: { label: '技术三面', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   hr: { label: 'HR面/谈薪', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
   offer: { label: '已获 Offer 🎉', badge: 'bg-emerald-500/15 text-emerald-400 font-bold border-emerald-500/30' },
   rejected: { label: '流程终止', badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
 }
 
-export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
+export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchUpdateJobs }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
+  const [applyTab, setApplyTab] = useState<'all' | 'applied' | 'not_applied'>('all')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isFullscreen, setIsFullscreen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
+  // 统计已投递与未投递总数
+  const appliedCount = jobs.filter((j) => isJobApplied(j)).length
+  const notAppliedCount = jobs.length - appliedCount
+
   const filtered = jobs.filter((j) => {
+    // 投递状态 Tab 过滤
+    if (applyTab === 'applied' && !isJobApplied(j)) return false
+    if (applyTab === 'not_applied' && isJobApplied(j)) return false
+
     const matchesSearch =
       j.company.toLowerCase().includes(search.toLowerCase()) ||
       j.role.toLowerCase().includes(search.toLowerCase()) ||
@@ -55,6 +71,71 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
 
     return matchesSearch && matchesStatus && matchesPriority
   })
+
+  // 行内单项切换投递状态 (已投递 ⇄ 未投递)
+  const handleToggleApplyStatus = (job: JobApplication, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const currentApplied = isJobApplied(job)
+    const nextApplied = !currentApplied
+    const nextStatus: JobStatus = nextApplied
+      ? (job.status === 'wishlist' ? 'applied' : job.status)
+      : 'wishlist'
+
+    const updatedJob: JobApplication = {
+      ...job,
+      applyStatus: nextApplied ? '已投递' : '未投递',
+      status: nextStatus,
+      updatedAt: new Date().toISOString(),
+    }
+    onUpdateJob?.(updatedJob)
+  }
+
+  // 批量全选/取消
+  const handleToggleSelectAll = () => {
+    if (selectedIds.size === filtered.length && filtered.length > 0) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filtered.map((j) => j.id)))
+    }
+  }
+
+  // 单行勾选
+  const handleToggleSelectRow = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const next = new Set(selectedIds)
+    if (next.has(id)) {
+      next.delete(id)
+    } else {
+      next.add(id)
+    }
+    setSelectedIds(next)
+  }
+
+  // 批量设置投递状态
+  const handleBatchSetApplyStatus = (nextApplied: boolean) => {
+    if (selectedIds.size === 0) return
+    const updatedJobs = jobs.map((j) => {
+      if (selectedIds.has(j.id)) {
+        const nextStatus: JobStatus = nextApplied
+          ? (j.status === 'wishlist' ? 'applied' : j.status)
+          : 'wishlist'
+        return {
+          ...j,
+          applyStatus: nextApplied ? '已投递' : '未投递',
+          status: nextStatus,
+          updatedAt: new Date().toISOString(),
+        }
+      }
+      return j
+    })
+
+    if (onBatchUpdateJobs) {
+      onBatchUpdateJobs(updatedJobs)
+    } else if (onUpdateJob) {
+      updatedJobs.filter((j) => selectedIds.has(j.id)).forEach((j) => onUpdateJob(j))
+    }
+    setSelectedIds(new Set())
+  }
 
   // 快捷横向滑动控制
   const handleScrollHorizontally = (offset: number) => {
@@ -72,12 +153,12 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
   }
 
   const exportCSV = () => {
-    const headers = ['投递公司', '优先级', '投递日期', '投递状态', '类型与岗位', 'base地', '职位', '行业', '官网', '当前阶段', '备注']
+    const headers = ['投递公司', '投递状态', '优先级', '投递日期', '类型与岗位', 'base地', '职位', '行业', '官网', '当前阶段', '备注']
     const rows = filtered.map((j) => [
       `"${j.company}"`,
+      `"${isJobApplied(j) ? '已投递' : '未投递'}"`,
       `"${j.priority || ''}"`,
       `"${j.applyDate}"`,
-      `"${j.applyStatus || '已投递'}"`,
       `"${j.category || ''}"`,
       `"${j.location || ''}"`,
       `"${j.role}"`,
@@ -97,60 +178,83 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
   }
 
   return (
-    <div className={`space-y-4 ${isFullscreen ? 'fixed inset-3 sm:inset-6 z-50 bg-[#070a12]/95 backdrop-blur-2xl p-4 sm:p-6 rounded-3xl border border-cyan-500/30 shadow-2xl flex flex-col' : ''}`}>
-      {/* 搜索与多维筛选工具条 */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl linear-card shrink-0">
-        <div className="flex items-center gap-2 w-full md:w-auto flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜索公司、职位、Base地、行业、备注..."
-              className="w-full pl-9 pr-3.5 py-2 text-xs sm:text-sm bg-black/40 border border-white/[0.08] rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500/60 transition-colors"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
-          {/* 优先级筛选 */}
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="text-xs sm:text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500/60"
+    <div className={`space-y-3.5 ${isFullscreen ? 'fixed inset-3 sm:inset-6 z-50 bg-[#070a12]/95 backdrop-blur-2xl p-4 sm:p-6 rounded-3xl border border-cyan-500/30 shadow-2xl flex flex-col' : ''}`}>
+      {/* 顶部标签切换栏：已投递 vs 未投递 / 意向储备 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl linear-card shrink-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0">
+          <button
+            onClick={() => setApplyTab('all')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+              applyTab === 'all'
+                ? 'bg-white/[0.12] text-white font-semibold shadow-sm border border-white/[0.15]'
+                : 'text-zinc-400 hover:text-white bg-white/[0.02] border border-transparent'
+            }`}
           >
-            <option value="all" className="bg-[#10131d]">全部优先级</option>
-            <option value="高" className="bg-[#10131d]">高优先级</option>
-            <option value="中" className="bg-[#10131d]">中优先级</option>
-            <option value="低" className="bg-[#10131d]">低优先级</option>
-          </select>
-
-          {/* 状态筛选 */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs sm:text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500/60 font-medium"
-          >
-            <option value="all" className="bg-[#10131d]">全部状态 ({jobs.length})</option>
-            <option value="wishlist" className="bg-[#10131d]">意向准备</option>
-            <option value="applied" className="bg-[#10131d]">已投递</option>
-            <option value="assessment" className="bg-[#10131d]">笔试/测评</option>
-            <option value="interview1" className="bg-[#10131d]">技术一面</option>
-            <option value="interview2" className="bg-[#10131d]">技术二面</option>
-            <option value="hr" className="bg-[#10131d]">HR面/终面</option>
-            <option value="offer" className="bg-[#10131d]">已获 Offer</option>
-            <option value="rejected" className="bg-[#10131d]">流程终止</option>
-          </select>
+            <span>全部岗位</span>
+            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-white/[0.08] text-zinc-300">
+              {jobs.length}
+            </span>
+          </button>
 
           <button
-            onClick={exportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 rounded-xl border border-white/[0.08] transition-colors"
+            onClick={() => setApplyTab('applied')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+              applyTab === 'applied'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-blue-300 bg-white/[0.02] border border-transparent'
+            }`}
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>导出 CSV</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <span>实际已投递</span>
+            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300">
+              {appliedCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setApplyTab('not_applied')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+              applyTab === 'not_applied'
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-amber-300 bg-white/[0.02] border border-transparent'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>未投递 / 意向储备</span>
+            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300">
+              {notAppliedCount}
+            </span>
           </button>
         </div>
+
+        {/* 批量操作工具栏 */}
+        {selectedIds.size > 0 ? (
+          <div className="flex items-center gap-2 flex-wrap text-xs bg-blue-500/10 border border-blue-500/25 px-3 py-1.5 rounded-xl animate-in fade-in duration-150">
+            <span className="text-blue-300 font-medium font-mono">已选中 {selectedIds.size} 项:</span>
+            <button
+              onClick={() => handleBatchSetApplyStatus(true)}
+              className="px-2.5 py-1 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors shadow-sm"
+            >
+              设为「已投递」
+            </button>
+            <button
+              onClick={() => handleBatchSetApplyStatus(false)}
+              className="px-2.5 py-1 rounded-lg bg-white/[0.08] text-amber-300 hover:bg-white/[0.15] border border-amber-500/30 transition-colors"
+            >
+              设为「未投递」
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="text-zinc-400 hover:text-white px-1.5 py-1"
+            >
+              取消
+            </button>
+          </div>
+        ) : (
+          <p className="text-[11px] text-zinc-500 hidden sm:block">
+            💡 点击列表「投递状态」微徽章可直接秒切 已投 ⇄ 未投
+          </p>
+        )}
       </div>
 
       {/* ===================== 二级终端视窗 (Sub-Window Terminal) ===================== */}
@@ -211,16 +315,31 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
           ref={scrollContainerRef}
           className="flex-1 overflow-x-auto overflow-y-auto relative divide-y divide-white/[0.05]"
         >
-          <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[1100px]">
+          <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[1180px]">
             {/* 表头固定在二级窗口顶部 */}
             <thead className="sticky top-0 z-20 bg-[#090d18]/95 backdrop-blur-md text-zinc-300 border-b border-cyan-500/20 font-semibold shadow-sm">
               <tr>
-                <th className="p-3.5 pl-4 sticky left-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[160px]">
+                {/* 勾选列 */}
+                <th className="p-3.5 pl-4 sticky left-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                    onChange={handleToggleSelectAll}
+                    className="rounded bg-black/40 border-white/20 text-blue-500 focus:ring-0 cursor-pointer"
+                    title="全选/取消全选"
+                  />
+                </th>
+                <th className="p-3.5 sticky left-10 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[160px]">
                   投递公司
+                </th>
+                <th className="p-3.5 min-w-[110px]">
+                  <div className="flex items-center gap-1">
+                    <span>投递状态</span>
+                    <Sparkles className="w-3 h-3 text-cyan-400" />
+                  </div>
                 </th>
                 <th className="p-3.5 min-w-[80px]">优先级</th>
                 <th className="p-3.5 min-w-[110px]">投递日期</th>
-                <th className="p-3.5 min-w-[90px]">投递状态</th>
                 <th className="p-3.5 min-w-[120px]">类型与岗位</th>
                 <th className="p-3.5 min-w-[90px]">Base地</th>
                 <th className="p-3.5 min-w-[200px]">职位名称</th>
@@ -236,19 +355,56 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
             <tbody className="divide-y divide-white/[0.04]">
               {filtered.map((job) => {
                 const statusMeta = STATUS_LABELS[job.status] || STATUS_LABELS.applied
+                const applied = isJobApplied(job)
+                const isSelected = selectedIds.has(job.id)
 
                 return (
                   <tr
                     key={job.id}
                     onClick={() => onSelectJob(job)}
-                    className="hover:bg-cyan-500/[0.04] transition-colors cursor-pointer group"
+                    className={`hover:bg-cyan-500/[0.04] transition-colors cursor-pointer group ${
+                      isSelected ? 'bg-blue-500/[0.06]' : ''
+                    }`}
                   >
+                    {/* 勾选框 */}
+                    <td
+                      className="p-3.5 pl-4 sticky left-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] text-center"
+                      onClick={(e) => handleToggleSelectRow(job.id, e)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="rounded bg-black/40 border-white/20 text-blue-500 focus:ring-0 cursor-pointer"
+                      />
+                    </td>
+
                     {/* 投递公司 (左侧固定微粘滞) */}
-                    <td className="p-3.5 pl-4 font-bold text-white text-sm sm:text-base whitespace-nowrap sticky left-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)]">
+                    <td className="p-3.5 sticky left-10 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] font-bold text-white text-sm sm:text-base whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
+                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-cyan-400' : 'bg-amber-400'} group-hover:scale-125 transition-transform`} />
                         <span>{job.company}</span>
                       </div>
+                    </td>
+
+                    {/* 投递状态 (交互式徽章，点击直接一键切换) */}
+                    <td
+                      className="p-3.5 whitespace-nowrap"
+                      onClick={(e) => handleToggleApplyStatus(job, e)}
+                    >
+                      <button
+                        type="button"
+                        title="点击直接切换状态：已投递 ⇄ 未投递"
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all hover:scale-105 active:scale-95 ${
+                          applied
+                            ? 'bg-blue-500/15 text-blue-300 border-blue-500/30 hover:bg-blue-500/25'
+                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-blue-400' : 'bg-amber-400'}`} />
+                        <span>{applied ? '已投递' : '未投递'}</span>
+                        <ArrowUpDown className="w-2.5 h-2.5 opacity-60 ml-0.5" />
+                      </button>
                     </td>
 
                     {/* 优先级 */}
@@ -271,11 +427,6 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
                     {/* 投递日期 */}
                     <td className="p-3.5 font-mono text-zinc-300 whitespace-nowrap">
                       {job.applyDate}
-                    </td>
-
-                    {/* 投递状态 */}
-                    <td className="p-3.5 text-zinc-200 whitespace-nowrap">
-                      {job.applyStatus || '已投递'}
                     </td>
 
                     {/* 类型与岗位 */}
@@ -361,10 +512,10 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob }: Props) {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="p-16 text-center text-zinc-400">
+                  <td colSpan={13} className="p-16 text-center text-zinc-400">
                     <p className="text-base font-medium text-zinc-300">暂无匹配的求职记录</p>
                     <p className="text-xs sm:text-sm mt-1.5 text-zinc-500">
-                      点击右上角「飞书表格导入」批量导入，或点击「新增投递」创建第一条记录
+                      可切换上方「全部岗位」/「实际已投递」/「未投递/意向储备」标签
                     </p>
                   </td>
                 </tr>

@@ -41,8 +41,12 @@ const STATUS_MAP: Record<string, JobStatus> = {
   '技术二面': 'interview2',
   '复面': 'interview2',
   '交叉面': 'interview2',
-  '主管面': 'interview2',
-  '三面': 'interview2',
+
+  '三面': 'interview3',
+  '技术三面': 'interview3',
+  '三轮': 'interview3',
+  '主管面': 'interview3',
+  '业务面': 'interview3',
 
   'hr面': 'hr',
   'hr': 'hr',
@@ -78,9 +82,16 @@ const COMMON_CITIES = [
   '东莞', '宁波', '无锡', '香港', '澳门', '远程', '全国', '海外'
 ]
 
+// 判断岗位是否属于实际已投递
+export function isJobApplied(job: { status?: JobStatus; applyStatus?: string }): boolean {
+  if (job.status === 'wishlist') return false
+  if (job.applyStatus && /未投|待投|未申请|准备|想去|意向/i.test(job.applyStatus)) return false
+  return true
+}
+
 // 智能提取状态
-function parseStatus(rawStatus: string | undefined): JobStatus {
-  if (!rawStatus) return 'applied'
+function parseStatus(rawStatus: string | undefined, defaultStatus: JobStatus = 'applied'): JobStatus {
+  if (!rawStatus) return defaultStatus
   const text = rawStatus.trim().toLowerCase()
   
   for (const [key, val] of Object.entries(STATUS_MAP)) {
@@ -88,7 +99,7 @@ function parseStatus(rawStatus: string | undefined): JobStatus {
       return val
     }
   }
-  return 'applied'
+  return defaultStatus
 }
 
 // 智能提取日期为 YYYY-MM-DD
@@ -246,10 +257,30 @@ function parseSingleRow(
     result.applyDate = dateCell ? parseDate(dateCell) : parseDate(cleanCells[2])
   }
 
-  // 投递状态 (已投递 / 待投递)
-  if (!result.applyStatus) {
-    const applyStatCell = cleanCells.find((c) => /已投|待投|未投|初筛|评估/i.test(c))
-    result.applyStatus = applyStatCell || (cleanCells[3] ? cleanCells[3] : '已投递')
+  // 投递状态 (已投递 / 待投递 / 未投递)
+  let isNotYetApplied = false
+  if (result.applyStatus) {
+    if (/未投|待投|未申请|准备|想去|意向/i.test(result.applyStatus)) {
+      result.applyStatus = '未投递'
+      isNotYetApplied = true
+    } else if (/已投|初筛|筛选|评估/i.test(result.applyStatus)) {
+      result.applyStatus = '已投递'
+    }
+  } else {
+    const applyStatCell = cleanCells.find((c) => /已投|待投|未投|初筛|评估|想去|意向/i.test(c))
+    if (applyStatCell) {
+      if (/未投|待投|未申请|准备|想去|意向/i.test(applyStatCell)) {
+        result.applyStatus = '未投递'
+        isNotYetApplied = true
+      } else {
+        result.applyStatus = '已投递'
+      }
+    } else if (cleanCells[3] && /未投|待投|未申请|准备|想去|意向/i.test(cleanCells[3])) {
+      result.applyStatus = '未投递'
+      isNotYetApplied = true
+    } else {
+      result.applyStatus = '已投递'
+    }
   }
 
   // 类型与岗位 (如 "秋招 研发", "校招 算法")
@@ -289,10 +320,22 @@ function parseSingleRow(
     if (cleanCells[9]) result.notes = cleanCells[9]
   }
 
-  // 进展状态 (笔试 / 一面 / 二面 / HR / Offer / 挂)
+  // 进展状态 (笔试 / 一面 / 二面 / 三面 / HR / Offer / 挂 / 未投意向)
   if (!result.status) {
     const stageCell = cleanCells[10] || cleanCells.find((c) => Object.keys(STATUS_MAP).some((k) => c.includes(k) && c !== result.applyStatus))
-    result.status = parseStatus(stageCell || 'applied')
+    if (stageCell) {
+      result.status = parseStatus(stageCell, isNotYetApplied ? 'wishlist' : 'applied')
+    } else {
+      result.status = isNotYetApplied ? 'wishlist' : 'applied'
+    }
+  }
+
+  // 状态与投递状态互锁约束
+  if (isNotYetApplied && result.status === 'applied') {
+    result.status = 'wishlist'
+  }
+  if (result.status === 'wishlist') {
+    result.applyStatus = '未投递'
   }
 
   // 如果依然没有公司名或公司名包含无效字眼，舍弃
@@ -307,10 +350,18 @@ function parseSingleRow(
   if (result.category) tags.push(result.category)
 
   // 自动生成面试轮次记录（如果是面试或笔试状态）
-  const interviews = (result.status === 'assessment' || result.status === 'interview1' || result.status === 'interview2' || result.status === 'hr')
+  const interviews = (result.status === 'assessment' || result.status === 'interview1' || result.status === 'interview2' || result.status === 'interview3' || result.status === 'hr')
     ? [{
         id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        round: result.status === 'assessment' ? '笔试测评' : result.status === 'interview2' ? '二面' : result.status === 'hr' ? 'HR面' : '一面',
+        round: result.status === 'assessment'
+          ? '笔试测评'
+          : result.status === 'interview3'
+          ? '技术三面'
+          : result.status === 'interview2'
+          ? '技术二面'
+          : result.status === 'hr'
+          ? 'HR面'
+          : '技术一面',
         date: result.applyDate || getLocalDateKey(),
         questions: [],
         feedback: '从飞书表格同步',

@@ -25,11 +25,12 @@ interface Props {
 }
 
 const STATUS_OPTIONS: { value: JobStatus; label: string; color: string }[] = [
-  { value: 'wishlist', label: '意向准备', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+  { value: 'wishlist', label: '意向准备/未投递', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
   { value: 'applied', label: '已投递', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   { value: 'assessment', label: '笔试/测评', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
   { value: 'interview1', label: '技术一面', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
   { value: 'interview2', label: '技术二面/交叉', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+  { value: 'interview3', label: '技术三面/主管', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   { value: 'hr', label: 'HR面/谈薪', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
   { value: 'offer', label: '录用 / Offer 🎉', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
   { value: 'rejected', label: '流程终止 / 挂', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
@@ -51,7 +52,8 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
   if (!isOpen || !job || !formData) return null
 
   const handleStatusChange = (status: JobStatus) => {
-    setFormData({ ...formData, status, updatedAt: new Date().toISOString() })
+    const nextApplyStatus = status === 'wishlist' ? '未投递' : '已投递'
+    setFormData({ ...formData, status, applyStatus: nextApplyStatus, updatedAt: new Date().toISOString() })
   }
 
   const handleAddInterview = () => {
@@ -125,6 +127,52 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
 
         {/* 主表单区域 */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 text-xs">
+          {/* 投递分类开关 */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+            <div>
+              <label className="text-white font-semibold text-xs block">投递状态分类：</label>
+              <p className="text-[11px] text-zinc-400 mt-0.5">区分实际已投递与意向备战储备企业</p>
+            </div>
+            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/[0.08]">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    applyStatus: '已投递',
+                    status: formData.status === 'wishlist' ? 'applied' : formData.status,
+                    updatedAt: new Date().toISOString(),
+                  })
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  (formData.applyStatus !== '未投递' && formData.status !== 'wishlist')
+                    ? 'bg-blue-500 text-white font-semibold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                已投递
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    applyStatus: '未投递',
+                    status: 'wishlist',
+                    updatedAt: new Date().toISOString(),
+                  })
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  (formData.applyStatus === '未投递' || formData.status === 'wishlist')
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                未投递 / 备选
+              </button>
+            </div>
+          </div>
+
           {/* 状态阶段选择器 */}
           <div>
             <label className="text-zinc-400 font-medium block mb-2">当前进展阶段：</label>

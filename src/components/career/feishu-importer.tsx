@@ -10,7 +10,7 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
-import { parseFeishuClipboardText, parseFeishuExcelFile } from '@/lib/feishu-parser'
+import { parseFeishuClipboardText, parseFeishuExcelFile, isJobApplied } from '@/lib/feishu-parser'
 import { FeishuImportResult } from '@/types'
 import { StorageService } from '@/lib/storage'
 
@@ -188,20 +188,31 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
           {/* 解析结果全字段实时核对预览 */}
           {parsedResult && (
             <div className="space-y-3">
-              <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <h4 className="text-xs font-semibold text-white">
-                    已精准识别 {parsedResult.successCount} 条求职记录（11 字段完整对应）
-                  </h4>
-                </div>
-                <button
-                  onClick={() => setParsedResult(null)}
-                  className="text-xs text-zinc-400 hover:text-white underline"
-                >
-                  重新粘贴
-                </button>
-              </div>
+              {(() => {
+                const previewApplied = parsedResult.jobs.filter((j) => isJobApplied(j)).length
+                const previewNotApplied = parsedResult.jobs.length - previewApplied
+                return (
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div>
+                        <h4 className="text-xs font-semibold text-white">
+                          已精准识别 {parsedResult.successCount} 条求职记录
+                        </h4>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                          实际已投递 <span className="text-blue-400 font-semibold">{previewApplied}</span> 家 · 意向储备(未投) <span className="text-amber-400 font-semibold">{previewNotApplied}</span> 家
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setParsedResult(null)}
+                      className="text-xs text-zinc-400 hover:text-white underline self-end sm:self-auto"
+                    >
+                      重新粘贴
+                    </button>
+                  </div>
+                )
+              })()}
 
               {/* 11 列对齐核对预览表格 */}
               <div className="border border-white/[0.08] rounded-xl overflow-hidden max-h-64 overflow-y-auto overflow-x-auto">
@@ -222,39 +233,51 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
-                    {parsedResult.jobs.map((job, idx) => (
-                      <tr key={idx} className="hover:bg-white/[0.02]">
-                        <td className="p-2.5 pl-3 font-semibold text-white whitespace-nowrap">{job.company}</td>
-                        <td className="p-2.5 whitespace-nowrap">
-                          {job.priority ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
-                              {job.priority}
+                    {parsedResult.jobs.map((job, idx) => {
+                      const applied = isJobApplied(job)
+                      return (
+                        <tr key={idx} className="hover:bg-white/[0.02]">
+                          <td className="p-2.5 pl-3 font-semibold text-white whitespace-nowrap">{job.company}</td>
+                          <td className="p-2.5 whitespace-nowrap">
+                            {job.priority ? (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
+                                {job.priority}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td className="p-2.5 text-zinc-400 font-mono whitespace-nowrap">{job.applyDate}</td>
+                          <td className="p-2.5 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                              applied
+                                ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                            }`}>
+                              <span className={`w-1 h-1 rounded-full ${applied ? 'bg-blue-400' : 'bg-amber-400'}`} />
+                              <span>{applied ? '已投递' : '未投递'}</span>
                             </span>
-                          ) : '-'}
-                        </td>
-                        <td className="p-2.5 text-zinc-400 font-mono whitespace-nowrap">{job.applyDate}</td>
-                        <td className="p-2.5 text-zinc-300 whitespace-nowrap">{job.applyStatus}</td>
-                        <td className="p-2.5 text-zinc-400 whitespace-nowrap">{job.category || '-'}</td>
-                        <td className="p-2.5 text-zinc-300 whitespace-nowrap">{job.location || '-'}</td>
-                        <td className="p-2.5 font-medium text-white max-w-[160px] truncate" title={job.role}>
-                          {job.role}
-                        </td>
-                        <td className="p-2.5 text-zinc-400 max-w-[100px] truncate">{job.industry || '-'}</td>
-                        <td className="p-2.5 whitespace-nowrap">
-                          {job.jobUrl ? (
-                            <span className="text-blue-400 text-[11px] truncate max-w-[80px] inline-block">{job.jobUrl}</span>
-                          ) : '-'}
-                        </td>
-                        <td className="p-2.5 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
-                            {job.status}
-                          </span>
-                        </td>
-                        <td className="p-2.5 pr-3 text-zinc-400 truncate max-w-[120px] text-[11px]" title={job.notes}>
-                          {job.notes || '-'}
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="p-2.5 text-zinc-400 whitespace-nowrap">{job.category || '-'}</td>
+                          <td className="p-2.5 text-zinc-300 whitespace-nowrap">{job.location || '-'}</td>
+                          <td className="p-2.5 font-medium text-white max-w-[160px] truncate" title={job.role}>
+                            {job.role}
+                          </td>
+                          <td className="p-2.5 text-zinc-400 max-w-[100px] truncate">{job.industry || '-'}</td>
+                          <td className="p-2.5 whitespace-nowrap">
+                            {job.jobUrl ? (
+                              <span className="text-blue-400 text-[11px] truncate max-w-[80px] inline-block">{job.jobUrl}</span>
+                            ) : '-'}
+                          </td>
+                          <td className="p-2.5 whitespace-nowrap">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="p-2.5 pr-3 text-zinc-400 truncate max-w-[120px] text-[11px]" title={job.notes}>
+                            {job.notes || '-'}
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

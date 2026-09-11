@@ -17,11 +17,12 @@ interface Props {
 }
 
 const COLUMNS: { id: JobStatus; title: string; dotColor: string }[] = [
-  { id: 'wishlist', title: '意向备战', dotColor: 'bg-zinc-500' },
+  { id: 'wishlist', title: '意向备战(未投)', dotColor: 'bg-zinc-500' },
   { id: 'applied', title: '已投递', dotColor: 'bg-blue-400' },
   { id: 'assessment', title: '笔试 / 测评', dotColor: 'bg-purple-400' },
   { id: 'interview1', title: '技术一面', dotColor: 'bg-amber-400' },
   { id: 'interview2', title: '二面 / 交叉面', dotColor: 'bg-orange-400' },
+  { id: 'interview3', title: '技术三面', dotColor: 'bg-indigo-400' },
   { id: 'hr', title: 'HR面 / 谈薪', dotColor: 'bg-pink-400' },
   { id: 'offer', title: '录用 / Offer 🎉', dotColor: 'bg-emerald-400' },
   { id: 'rejected', title: '已归档', dotColor: 'bg-zinc-600' },

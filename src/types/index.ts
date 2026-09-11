@@ -1,9 +1,10 @@
 export type JobStatus =
-  | 'wishlist'     // 意向准备
+  | 'wishlist'     // 意向准备/未投递
   | 'applied'      // 已投递
   | 'assessment'   // 笔试/测评
   | 'interview1'   // 技术一面
-  | 'interview2'   // 二面/交叉面
+  | 'interview2'   // 技术二面/交叉面
+  | 'interview3'   // 技术三面/主管面
   | 'hr'           // HR面/终面
   | 'offer'        // 意向书/Offer
   | 'rejected'     // 已挂/流程终止
