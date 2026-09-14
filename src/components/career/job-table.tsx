@@ -425,27 +425,27 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 投递日期 */}
-                    <td className="p-3.5 font-mono text-zinc-300 whitespace-nowrap">
+                    <td className="p-3.5 font-mono text-zinc-300 text-xs sm:text-sm whitespace-nowrap">
                       {job.applyDate}
                     </td>
 
                     {/* 类型与岗位 */}
-                    <td className="p-3.5 text-zinc-400 whitespace-nowrap">
+                    <td className="p-3.5 text-zinc-300 text-xs sm:text-sm whitespace-nowrap">
                       {job.category || '-'}
                     </td>
 
                     {/* base地 */}
-                    <td className="p-3.5 text-zinc-200 whitespace-nowrap">
+                    <td className="p-3.5 text-zinc-200 text-xs sm:text-sm whitespace-nowrap">
                       {job.location || '-'}
                     </td>
 
                     {/* 职位 */}
-                    <td className="p-3.5 font-medium text-white max-w-[220px] truncate" title={job.role}>
+                    <td className="p-3.5 font-bold text-white text-sm sm:text-base max-w-[240px] truncate" title={job.role}>
                       {job.role}
                     </td>
 
                     {/* 行业 */}
-                    <td className="p-3.5 text-zinc-400 max-w-[140px] truncate" title={job.industry}>
+                    <td className="p-3.5 text-zinc-300 text-xs sm:text-sm max-w-[150px] truncate" title={job.industry}>
                       {job.industry || '-'}
                     </td>
 
@@ -456,9 +456,9 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                           href={job.jobUrl.startsWith('http') ? job.jobUrl : `https://${job.jobUrl}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
+                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 hover:underline"
                         >
-                          <Globe className="w-3.5 h-3.5" />
+                          <Globe className="w-4 h-4" />
                           <span>投递官网</span>
                         </a>
                       ) : (
@@ -475,7 +475,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                             {tags.map((tag, tIdx) => (
                               <span
                                 key={tIdx}
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${tag.color}`}
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold border ${tag.color}`}
                               >
                                 {tag.text}
                               </span>
@@ -486,7 +486,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 备注 */}
-                    <td className="p-3.5 text-zinc-400 max-w-[240px] truncate text-xs sm:text-sm" title={job.notes}>
+                    <td className="p-3.5 text-zinc-300 max-w-[260px] truncate text-xs sm:text-sm" title={job.notes}>
                       {job.notes || '-'}
                     </td>
 

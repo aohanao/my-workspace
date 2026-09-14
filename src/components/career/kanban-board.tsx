@@ -84,34 +84,34 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
           {/* 左侧总数核验公式 */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
             <span className="font-semibold text-white flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
               看板总数：
-              <span className="font-mono text-blue-400 font-bold text-sm">{totalJobs}</span>
-              <span className="text-zinc-400">家</span>
+              <span className="font-mono text-blue-400 font-bold text-sm sm:text-base">{totalJobs}</span>
+              <span className="text-zinc-400 text-xs sm:text-sm">家</span>
             </span>
             <span className="text-zinc-600">=</span>
-            <span className="text-zinc-300 font-medium">
-              实际已投 <span className="font-mono font-bold text-white">{appliedCount}</span> 家
+            <span className="text-zinc-200 font-medium text-xs sm:text-sm">
+              实际已投 <span className="font-mono font-bold text-white text-sm sm:text-base">{appliedCount}</span> 家
             </span>
-            <span className="text-zinc-500 text-[10px] sm:text-[11px]">
-              (待筛 <span className="font-mono text-zinc-300">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300">{assessmentCount}</span> · 面试推进 <span className="font-mono text-amber-300">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 {rejectedCount}</span>)
+            <span className="text-zinc-400 text-xs sm:text-sm">
+              (待筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试推进 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 {rejectedCount}</span>)
             </span>
             <span className="text-zinc-600">+</span>
-            <span className="text-zinc-400">
-              意向储备 <span className="font-mono font-semibold text-amber-400">{wishlistCount}</span> 家
+            <span className="text-zinc-400 text-xs sm:text-sm">
+              意向储备 <span className="font-mono font-semibold text-amber-400 text-sm sm:text-base">{wishlistCount}</span> 家
             </span>
           </div>
 
           {/* 右侧快速泳道筛选标签 */}
-          <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[11px] text-zinc-500 mr-1 hidden sm:inline flex items-center gap-1">
-              <Filter className="w-3 h-3" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs sm:text-sm text-zinc-400 mr-1 hidden sm:inline flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5" />
               泳道视图:
             </span>
             <button
               type="button"
               onClick={() => setFilterMode('all')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 filterMode === 'all'
                   ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -122,7 +122,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('applied_only')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 filterMode === 'applied_only'
                   ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -133,7 +133,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('rejected_only')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 filterMode === 'rejected_only'
                   ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10'
@@ -144,7 +144,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('wishlist_only')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 filterMode === 'wishlist_only'
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -171,14 +171,14 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             >
               {/* 列头 */}
               <div
-                className={`px-4 py-3 border-b border-white/[0.06] flex items-center justify-between ${
+                className={`px-4 py-3.5 border-b border-white/[0.06] flex items-center justify-between ${
                   col.headerBg || 'bg-white/[0.02]'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
                   <h4
-                    className={`font-semibold text-xs tracking-tight ${
+                    className={`font-bold text-sm sm:text-base tracking-tight ${
                       isRejectedCol ? 'text-rose-300' : 'text-white'
                     }`}
                   >
@@ -187,10 +187,10 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span
-                    className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                    className={`text-xs sm:text-sm font-mono font-bold px-2.5 py-0.5 rounded-full ${
                       isRejectedCol
                         ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                        : 'bg-white/[0.04] text-zinc-300'
+                        : 'bg-white/[0.06] text-zinc-200'
                     }`}
                   >
                     {colJobs.length}
@@ -210,7 +210,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                     <div
                       key={job.id}
                       onClick={() => onSelectJob(job)}
-                      className={`p-3.5 rounded-xl cursor-pointer group relative overflow-hidden space-y-2.5 transition-all border ${
+                      className={`p-4 rounded-xl cursor-pointer group relative overflow-hidden space-y-3 transition-all border ${
                         isRejectedCol
                           ? 'bg-[#181116]/80 border-rose-500/25 hover:border-rose-500/50'
                           : 'linear-card hover:border-blue-500/40'
@@ -220,7 +220,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <h5
-                            className={`font-semibold text-sm transition-colors truncate ${
+                            className={`font-bold text-base transition-colors truncate ${
                               isRejectedCol
                                 ? 'text-zinc-200 group-hover:text-rose-300'
                                 : 'text-white group-hover:text-blue-400'
@@ -229,23 +229,23 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                           >
                             {job.company}
                           </h5>
-                          <p className="text-xs text-zinc-400 truncate mt-0.5" title={job.role}>
+                          <p className="text-xs sm:text-sm text-zinc-300 truncate mt-1" title={job.role}>
                             {job.role}
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isRejectedCol ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap ${getJobStageBadge(job).color}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${getJobStageBadge(job).color}`}>
                               {getJobStageBadge(job).text}
                             </span>
                           ) : job.statusTags && job.statusTags.length > 0 ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap ${getStatusTagStyle(job.statusTags[0])}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${getStatusTagStyle(job.statusTags[0])}`}>
                               {job.statusTags[0]}
                             </span>
                           ) : null}
                           {job.priority && (
                             <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap ${
+                              className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${
                                 job.priority === '高'
                                   ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                                   : job.priority === '中'
@@ -260,16 +260,16 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       </div>
 
                       {/* 城市与薪资 */}
-                      <div className="flex items-center gap-3 text-[11px] text-zinc-400">
+                      <div className="flex items-center gap-3 text-xs text-zinc-300">
                         {job.location && (
                           <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-zinc-500" />
+                            <MapPin className="w-3.5 h-3.5 text-zinc-400" />
                             {job.location}
                           </span>
                         )}
                         {job.salary && (
-                          <span className="flex items-center gap-1 font-mono text-emerald-400 font-medium truncate">
-                            <DollarSign className="w-3 h-3" />
+                          <span className="flex items-center gap-1 font-mono text-emerald-400 font-semibold truncate">
+                            <DollarSign className="w-3.5 h-3.5" />
                             {job.salary}
                           </span>
                         )}
@@ -278,21 +278,21 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       {/* 面试/复盘提示 */}
                       {latestInterview && (
                         <div
-                          className={`p-2 rounded-lg text-[11px] border ${
+                          className={`p-2.5 rounded-lg border text-xs sm:text-sm ${
                             isRejectedCol
-                              ? 'bg-rose-500/[0.04] border-rose-500/15 text-rose-200/80'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-300'
+                              ? 'bg-rose-500/[0.08] border-rose-500/20 text-rose-200'
+                              : 'bg-white/[0.04] border-white/[0.08] text-zinc-200'
                           }`}
                         >
-                          <div className="flex items-center justify-between font-medium mb-0.5">
-                            <span className="flex items-center gap-1">
-                              <Clock className={`w-3 h-3 ${isRejectedCol ? 'text-rose-400' : 'text-amber-400'}`} />
+                          <div className="flex items-center justify-between font-semibold mb-1">
+                            <span className="flex items-center gap-1.5">
+                              <Clock className={`w-3.5 h-3.5 ${isRejectedCol ? 'text-rose-400' : 'text-amber-400'}`} />
                               {latestInterview.round}
                             </span>
-                            <span className="text-[10px] text-zinc-500 font-mono">{latestInterview.date}</span>
+                            <span className="text-xs text-zinc-400 font-mono">{latestInterview.date}</span>
                           </div>
                           {latestInterview.questions && latestInterview.questions.length > 0 && (
-                            <p className="text-[10px] text-zinc-500 truncate">
+                            <p className="text-xs text-zinc-400 truncate">
                               已录入 {latestInterview.questions.length} 道面试真题
                             </p>
                           )}
@@ -301,20 +301,20 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
 
                       {/* 备注中若有挂了信息直接呈现 */}
                       {job.notes && (
-                        <p className="text-[10px] text-zinc-400 line-clamp-1 italic">
+                        <p className="text-xs text-zinc-300 line-clamp-1 italic">
                           {job.notes}
                         </p>
                       )}
 
                       {/* 底部操作区：投递日期与快速流转按钮 */}
-                      <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[10px] text-zinc-500">
+                      <div className="flex items-center justify-between pt-2.5 border-t border-white/[0.06] text-xs text-zinc-400">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="w-3.5 h-3.5" />
                           {job.applyDate}
                         </span>
 
                         {/* 快捷操作按钮组 */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           {/* 如果已挂，提供快速恢复至已投递按钮 */}
                           {isRejectedCol ? (
                             <button
@@ -324,9 +324,9 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                                 e.stopPropagation()
                                 onUpdateStatus(job.id, 'applied')
                               }}
-                              className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08]"
+                              className="flex items-center gap-1 px-2 py-0.5 rounded text-xs text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08]"
                             >
-                              <RotateCcw className="w-3 h-3 text-blue-400" />
+                              <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
                               <span>恢复</span>
                             </button>
                           ) : (
@@ -338,9 +338,9 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                                 e.stopPropagation()
                                 onUpdateStatus(job.id, 'rejected')
                               }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-zinc-500 hover:text-rose-400 hover:bg-rose-500/15"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-500/15"
                             >
-                              <XCircle className="w-3.5 h-3.5" />
+                              <XCircle className="w-4 h-4" />
                             </button>
                           )}
 

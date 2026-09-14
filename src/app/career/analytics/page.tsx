@@ -137,102 +137,102 @@ export default function CareerAnalyticsPage() {
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部导航与操作 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-3">
           <Link
             href="/career"
-            className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-colors"
           >
-            <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5" />
+            <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <div className="p-1.5 sm:p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                <BarChart3 className="w-4 sm:w-5 h-4 sm:h-5" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <BarChart3 className="w-5 sm:w-6 h-5 sm:h-6" />
               </div>
               <span>秋招求职量化大屏</span>
             </h1>
-            <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
               多维度投递转化率 · 城市分布 · 核心企业推进矩阵
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-[11px] bg-emerald-500/10 text-emerald-400 font-medium px-3 py-1 rounded-full flex items-center gap-1.5 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="text-xs sm:text-sm bg-emerald-500/10 text-emerald-400 font-semibold px-3.5 py-1.5 rounded-full flex items-center gap-2 border border-emerald-500/20">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
             数据实时统计
           </span>
         </div>
       </div>
 
       {/* 核心指标统计横幅 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {/* 实际已投递企业 */}
-        <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
-          <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+        <div className="linear-card p-4 sm:p-5 rounded-2xl">
+          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
             <Building2 className="w-4 h-4 text-blue-400" />
             实际已投递
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-white">{totalApplied}</span>
-            <span className="text-xs text-zinc-500">家</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
+            <span className="text-3xl sm:text-4xl font-bold font-mono text-white">{totalApplied}</span>
+            <span className="text-xs sm:text-sm text-zinc-400">家</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2">
-            储备未投 <span className="font-mono text-amber-400">{notAppliedCount}</span> 家 (共{jobs.length}家)
+          <p className="text-xs text-zinc-400 mt-2">
+            储备未投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家 (共{jobs.length}家)
           </p>
         </div>
 
         {/* 技术一面转化率 (点击弹窗查看多轮面试全景漏斗) */}
         <div
           onClick={() => setIsConversionModalOpen(true)}
-          className="linear-card p-3.5 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
+          className="linear-card p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
           title="点击弹窗查看一面、二面、三面、终面各阶段全景转化率与企业明细"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+            <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-amber-400" />
               <span>技术一面转化率</span>
             </p>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-medium flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5" />
+            <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
               各阶段明细 ↗
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">{rate1}%</span>
-            <span className="text-xs text-zinc-500">({round1Jobs.length}家到达)</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
+            <span className="text-3xl sm:text-4xl font-bold font-mono text-amber-400">{rate1}%</span>
+            <span className="text-xs sm:text-sm text-zinc-400">({round1Jobs.length}家到达)</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5 sm:mt-2 group-hover:text-amber-300/80 transition-colors">
+          <p className="text-xs text-zinc-400 mt-2 group-hover:text-amber-300/90 transition-colors">
             占已投递 {rate1}% · 点击弹窗查看各阶段转化率
           </p>
         </div>
 
         {/* 斩获 Offer */}
-        <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
-          <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+        <div className="linear-card p-4 sm:p-5 rounded-2xl">
+          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
             <Award className="w-4 h-4 text-emerald-400" />
             斩获 Offer
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">{offers}</span>
-            <span className="text-xs text-zinc-500">份</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
+            <span className="text-3xl sm:text-4xl font-bold font-mono text-emerald-400">{offers}</span>
+            <span className="text-xs sm:text-sm text-zinc-400">份</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-emerald-400 mt-1.5 sm:mt-2">
+          <p className="text-xs text-emerald-400 mt-2 font-medium">
             全投递录用率 {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
           </p>
         </div>
 
         {/* 沉淀考点真题 */}
-        <div className="linear-card p-3.5 sm:p-5 rounded-2xl">
-          <p className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+        <div className="linear-card p-4 sm:p-5 rounded-2xl">
+          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-400" />
             沉淀考点真题
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-indigo-400">{totalQuestionsCount}</span>
-            <span className="text-xs text-zinc-500">道</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
+            <span className="text-3xl sm:text-4xl font-bold font-mono text-indigo-400">{totalQuestionsCount}</span>
+            <span className="text-xs sm:text-sm text-zinc-400">道</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-indigo-400 mt-1.5 sm:mt-2">专属面经复盘库</p>
+          <p className="text-xs text-indigo-300 mt-2 font-medium">专属面经复盘考点库</p>
         </div>
       </div>
 
@@ -242,16 +242,16 @@ export default function CareerAnalyticsPage() {
         <div className="lg:col-span-2 linear-card p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-4">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 border-b border-white/[0.06] pb-3">
-              <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-400" />
+              <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-blue-400" />
                 <span>秋招全流程漏斗转化分析</span>
               </h3>
 
               {/* 漏斗视图切换：全流程 vs 技术面试多轮细分 */}
-              <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.08]">
+              <div className="flex items-center gap-1.5 bg-white/[0.04] p-1 rounded-xl border border-white/[0.08]">
                 <button
                   onClick={() => setFunnelView('overview')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     funnelView === 'overview'
                       ? 'bg-blue-500/20 text-blue-300 font-semibold shadow-sm'
                       : 'text-zinc-400 hover:text-white'
@@ -261,7 +261,7 @@ export default function CareerAnalyticsPage() {
                 </button>
                 <button
                   onClick={() => setFunnelView('rounds')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     funnelView === 'rounds'
                       ? 'bg-indigo-500/20 text-indigo-300 font-semibold shadow-sm'
                       : 'text-zinc-400 hover:text-white'
@@ -271,31 +271,31 @@ export default function CareerAnalyticsPage() {
                 </button>
               </div>
             </div>
-            <p className="text-xs text-zinc-400 mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-zinc-400 mb-4 sm:mb-6">
               {funnelView === 'overview'
                 ? '量化从实际已投递到初筛、技术面试、终面及录用的全流程流转率。'
                 : '专门下钻技术面试各轮次（一面、二面、三面、录用）的到达与晋级通过率。'}
             </p>
           </div>
 
-          <div className="space-y-3.5 sm:space-y-4 my-2">
+          <div className="space-y-4 sm:space-y-5 my-2">
             {(funnelView === 'overview' ? overviewFunnelData : roundsFunnelData).map((item, idx) => (
-              <div key={idx} className="space-y-1.5 text-xs">
+              <div key={idx} className="space-y-2 text-xs sm:text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-300 font-medium flex items-center gap-2">
+                  <span className="text-zinc-200 font-semibold flex items-center gap-2">
                     <span>{item.stage}</span>
                     {item.detail ? (
-                      <span className="text-[10px] text-zinc-500 font-normal">({item.detail})</span>
+                      <span className="text-xs text-zinc-400 font-normal">({item.detail})</span>
                     ) : null}
                   </span>
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <span className="text-zinc-400 font-mono">{item.count} 家</span>
-                    <span className="px-2 py-0.5 rounded text-[11px] bg-white/[0.04] font-semibold text-white border border-white/[0.06]">
+                    <span className="text-zinc-300 font-mono font-medium">{item.count} 家</span>
+                    <span className="px-2.5 py-0.5 rounded-md text-xs sm:text-sm bg-white/[0.06] font-bold text-white border border-white/[0.08]">
                       {item.rate}
                     </span>
                   </div>
                 </div>
-                <div className="w-full bg-black/40 rounded-full h-2.5 overflow-hidden p-0.5 border border-white/[0.06]">
+                <div className="w-full bg-black/40 rounded-full h-3 overflow-hidden p-0.5 border border-white/[0.06]">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
@@ -308,13 +308,13 @@ export default function CareerAnalyticsPage() {
             ))}
           </div>
 
-          <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-zinc-400 flex-wrap gap-2">
-            <span className="text-[11px]">
+          <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs sm:text-sm text-zinc-400 flex-wrap gap-2">
+            <span className="text-xs sm:text-sm">
               {funnelView === 'overview'
                 ? '💡 建议：一面着手八股算法，二面业务架构，终面系统思考'
                 : `💡 一面通过率 ${passRate1to2}% · 二面通过率 ${passRate2to3}%`}
             </span>
-            <span className="font-mono text-blue-400 font-medium text-xs">
+            <span className="font-mono text-blue-400 font-semibold text-xs sm:text-sm">
               终面录用转化: {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
             </span>
           </div>
@@ -324,12 +324,12 @@ export default function CareerAnalyticsPage() {
         <div className="linear-card p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-2">
-              <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2">
-                <PieIcon className="w-4 h-4 text-purple-400" />
+              <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                <PieIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-400" />
                 当前流程状态占比
               </h3>
             </div>
-            <p className="text-xs text-zinc-400">各阶段实时比例</p>
+            <p className="text-xs sm:text-sm text-zinc-400">各阶段实时比例与分布</p>
           </div>
 
           <div className="h-48 sm:h-56 w-full my-2">
@@ -350,18 +350,18 @@ export default function CareerAnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '11px', color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/[0.06]">
+          <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm pt-2 border-t border-white/[0.06]">
             {statusPieData.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-zinc-400 text-[11px]">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
+              <div key={idx} className="flex items-center gap-2 text-zinc-300 text-xs sm:text-sm">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
                 <span className="truncate">{item.label}:</span>
-                <span className="font-mono font-semibold text-white">{item.count}</span>
+                <span className="font-mono font-bold text-white">{item.count}</span>
               </div>
             ))}
           </div>
@@ -373,21 +373,21 @@ export default function CareerAnalyticsPage() {
         {/* 城市分布柱状图 */}
         <div className="linear-card p-4 sm:p-6 rounded-2xl space-y-4">
           <div className="flex items-center justify-between mb-2 border-b border-white/[0.06] pb-3">
-            <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-400" />
+            <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+              <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-400" />
               工作地点 / Base 分布
             </h3>
-            <span className="text-xs text-zinc-500">意向城市</span>
+            <span className="text-xs sm:text-sm text-zinc-400">意向城市</span>
           </div>
 
           <div className="h-48 sm:h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="city" fontSize={11} stroke="#71717a" />
-                <YAxis allowDecimals={false} fontSize={11} stroke="#71717a" />
+                <XAxis dataKey="city" fontSize={12} stroke="#a1a1aa" />
+                <YAxis allowDecimals={false} fontSize={12} stroke="#a1a1aa" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '11px', color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
                 />
                 <Bar dataKey="count" name="投递数" fill="#3b82f6" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -399,27 +399,27 @@ export default function CareerAnalyticsPage() {
         <div className="linear-card p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2 border-b border-white/[0.06] pb-3">
-              <h3 className="font-semibold text-xs sm:text-sm text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" />
+              <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-amber-400" />
                 重点大厂攻坚矩阵
               </h3>
-              <span className="text-xs text-zinc-500">核心意向</span>
+              <span className="text-xs sm:text-sm text-zinc-400">核心意向</span>
             </div>
           </div>
 
-          <div className="space-y-2.5 overflow-y-auto max-h-56 pr-1">
+          <div className="space-y-3 overflow-y-auto max-h-60 pr-1">
             {jobs.slice(0, 5).map((job) => (
               <div
                 key={job.id}
-                className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between gap-2"
+                className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between gap-3 hover:bg-white/[0.04] transition-colors"
               >
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-xs border border-blue-500/20 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/20 shrink-0">
                     {job.company.substring(0, 1)}
                   </div>
                   <div className="min-w-0">
-                    <h5 className="font-semibold text-xs text-white truncate">{job.company}</h5>
-                    <p className="text-[11px] text-zinc-400 truncate">{job.role} · {job.location || '全国'}</p>
+                    <h5 className="font-bold text-sm sm:text-base text-white truncate">{job.company}</h5>
+                    <p className="text-xs sm:text-sm text-zinc-300 truncate mt-0.5">{job.role} · {job.location || '全国'}</p>
                   </div>
                 </div>
 
@@ -427,13 +427,13 @@ export default function CareerAnalyticsPage() {
                   {(() => {
                     const badge = getJobStageBadge(job)
                     return (
-                      <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium border ${badge.color}`}>
+                      <span className={`text-xs sm:text-sm px-3 py-1 rounded-full font-medium border ${badge.color}`}>
                         {badge.text}
                       </span>
                     )
                   })()}
                   {job.salary && (
-                    <p className="text-[11px] text-emerald-400 mt-1 font-mono font-medium">
+                    <p className="text-xs sm:text-sm text-emerald-400 mt-1 font-mono font-semibold">
                       {job.salary}
                     </p>
                   )}
@@ -442,7 +442,7 @@ export default function CareerAnalyticsPage() {
             ))}
 
             {jobs.length === 0 && (
-              <div className="py-8 text-center text-xs text-zinc-500">
+              <div className="py-8 text-center text-xs sm:text-sm text-zinc-500">
                 暂无投递数据
               </div>
             )}
