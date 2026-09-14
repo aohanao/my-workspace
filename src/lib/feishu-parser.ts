@@ -127,11 +127,18 @@ export function hasReachedStage(
       return false
 
     case 'round1':
-      // 只要到达过一面、二面、三面、HR面、Offer中任一阶段，或有面试记录，或备注/历史提及面试，均计入
+      // 1. 处于一面及后续阶段的流程
       if (['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(status)) return true
       if (last && ['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(last)) return true
       if (interviews.length > 0 && interviews.some((i) => !/笔试|测评/i.test(i.round))) return true
       if (/一面|一轮|初面|技术面|专业面|群面|现场面|线上面试|二面|三面|hr|面试挂|面试/i.test(notes)) return true
+      // 2. 核心：所有已挂/流程终止的企业，默认均作为经历过面试并终止的流程计入面试转化率（除非明确标记为仅初筛挂且无面试记录）
+      if (status === 'rejected') {
+        if (last === 'applied' && !/一面|二面|面试/i.test(notes) && interviews.length === 0) {
+          return false
+        }
+        return true
+      }
       return false
 
     case 'assessment':
@@ -156,13 +163,7 @@ export function getJobStageBadge(job: JobApplication): { text: string; color: st
     if (hasReachedStage(job, 'round2')) {
       return { text: '已挂(二面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
     }
-    if (hasReachedStage(job, 'round1')) {
-      return { text: '已挂(技术一面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
-    }
-    if (hasReachedStage(job, 'assessment')) {
-      return { text: '已挂(笔试测评)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
-    }
-    return { text: '已挂(简历初筛)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    return { text: '已挂', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
   }
 
   switch (status) {
