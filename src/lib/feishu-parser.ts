@@ -89,7 +89,7 @@ export function isJobApplied(job: { status?: JobStatus; applyStatus?: string }):
   return true
 }
 
-// 统一判定求职流程是否到达过指定阶段（全面纳入已挂流程、历史轮次与备注线索）
+// 统一判定求职流程是否到达过指定阶段（严格按照挂掉前的实际轮次判定，精确下钻各 TAB）
 export function hasReachedStage(
   job: JobApplication,
   stage: 'assessment' | 'round1' | 'round2' | 'round3' | 'hr' | 'offer'
@@ -127,18 +127,11 @@ export function hasReachedStage(
       return false
 
     case 'round1':
-      // 1. 处于一面及后续阶段的流程
+      // 必须真正到达过一面（包括进行中、后续轮次、或在一面/二面/三面/HR面挂掉；初筛挂、笔试挂绝不计入）
       if (['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(status)) return true
       if (last && ['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(last)) return true
-      if (interviews.length > 0 && interviews.some((i) => !/笔试|测评/i.test(i.round))) return true
-      if (/一面|一轮|初面|技术面|专业面|群面|现场面|线上面试|二面|三面|hr|面试挂|面试/i.test(notes)) return true
-      // 2. 核心：所有已挂/流程终止的企业，默认均作为经历过面试并终止的流程计入面试转化率（除非明确标记为仅初筛挂且无面试记录）
-      if (status === 'rejected') {
-        if (last === 'applied' && !/一面|二面|面试/i.test(notes) && interviews.length === 0) {
-          return false
-        }
-        return true
-      }
+      if (interviews.some((i) => !/笔试|测评/i.test(i.round))) return true
+      if (/一面|一轮|初面|技术面|专业面|群面|现场面|线上面试|二面|三面|hr/i.test(notes)) return true
       return false
 
     case 'assessment':
@@ -154,16 +147,25 @@ export function hasReachedStage(
 export function getJobStageBadge(job: JobApplication): { text: string; color: string; isRejected: boolean } {
   const status = normalizeJobStatus(job.status)
   if (status === 'rejected') {
-    if (hasReachedStage(job, 'hr')) {
-      return { text: '已挂(HR终面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    const last = job.lastStage ? normalizeJobStatus(job.lastStage) : undefined
+    const notes = (job.notes || '') + ' ' + (job.category || '')
+
+    if (last === 'hr' || /hr|终面|人事/i.test(notes)) {
+      return { text: '已挂·终面', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
     }
-    if (hasReachedStage(job, 'round3')) {
-      return { text: '已挂(三面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    if (last === 'interview3' || /三面|主管/i.test(notes)) {
+      return { text: '已挂·三面', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
     }
-    if (hasReachedStage(job, 'round2')) {
-      return { text: '已挂(二面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    if (last === 'interview2' || /二面|交叉|复面/i.test(notes)) {
+      return { text: '已挂·二面', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
     }
-    return { text: '已挂', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    if (last === 'interview1' || /一面|初面|技术面/i.test(notes) || (job.interviews && job.interviews.some((i) => !/笔试|测评/i.test(i.round)))) {
+      return { text: '已挂·一面', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    if (last === 'assessment' || /笔试|测评/i.test(notes) || (job.interviews && job.interviews.some((i) => /笔试|测评/i.test(i.round)))) {
+      return { text: '已挂·笔试', color: 'bg-purple-500/15 text-purple-300 border-purple-500/30', isRejected: true }
+    }
+    return { text: '已挂·初筛', color: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30', isRejected: true }
   }
 
   switch (status) {
@@ -185,6 +187,62 @@ export function getJobStageBadge(job: JobApplication): { text: string; color: st
     default:
       return { text: '已投待初筛', color: 'bg-blue-500/15 text-blue-300 border-blue-500/30', isRejected: false }
   }
+}
+
+// 智能解析飞书多维表格「多选状态」（如: "技术一面, 流程终止" 或 "笔试, 挂了" 或 "初筛, 已拒绝"）
+export function parseMultiSelectStatus(rawText?: string | null): {
+  status: JobStatus
+  lastStage?: JobStatus
+  isRejected: boolean
+  highestRound?: 'assessment' | 'interview1' | 'interview2' | 'interview3' | 'hr' | 'offer'
+} {
+  if (!rawText) return { status: 'applied', isRejected: false }
+  const text = String(rawText).trim().toLowerCase()
+
+  // 1. 判断是否包含已挂/拒绝/淘汰/终止
+  const isRejected = /挂|淘汰|终止|不合适|感谢信|未通过|不通过|被拒|拒信|fail|reject|已拒绝|归档/i.test(text)
+
+  // 2. 判断多选中包含的具体推进轮次（支持飞书表格多选标签）
+  let highestRound: 'assessment' | 'interview1' | 'interview2' | 'interview3' | 'hr' | 'offer' | undefined = undefined
+
+  if (/offer|录用|意向书|已oc|带薪实习|oc/i.test(text)) {
+    highestRound = 'offer'
+  } else if (/hr|终面|人事|谈薪|综合面/i.test(text)) {
+    highestRound = 'hr'
+  } else if (/三面|三轮|主管面|业务面|interview3/i.test(text)) {
+    highestRound = 'interview3'
+  } else if (/二面|二轮|复面|交叉|interview2/i.test(text)) {
+    highestRound = 'interview2'
+  } else if (/一面|一轮|初面|专业面|群面|技术面|线上面试|现场面|interview1|interview/i.test(text)) {
+    highestRound = 'interview1'
+  } else if (/笔试|测评|性格测试|在线测评|做测评|assessment/i.test(text)) {
+    highestRound = 'assessment'
+  }
+
+  // 3. 如果包含挂/终止，明确记录终止前的具体轮次
+  if (isRejected) {
+    return {
+      status: 'rejected',
+      lastStage: highestRound || 'applied',
+      isRejected: true,
+      highestRound,
+    }
+  }
+
+  // 4. 如果未挂，状态即为最高轮次
+  if (highestRound) {
+    return {
+      status: highestRound,
+      isRejected: false,
+      highestRound,
+    }
+  }
+
+  if (/意向|准备|未投|待投|想去|未申请|wishlist/i.test(text)) {
+    return { status: 'wishlist', isRejected: false }
+  }
+
+  return { status: 'applied', isRejected: false }
 }
 
 // 全局状态归一化处理器 (确保任意状态输入均严格映射到 9 种合法状态之一)
@@ -489,40 +547,43 @@ function parseSingleRow(
   }
 
   // 进展状态 (笔试 / 一面 / 二面 / 三面 / HR / Offer / 挂 / 未投意向)
-  if (!result.status) {
-    const stageCell = cleanCells[10] || cleanCells.find((c) => Object.keys(STATUS_MAP).some((k) => c.includes(k) && c !== result.applyStatus))
-    if (stageCell) {
-      result.status = parseStatus(stageCell, isNotYetApplied ? 'wishlist' : 'applied')
-    } else {
-      result.status = isNotYetApplied ? 'wishlist' : 'applied'
-    }
-  }
+  // 进展状态：飞书多维表格多选状态智能识别（如 "技术一面, 流程终止" / "笔试, 挂了" / "二面, 淘汰"）
+  const rawStatusCell = cleanCells[10] || cleanCells.find((c) => Object.keys(STATUS_MAP).some((k) => c.includes(k) && c !== result.applyStatus)) || ''
+  const multiParsed = parseMultiSelectStatus(rawStatusCell)
 
   // 6. 全局挂 / 淘汰检测与终止前阶段(lastStage)识别
   const isRejectedRow =
+    multiParsed.isRejected ||
     /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.notes || '') ||
     /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.applyStatus || '') ||
     cleanCells.some((c) => /挂了|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(c))
 
   if (isRejectedRow) {
-    // 识别在挂掉前到达的最高轮次
-    const rawContext = [cleanCells[10], result.notes, result.applyStatus, cleanCells.join(' ')].filter(Boolean).join(' ')
-    if (/hr|终面|人事|谈薪/i.test(rawContext)) {
-      result.lastStage = 'hr'
-    } else if (/三面|三轮|主管面|业务面/i.test(rawContext)) {
-      result.lastStage = 'interview3'
-    } else if (/二面|二轮|复面|交叉/i.test(rawContext)) {
-      result.lastStage = 'interview2'
-    } else if (/一面|一轮|初面|技术面|专业面|群面|线上面试|现场面|面试/i.test(rawContext)) {
-      result.lastStage = 'interview1'
-    } else if (/笔试|测评/i.test(rawContext)) {
-      result.lastStage = 'assessment'
+    result.status = 'rejected'
+    if (multiParsed.lastStage && multiParsed.lastStage !== 'applied') {
+      result.lastStage = multiParsed.lastStage
+    } else {
+      const rawContext = [cleanCells[10], result.notes, result.applyStatus, cleanCells.join(' ')].filter(Boolean).join(' ')
+      if (/hr|终面|人事|谈薪/i.test(rawContext)) {
+        result.lastStage = 'hr'
+      } else if (/三面|三轮|主管面|业务面/i.test(rawContext)) {
+        result.lastStage = 'interview3'
+      } else if (/二面|二轮|复面|交叉/i.test(rawContext)) {
+        result.lastStage = 'interview2'
+      } else if (/一面|一轮|初面|技术面|专业面|群面|线上面试|现场面|面试/i.test(rawContext)) {
+        result.lastStage = 'interview1'
+      } else if (/笔试|测评/i.test(rawContext)) {
+        result.lastStage = 'assessment'
+      } else {
+        result.lastStage = 'applied'
+      }
     }
 
-    result.status = 'rejected'
     if (!isNotYetApplied) {
       result.applyStatus = '已投递'
     }
+  } else {
+    result.status = multiParsed.status || (isNotYetApplied ? 'wishlist' : 'applied')
   }
 
   // 状态与投递状态互锁约束
