@@ -133,6 +133,52 @@ export default function CareerAnalyticsPage() {
     return acc + (job.interviews?.reduce((qAcc, iv) => qAcc + (iv.questions?.length || 0), 0) || 0)
   }, 0)
 
+  // 重点大厂关键词表（覆盖主流互联网大厂、硬科技与知名企业）
+  const TOP_TECH_COMPANIES = [
+    '腾讯', '阿里', '淘宝', '天猫', '蚂蚁', '字节', '抖音', 'tiktok', '美团', '快手',
+    '百度', '华为', '海思', '网易', '拼多多', 'pdd', '京东', '小红书', '米哈游', 'mihoyo',
+    '滴滴', 'b站', '哔哩哔哩', 'bilibili', '微众', '大疆', 'dji', 'oppo', 'vivo', '小米',
+    '中兴', '荣耀', '深信服', '顺丰', '平安', '招商', '招银', 'shopee', 'shein', '希音',
+    '微软', 'microsoft', 'google', 'apple', '特斯拉', 'tesla', '英伟达', 'nvidia', 'intel', 'amd'
+  ]
+
+  // 计算重点大厂攻坚列表：深圳 Base 优先，大厂优先，且优先展示深入流程的企业
+  const focusJobs = [...jobs]
+    .map((job) => {
+      const compLower = (job.company || '').toLowerCase()
+      const locLower = (job.location || '').toLowerCase()
+
+      // 是否匹配知名大厂
+      const isTopTier = TOP_TECH_COMPANIES.some((k) => compLower.includes(k.toLowerCase()))
+      // 是否在深圳
+      const isShenzhen = locLower.includes('深圳') || locLower.includes('shenzhen')
+
+      // 阶段权重（流程越深权重越高：Offer > HR面 > 三面 > 二面 > 一面 > 笔试 > 初筛 > 意向）
+      let stageScore = 0
+      if (hasReachedStage(job, 'offer')) stageScore = 80
+      else if (hasReachedStage(job, 'hr')) stageScore = 70
+      else if (hasReachedStage(job, 'round3')) stageScore = 60
+      else if (hasReachedStage(job, 'round2')) stageScore = 50
+      else if (hasReachedStage(job, 'round1')) stageScore = 40
+      else if (hasReachedStage(job, 'assessment')) stageScore = 30
+      else if (isJobApplied(job)) stageScore = 20
+      else stageScore = 10
+
+      // 综合评分计算：深圳大厂 > 深圳其他 > 非深圳大厂 > 其他
+      let priorityScore = stageScore
+      if (isTopTier) priorityScore += 1000
+      if (isShenzhen) priorityScore += 2000 // 深圳 base 优先加权最高
+
+      return {
+        job,
+        isTopTier,
+        isShenzhen,
+        priorityScore,
+      }
+    })
+    .sort((a, b) => b.priorityScore - a.priorityScore)
+    .map((item) => item.job)
+
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部导航与操作 */}
@@ -403,45 +449,56 @@ export default function CareerAnalyticsPage() {
                 <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-amber-400" />
                 重点大厂攻坚矩阵
               </h3>
-              <span className="text-xs sm:text-sm text-zinc-400">核心意向</span>
+              <span className="text-xs sm:text-sm text-zinc-400 font-mono">大厂名单 · 深圳优先</span>
             </div>
           </div>
 
           <div className="space-y-3 overflow-y-auto max-h-60 pr-1">
-            {jobs.slice(0, 5).map((job) => (
-              <div
-                key={job.id}
-                className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between gap-3 hover:bg-white/[0.04] transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/20 shrink-0">
-                    {job.company.substring(0, 1)}
+            {focusJobs.slice(0, 6).map((job) => {
+              const isShenzhen = (job.location || '').includes('深圳') || (job.location || '').toLowerCase().includes('shenzhen')
+
+              return (
+                <div
+                  key={job.id}
+                  className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between gap-3 hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/20 shrink-0">
+                      {job.company.substring(0, 1)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-bold text-sm sm:text-base text-white truncate">{job.company}</h5>
+                        {isShenzhen && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0 font-medium">
+                            深圳 Base
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-zinc-300 truncate mt-0.5">{job.role} · {job.location || '全国'}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h5 className="font-bold text-sm sm:text-base text-white truncate">{job.company}</h5>
-                    <p className="text-xs sm:text-sm text-zinc-300 truncate mt-0.5">{job.role} · {job.location || '全国'}</p>
+
+                  <div className="text-right shrink-0">
+                    {(() => {
+                      const badge = getJobStageBadge(job)
+                      return (
+                        <span className={`text-xs sm:text-sm px-3 py-1 rounded-full font-medium border ${badge.color}`}>
+                          {badge.text}
+                        </span>
+                      )
+                    })()}
+                    {job.salary && (
+                      <p className="text-xs sm:text-sm text-emerald-400 mt-1 font-mono font-semibold">
+                        {job.salary}
+                      </p>
+                    )}
                   </div>
                 </div>
+              )
+            })}
 
-                <div className="text-right shrink-0">
-                  {(() => {
-                    const badge = getJobStageBadge(job)
-                    return (
-                      <span className={`text-xs sm:text-sm px-3 py-1 rounded-full font-medium border ${badge.color}`}>
-                        {badge.text}
-                      </span>
-                    )
-                  })()}
-                  {job.salary && (
-                    <p className="text-xs sm:text-sm text-emerald-400 mt-1 font-mono font-semibold">
-                      {job.salary}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {jobs.length === 0 && (
+            {focusJobs.length === 0 && (
               <div className="py-8 text-center text-xs sm:text-sm text-zinc-500">
                 暂无投递数据
               </div>
