@@ -28,11 +28,15 @@ import { FeishuImporter } from '@/components/career/feishu-importer'
 import { JobDetailModal } from '@/components/career/job-detail-modal'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
 import { getLocalDateKey } from '@/lib/utils'
+import { getSupabase } from '@/lib/supabase'
+import { FeishuSyncModal } from '@/components/career/feishu-sync-modal'
+import { Zap } from 'lucide-react'
 
 export default function CareerPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban')
   const [isImporterOpen, setIsImporterOpen] = useState(false)
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
@@ -42,9 +46,34 @@ export default function CareerPage() {
 
   useEffect(() => {
     loadData()
+    // 首次进入自动拉取云端最新数据
+    StorageService.initCloudSync()
+
     const handleUpdate = () => loadData()
     window.addEventListener('workspace-data-updated', handleUpdate)
-    return () => window.removeEventListener('workspace-data-updated', handleUpdate)
+
+    // 订阅 Supabase Realtime 变更（飞书 Webhook 同步写入后，网页端秒级自动响应刷新）
+    const supabase = getSupabase()
+    let channel: any = null
+    if (supabase) {
+      channel = supabase
+        .channel('workspace_realtime_jobs_channel')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'workspace_storage', filter: 'key=eq.workspace_jobs_v4' },
+          () => {
+            StorageService.initCloudSync()
+          }
+        )
+        .subscribe()
+    }
+
+    return () => {
+      window.removeEventListener('workspace-data-updated', handleUpdate)
+      if (channel && supabase) {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [])
 
   const handleCreateNew = () => {
@@ -175,6 +204,16 @@ export default function CareerPage() {
             <BarChart3 className="w-4 h-4 text-emerald-400" />
             <span>量化大屏</span>
           </Link>
+
+          {/* 飞书实时同步 (Webhook) */}
+          <button
+            onClick={() => setIsSyncModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 text-xs font-medium border border-cyan-500/30 transition-colors shadow-sm"
+            title="配置飞书多维表格自动化 Webhook，实现变更秒级自动同步"
+          >
+            <Zap className="w-3.5 h-3.5 text-cyan-400" />
+            <span>实时同步</span>
+          </button>
 
           {/* 飞书导入 */}
           <button
@@ -406,6 +445,13 @@ export default function CareerPage() {
           setSelectedJob(job)
           setIsDetailOpen(true)
         }}
+      />
+
+      {/* 飞书实时同步配置弹窗 */}
+      <FeishuSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSyncTriggered={() => loadData()}
       />
     </div>
   )
