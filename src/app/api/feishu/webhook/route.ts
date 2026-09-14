@@ -8,7 +8,43 @@ import { parseMultiSelectStatus, extractStatusTags } from '@/lib/feishu-parser'
 // 支持飞书事件校验 (challenge) 及记录变更数据直接同步到 Supabase
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    let body: any = {}
+    const contentType = req.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      try {
+        body = await req.json()
+      } catch (e) {
+        body = {}
+      }
+    } else if (contentType.includes('form-data') || contentType.includes('urlencoded')) {
+      try {
+        const formData = await req.formData()
+        const obj: Record<string, any> = {}
+        formData.forEach((val, key) => {
+          obj[key] = val
+        })
+        body = obj
+      } catch (e) {
+        body = {}
+      }
+    } else {
+      // 兜底尝试
+      try {
+        body = await req.json()
+      } catch (e) {
+        try {
+          const formData = await req.formData()
+          const obj: Record<string, any> = {}
+          formData.forEach((val, key) => {
+            obj[key] = val
+          })
+          body = obj
+        } catch (e2) {
+          body = {}
+        }
+      }
+    }
 
     // 1. 飞书开放平台事件订阅 URL 校验 (Challenge 验证握手)
     if (body.type === 'url_verification' && body.challenge) {
@@ -34,7 +70,7 @@ export async function POST(req: NextRequest) {
     // 4. 解析飞书发送过来的记录数据 (支持飞书自动化 Webhook Payload 或开放平台事件)
     const fields = body.fields || body.record?.fields || body.data?.fields || body
 
-    const company = (fields['公司'] || fields['投递公司'] || fields['company'] || '').trim()
+    const company = (fields['投递公司'] || fields['公司'] || fields['company'] || '').trim()
     if (!company) {
       return NextResponse.json({
         success: true,
@@ -42,15 +78,15 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const rawRole = fields['职位'] || fields['应聘职位'] || fields['role'] || '研发工程师'
+    const rawRole = fields['职位'] || fields['职位名称'] || fields['应聘职位'] || fields['role'] || '研发工程师'
     const priority = fields['优先级'] || fields['priority'] || undefined
     const applyDate = fields['投递日期'] || fields['日期'] || fields['applyDate'] || new Date().toISOString().split('T')[0]
     const applyStatus = fields['投递状态'] || fields['applyStatus'] || '已投递'
     const category = fields['类型与岗位'] || fields['岗位类别'] || fields['category'] || undefined
     const location = fields['base地'] || fields['城市'] || fields['地点'] || fields['location'] || undefined
     const industry = fields['行业'] || fields['所属行业'] || fields['industry'] || undefined
-    const jobUrl = fields['官网'] || fields['链接'] || fields['jobUrl'] || undefined
-    const rawStatus = fields['状态'] || fields['当前进展'] || fields['status'] || '已投递'
+    const jobUrl = fields['官网'] || fields['招聘官网'] || fields['链接'] || fields['jobUrl'] || undefined
+    const rawStatus = fields['状态/进展'] || fields['状态'] || fields['当前进展'] || fields['进展'] || fields['status'] || '已投递'
     const notes = fields['备注'] || fields['notes'] || undefined
 
     // 剥离 role 中可能混入的长 URL
