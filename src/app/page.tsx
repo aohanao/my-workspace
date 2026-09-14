@@ -195,7 +195,7 @@ export default function DashboardPage() {
               控制中枢 · Overview
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-2 max-w-xl leading-relaxed">
-              钻爆法隧道全工序机械化施工智能配置硕士攻坚 · 秋招求职管道推进 · 专注一天的核心节奏
+              秋招求职管道推进 · 学术毕业论文攻坚 · 专注一天的核心节奏
             </p>
           </div>
 
@@ -207,9 +207,9 @@ export default function DashboardPage() {
                 秋招冲刺截止
               </span>
               <div className="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                {careerCountdown.days} <span className="text-xs font-normal text-zinc-500">天</span>
+                {careerCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
-              <span className="text-[11px] text-zinc-500 block mt-1 font-mono">{WORKSPACE_DEADLINES.careerSprint.replaceAll('-', '.')}</span>
+              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{WORKSPACE_DEADLINES.careerSprint.replaceAll('-', '.')}</span>
             </div>
 
             {/* 论文初稿完成送审倒计时 */}
@@ -218,9 +218,9 @@ export default function DashboardPage() {
                 初稿完成送审
               </span>
               <div className="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                {thesisCountdown.days} <span className="text-xs font-normal text-zinc-500">天</span>
+                {thesisCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
-              <span className="text-[11px] text-zinc-500 block mt-1 font-mono">{(thesis?.blindReviewDate || WORKSPACE_DEADLINES.blindReview).replaceAll('-', '.')}</span>
+              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{(thesis?.blindReviewDate || WORKSPACE_DEADLINES.blindReview).replaceAll('-', '.')}</span>
             </div>
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                       {completedCount} / {dailyTasks.length} 完成
                     </span>
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">四象限优先级自选（重急 / 轻急 / 重缓 / 轻缓）· 支持点击切换</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">四象限优先级自选（重急 / 轻急 / 重缓 / 轻缓）</p>
                 </div>
               </div>
 
@@ -347,31 +347,34 @@ export default function DashboardPage() {
                       </span>
                     )}
 
-                    {/* 四象限级别徽章：仅显示 重急 / 轻急 / 重缓 / 轻缓，越重要越偏深红 */}
-                    <button
-                      onClick={() => handleCyclePriority(task.id, task.priority)}
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-transform hover:scale-105 shrink-0 ${priorityInfo.badgeClass}`}
-                      title={`当前等级: ${priorityInfo.desc}，点击切换级别`}
-                    >
-                      {priorityInfo.label}
-                    </button>
+                    {/* 右侧区域：四象限级别徽章 + 编辑删除按钮，统一靠最右对齐 */}
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      {/* 四象限级别徽章：仅显示 重急 / 轻急 / 重缓 / 轻缓 */}
+                      <button
+                        onClick={() => handleCyclePriority(task.id, task.priority)}
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-transform hover:scale-105 shrink-0 ${priorityInfo.badgeClass}`}
+                        title={`当前等级: ${priorityInfo.desc}，点击切换级别`}
+                      >
+                        {priorityInfo.label}
+                      </button>
 
-                    {/* 编辑与删除操作 */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleStartEditTask(task)}
-                        className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
-                        title="编辑任务"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="p-1.5 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-white/[0.06] transition-colors"
-                        title="删除任务"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {/* 编辑与删除操作 */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleStartEditTask(task)}
+                          className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
+                          title="编辑任务"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="p-1.5 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-white/[0.06] transition-colors"
+                          title="删除任务"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )
@@ -387,14 +390,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 底部新增待办表单：在输入窗口右边设置优先级下拉菜单 */}
+          {/* 底部新增待办表单：回车直接添加，右侧设优先级下拉菜单 */}
           <form onSubmit={handleAddTask} className="pt-3 border-t border-white/[0.08]">
             <div className="flex items-center gap-2 sm:gap-2.5">
               <input
                 type="text"
                 value={newTaskText}
                 onChange={(e) => setNewTaskText(e.target.value)}
-                placeholder="安排今日新事项（回车或点击添加）..."
+                placeholder="安排今日新事项（按回车 Enter 添加）..."
                 className="flex-1 min-w-0 px-4 py-2 sm:py-2.5 text-xs sm:text-sm rounded-full bg-black/40 border border-white/[0.1] text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30"
               />
 
@@ -454,15 +457,6 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-
-              {/* 添加安排按钮 */}
-              <button
-                type="submit"
-                className="px-4 sm:px-5 py-2 sm:py-2.5 linear-btn-primary text-xs sm:text-sm rounded-full font-semibold shrink-0 flex items-center gap-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>添加安排</span>
-              </button>
             </div>
           </form>
         </div>
@@ -485,13 +479,10 @@ export default function DashboardPage() {
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/25 flex items-center justify-center shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/25 flex items-center justify-center shadow-sm shrink-0">
                     <Briefcase className="w-4 h-4" />
                   </div>
-                  <div>
-                    <span className="text-xs sm:text-sm text-zinc-200 font-medium block">秋招投递企业</span>
-                    <span className="text-[11px] text-zinc-500 font-mono">Pipeline Tracking</span>
-                  </div>
+                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">秋招投递企业</span>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <div>
@@ -512,13 +503,10 @@ export default function DashboardPage() {
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shadow-sm shrink-0">
                     <GraduationCap className="w-4 h-4" />
                   </div>
-                  <div>
-                    <span className="text-xs sm:text-sm text-zinc-200 font-medium block">硕士论文进度</span>
-                    <span className="text-[11px] text-zinc-500 font-mono">Thesis & System</span>
-                  </div>
+                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">硕士论文进度</span>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <div>
@@ -539,13 +527,10 @@ export default function DashboardPage() {
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center shadow-sm shrink-0">
                     <Brain className="w-4 h-4" />
                   </div>
-                  <div>
-                    <span className="text-xs sm:text-sm text-zinc-200 font-medium block">力扣算法题库</span>
-                    <span className="text-[11px] text-zinc-500 font-mono">LeetCode & CS</span>
-                  </div>
+                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">力扣算法题库</span>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <span className="text-xs sm:text-sm font-bold font-mono text-amber-300">
@@ -644,9 +629,6 @@ export default function DashboardPage() {
                     <span className="font-medium text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full text-xs border border-amber-500/25">
                       {latestIv?.round || getJobStageBadge(job).text}
                     </span>
-                    {latestIv?.date && (
-                      <p className="text-xs text-zinc-500 font-mono mt-0.5">{latestIv.date}</p>
-                    )}
                   </div>
                 </div>
               )
