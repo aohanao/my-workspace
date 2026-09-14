@@ -146,8 +146,15 @@ export default function CareerAnalyticsPage() {
     '微软', 'microsoft', 'google', 'apple', '特斯拉', 'tesla', '英伟达', 'nvidia', 'intel', 'amd'
   ]
 
-  // 计算重点大厂攻坚列表：深圳 Base 优先，大厂优先，且优先展示深入流程的企业
+  // 计算重点大厂攻坚列表：排除已挂/终止企业，深圳 Base 优先，大厂优先，且优先展示深入流程的企业
   const focusJobs = [...jobs]
+    .filter((job) => {
+      // 核心：已挂或流程终止的企业不再参与“攻坚”矩阵
+      if (job.status === 'rejected') return false
+      const badge = getJobStageBadge(job)
+      if (badge.isRejected) return false
+      return true
+    })
     .map((job) => {
       const compLower = (job.company || '').toLowerCase()
       const locLower = (job.location || '').toLowerCase()
