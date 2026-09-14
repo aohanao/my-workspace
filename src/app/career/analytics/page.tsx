@@ -121,8 +121,12 @@ export default function CareerAnalyticsPage() {
 
   const cityMap: Record<string, number> = {}
   jobs.forEach((j) => {
-    const city = j.location || '其他/未填'
-    cityMap[city] = (cityMap[city] || 0) + 1
+    const rawCity = (j.location || '').trim()
+    // 排除未填、空值、其他等非实际城市
+    if (!rawCity || rawCity === '未填' || rawCity === '其他' || rawCity === '其他/未填' || rawCity === '待定' || rawCity === '全国') {
+      return
+    }
+    cityMap[rawCity] = (cityMap[rawCity] || 0) + 1
   })
   const cityData = Object.entries(cityMap)
     .map(([city, count]) => ({ city, count }))
@@ -426,18 +430,24 @@ export default function CareerAnalyticsPage() {
             <span className="text-xs sm:text-sm text-zinc-400">意向城市</span>
           </div>
 
-          <div className="h-48 sm:h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="city" fontSize={12} stroke="#a1a1aa" />
-                <YAxis allowDecimals={false} fontSize={12} stroke="#a1a1aa" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
-                />
-                <Bar dataKey="count" name="投递数" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="h-48 sm:h-56 w-full flex items-center justify-center">
+            {cityData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={cityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="city" fontSize={12} stroke="#a1a1aa" />
+                  <YAxis allowDecimals={false} fontSize={12} stroke="#a1a1aa" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                  />
+                  <Bar dataKey="count" name="投递数" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-xs sm:text-sm text-zinc-500 text-center">
+                暂无具体城市分布数据（已自动过滤未填与其他）
+              </div>
+            )}
           </div>
         </div>
 
