@@ -218,27 +218,30 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                     >
                       {/* 公司与岗位 */}
                       <div className="flex items-start justify-between gap-2">
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <h5
-                            className={`font-semibold text-sm transition-colors line-clamp-1 ${
+                            className={`font-semibold text-sm transition-colors truncate ${
                               isRejectedCol
                                 ? 'text-zinc-200 group-hover:text-rose-300'
                                 : 'text-white group-hover:text-blue-400'
                             }`}
+                            title={job.company}
                           >
                             {job.company}
                           </h5>
-                          <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">{job.role}</p>
+                          <p className="text-xs text-zinc-400 truncate mt-0.5" title={job.role}>
+                            {job.role}
+                          </p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isRejectedCol && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-rose-500/15 text-rose-300 border border-rose-500/30 whitespace-nowrap">
                               已挂
                             </span>
                           )}
                           {job.priority && (
                             <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium border ${
+                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap ${
                                 job.priority === '高'
                                   ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                                   : job.priority === '中'

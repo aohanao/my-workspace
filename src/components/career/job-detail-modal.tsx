@@ -53,7 +53,11 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
 
   const handleStatusChange = (status: JobStatus) => {
     const nextApplyStatus = status === 'wishlist' ? '未投递' : '已投递'
-    setFormData({ ...formData, status, applyStatus: nextApplyStatus, updatedAt: new Date().toISOString() })
+    let lastStage = formData.lastStage
+    if (status === 'rejected' && formData.status !== 'rejected') {
+      lastStage = formData.status
+    }
+    setFormData({ ...formData, status, applyStatus: nextApplyStatus, lastStage, updatedAt: new Date().toISOString() })
   }
 
   const handleAddInterview = () => {
@@ -200,6 +204,44 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
               })}
             </div>
           </div>
+
+          {/* 若流程已挂，提供终止前阶段标记 */}
+          {formData.status === 'rejected' && (
+            <div className="p-3 rounded-xl bg-rose-500/[0.04] border border-rose-500/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-rose-300 font-semibold text-xs block">
+                  终止阶段标记（计入面试各轮转化率）：
+                </label>
+                <span className="text-[10px] text-zinc-500">标记后将严格统计进各轮转化率</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { value: 'applied', label: '初筛挂' },
+                  { value: 'assessment', label: '笔试挂' },
+                  { value: 'interview1', label: '一面挂' },
+                  { value: 'interview2', label: '二面挂' },
+                  { value: 'interview3', label: '三面挂' },
+                  { value: 'hr', label: 'HR面挂' },
+                ].map((stg) => {
+                  const isCurrentLast = formData.lastStage === stg.value || (!formData.lastStage && stg.value === 'applied')
+                  return (
+                    <button
+                      key={stg.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, lastStage: stg.value as JobStatus })}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                        isCurrentLast
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold'
+                          : 'bg-white/[0.03] text-zinc-400 border border-white/[0.06] hover:text-white'
+                      }`}
+                    >
+                      {stg.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* 飞书 11 字段矩阵表单 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">

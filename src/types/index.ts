@@ -37,6 +37,7 @@ export interface JobApplication {
   notes?: string           // 备注
   salary?: string          // 薪资 / 待遇
   source?: string          // 来源渠道
+  lastStage?: JobStatus    // 终止前曾到达的最高阶段 (如 interview1, assessment 等)
   interviews?: InterviewRecord[]
   updatedAt: string
   tags?: string[]

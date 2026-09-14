@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { JobApplication } from '@/types'
-import { isJobApplied } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage, getJobStageBadge } from '@/lib/feishu-parser'
 import {
   X,
   TrendingUp,
@@ -34,28 +34,12 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
   const totalApplied = appliedJobs.length
   const notAppliedCount = notAppliedJobs.length
 
-  // 各阶段达到的企业列表
-  const round1Jobs = jobs.filter(
-    (j) =>
-      ['interview1', 'interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('一面') || i.round.includes('初面'))
-  )
-  const round2Jobs = jobs.filter(
-    (j) =>
-      ['interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('二面') || i.round.includes('复面') || i.round.includes('交叉'))
-  )
-  const round3Jobs = jobs.filter(
-    (j) =>
-      ['interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('三面') || i.round.includes('主管') || i.round.includes('业务'))
-  )
-  const hrJobs = jobs.filter(
-    (j) =>
-      ['hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('HR') || i.round.includes('人事') || i.round.includes('终面'))
-  )
-  const offerJobs = jobs.filter((j) => j.status === 'offer')
+  // 各阶段达到的企业列表（严格计入到达过该阶段但后续流程终止/已挂的企业）
+  const round1Jobs = jobs.filter((j) => hasReachedStage(j, 'round1'))
+  const round2Jobs = jobs.filter((j) => hasReachedStage(j, 'round2'))
+  const round3Jobs = jobs.filter((j) => hasReachedStage(j, 'round3'))
+  const hrJobs = jobs.filter((j) => hasReachedStage(j, 'hr'))
+  const offerJobs = jobs.filter((j) => hasReachedStage(j, 'offer'))
 
   // 转化率计算 (以实际已投递数 totalApplied 为分母)
   const rate1 = totalApplied > 0 ? Math.round((round1Jobs.length / totalApplied) * 100) : 0
@@ -275,9 +259,14 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${currentStageMeta.tagColor}`}>
-                      {job.status}
-                    </span>
+                    {(() => {
+                      const badge = getJobStageBadge(job)
+                      return (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${badge.color}`}>
+                          {badge.text}
+                        </span>
+                      )
+                    })()}
                     <p className="text-[10px] text-zinc-500 font-mono mt-1">
                       {job.applyDate}
                     </p>

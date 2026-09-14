@@ -89,6 +89,103 @@ export function isJobApplied(job: { status?: JobStatus; applyStatus?: string }):
   return true
 }
 
+// 统一判定求职流程是否到达过指定阶段（全面纳入已挂流程、历史轮次与备注线索）
+export function hasReachedStage(
+  job: JobApplication,
+  stage: 'assessment' | 'round1' | 'round2' | 'round3' | 'hr' | 'offer'
+): boolean {
+  if (!isJobApplied(job)) return false
+
+  const status = normalizeJobStatus(job.status)
+  const last = job.lastStage ? normalizeJobStatus(job.lastStage) : undefined
+  const notes = (job.notes || '') + ' ' + (job.category || '')
+  const interviews = job.interviews || []
+
+  switch (stage) {
+    case 'offer':
+      return status === 'offer' || last === 'offer'
+
+    case 'hr':
+      if (['offer', 'hr'].includes(status)) return true
+      if (last && ['offer', 'hr'].includes(last)) return true
+      if (interviews.some((i) => /hr|终面|人事|谈薪/i.test(i.round))) return true
+      if (/hr面|终面|人事面|谈薪/i.test(notes)) return true
+      return false
+
+    case 'round3':
+      if (['offer', 'hr', 'interview3'].includes(status)) return true
+      if (last && ['offer', 'hr', 'interview3'].includes(last)) return true
+      if (interviews.some((i) => /三面|三轮|主管|业务|hr|终面/i.test(i.round))) return true
+      if (/三面|主管面|业务面/i.test(notes)) return true
+      return false
+
+    case 'round2':
+      if (['offer', 'hr', 'interview3', 'interview2'].includes(status)) return true
+      if (last && ['offer', 'hr', 'interview3', 'interview2'].includes(last)) return true
+      if (interviews.some((i) => /二面|二轮|复面|交叉|三面|主管|业务|hr|终面/i.test(i.round))) return true
+      if (/二面|复面|交叉面/i.test(notes)) return true
+      return false
+
+    case 'round1':
+      // 只要到达过一面、二面、三面、HR面、Offer中任一阶段，或有面试记录，或备注/历史提及面试，均计入
+      if (['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(status)) return true
+      if (last && ['offer', 'hr', 'interview3', 'interview2', 'interview1'].includes(last)) return true
+      if (interviews.length > 0 && interviews.some((i) => !/笔试|测评/i.test(i.round))) return true
+      if (/一面|一轮|初面|技术面|专业面|群面|现场面|线上面试|二面|三面|hr|面试挂|面试/i.test(notes)) return true
+      return false
+
+    case 'assessment':
+      if (['offer', 'hr', 'interview3', 'interview2', 'interview1', 'assessment'].includes(status)) return true
+      if (last && ['offer', 'hr', 'interview3', 'interview2', 'interview1', 'assessment'].includes(last)) return true
+      if (interviews.some((i) => /笔试|测评/i.test(i.round))) return true
+      if (/笔试|测评|在线测试/i.test(notes)) return true
+      return false
+  }
+}
+
+// 获取流程当前或终止时的细致轮次阶段说明
+export function getJobStageBadge(job: JobApplication): { text: string; color: string; isRejected: boolean } {
+  const status = normalizeJobStatus(job.status)
+  if (status === 'rejected') {
+    if (hasReachedStage(job, 'hr')) {
+      return { text: '已挂(HR终面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    if (hasReachedStage(job, 'round3')) {
+      return { text: '已挂(三面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    if (hasReachedStage(job, 'round2')) {
+      return { text: '已挂(二面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    if (hasReachedStage(job, 'round1')) {
+      return { text: '已挂(技术一面)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    if (hasReachedStage(job, 'assessment')) {
+      return { text: '已挂(笔试测评)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+    }
+    return { text: '已挂(简历初筛)', color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', isRejected: true }
+  }
+
+  switch (status) {
+    case 'offer':
+      return { text: '斩获Offer 🎉', color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', isRejected: false }
+    case 'hr':
+      return { text: 'HR面/谈薪', color: 'bg-pink-500/15 text-pink-300 border-pink-500/30', isRejected: false }
+    case 'interview3':
+      return { text: '技术三面', color: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30', isRejected: false }
+    case 'interview2':
+      return { text: '技术二面', color: 'bg-orange-500/15 text-orange-300 border-orange-500/30', isRejected: false }
+    case 'interview1':
+      return { text: '技术一面', color: 'bg-amber-500/15 text-amber-300 border-amber-500/30', isRejected: false }
+    case 'assessment':
+      return { text: '笔试测评', color: 'bg-purple-500/15 text-purple-300 border-purple-500/30', isRejected: false }
+    case 'wishlist':
+      return { text: '意向备战', color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', isRejected: false }
+    case 'applied':
+    default:
+      return { text: '已投待初筛', color: 'bg-blue-500/15 text-blue-300 border-blue-500/30', isRejected: false }
+  }
+}
+
 // 全局状态归一化处理器 (确保任意状态输入均严格映射到 9 种合法状态之一)
 export function normalizeJobStatus(status?: string | null): JobStatus {
   if (!status) return 'applied'
@@ -363,6 +460,17 @@ function parseSingleRow(
     }
   }
 
+  // 若岗位名称中混入了长 URL 链接，自动剥离填充到 jobUrl 中，净化岗位显示
+  if (result.role) {
+    const urlMatch = result.role.match(/https?:\/\/[^\s\u4e00-\u9fa5]+/i)
+    if (urlMatch) {
+      if (!result.jobUrl) {
+        result.jobUrl = urlMatch[0]
+      }
+      result.role = result.role.replace(urlMatch[0], '').trim()
+    }
+  }
+
   // 行业
   if (!result.industry) {
     if (cleanCells[7]) result.industry = cleanCells[7]
@@ -389,13 +497,27 @@ function parseSingleRow(
     }
   }
 
-  // 6. 全局挂 / 淘汰检测 (若备注、投递状态或整行包含挂了/淘汰/流程终止，强制纠偏为 rejected)
+  // 6. 全局挂 / 淘汰检测与终止前阶段(lastStage)识别
   const isRejectedRow =
     /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.notes || '') ||
     /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过|被拒|拒信/i.test(result.applyStatus || '') ||
     cleanCells.some((c) => /挂了|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(c))
 
   if (isRejectedRow) {
+    // 识别在挂掉前到达的最高轮次
+    const rawContext = [cleanCells[10], result.notes, result.applyStatus, cleanCells.join(' ')].filter(Boolean).join(' ')
+    if (/hr|终面|人事|谈薪/i.test(rawContext)) {
+      result.lastStage = 'hr'
+    } else if (/三面|三轮|主管面|业务面/i.test(rawContext)) {
+      result.lastStage = 'interview3'
+    } else if (/二面|二轮|复面|交叉/i.test(rawContext)) {
+      result.lastStage = 'interview2'
+    } else if (/一面|一轮|初面|技术面|专业面|群面|线上面试|现场面|面试/i.test(rawContext)) {
+      result.lastStage = 'interview1'
+    } else if (/笔试|测评/i.test(rawContext)) {
+      result.lastStage = 'assessment'
+    }
+
     result.status = 'rejected'
     if (!isNotYetApplied) {
       result.applyStatus = '已投递'
@@ -421,19 +543,20 @@ function parseSingleRow(
   if (result.industry) tags.push(result.industry)
   if (result.category) tags.push(result.category)
 
-  // 自动生成面试轮次记录（如果是面试或笔试状态，或者备注提及了轮次）
+  // 自动生成面试轮次记录（如果是面试或笔试状态，或者备注/历史提及了轮次）
   let roundHint = ''
-  if (result.status === 'assessment' || /笔试|测评/i.test(result.notes || '')) roundHint = '笔试测评'
-  else if (result.status === 'interview3' || /三面|主管/i.test(result.notes || '')) roundHint = '技术三面'
-  else if (result.status === 'interview2' || /二面|交叉/i.test(result.notes || '')) roundHint = '技术二面'
-  else if (result.status === 'interview1' || /一面|初面/i.test(result.notes || '')) roundHint = '技术一面'
-  else if (result.status === 'hr' || /hr|终面/i.test(result.notes || '')) roundHint = 'HR面'
+  const effectiveStage = result.lastStage || result.status
+  if (effectiveStage === 'assessment' || /笔试|测评/i.test(result.notes || '')) roundHint = '笔试测评'
+  else if (effectiveStage === 'interview3' || /三面|主管/i.test(result.notes || '')) roundHint = '技术三面'
+  else if (effectiveStage === 'interview2' || /二面|交叉/i.test(result.notes || '')) roundHint = '技术二面'
+  else if (effectiveStage === 'interview1' || /一面|初面|面试|技术面/i.test(result.notes || '')) roundHint = '技术一面'
+  else if (effectiveStage === 'hr' || /hr|终面/i.test(result.notes || '')) roundHint = 'HR面'
 
   const interviews = roundHint
     ? [{
         id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         round: roundHint,
-        date: result.applyDate || getLocalDateKey(),
+        date: result.applyDate || new Date().toISOString().split('T')[0],
         questions: [],
         feedback: result.status === 'rejected' ? '流程终止已挂' : '从飞书表格同步',
       }]
@@ -451,6 +574,7 @@ function parseSingleRow(
     industry: result.industry,
     jobUrl: result.jobUrl,
     status: result.status || 'applied',
+    lastStage: result.lastStage,
     notes: result.notes,
     interviews,
     updatedAt: new Date().toISOString(),

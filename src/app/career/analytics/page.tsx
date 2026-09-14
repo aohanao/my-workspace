@@ -27,7 +27,7 @@ import {
 } from 'recharts'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
-import { isJobApplied } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
 
 const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444', '#06b6d4', '#6366f1']
@@ -54,30 +54,16 @@ export default function CareerAnalyticsPage() {
   const totalApplied = appliedJobs.length
   const notAppliedCount = notAppliedJobs.length
 
-  const passScreening = jobs.filter((j) => isJobApplied(j) && j.status !== 'applied').length
+  const passScreening = jobs.filter(
+    (j) => hasReachedStage(j, 'assessment') || hasReachedStage(j, 'round1')
+  ).length
 
-  // 各轮技术面试到达
-  const round1Jobs = jobs.filter(
-    (j) =>
-      ['interview1', 'interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('一面') || i.round.includes('初面'))
-  )
-  const round2Jobs = jobs.filter(
-    (j) =>
-      ['interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('二面') || i.round.includes('复面') || i.round.includes('交叉'))
-  )
-  const round3Jobs = jobs.filter(
-    (j) =>
-      ['interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('三面') || i.round.includes('主管') || i.round.includes('业务'))
-  )
-  const reachedFinal = jobs.filter(
-    (j) =>
-      ['hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('HR') || i.round.includes('终面'))
-  )
-  const offers = jobs.filter((j) => j.status === 'offer').length
+  // 各轮技术面试到达（严格包含到达过该轮次但后续流程终止/已挂的企业）
+  const round1Jobs = jobs.filter((j) => hasReachedStage(j, 'round1'))
+  const round2Jobs = jobs.filter((j) => hasReachedStage(j, 'round2'))
+  const round3Jobs = jobs.filter((j) => hasReachedStage(j, 'round3'))
+  const reachedFinal = jobs.filter((j) => hasReachedStage(j, 'hr'))
+  const offers = jobs.filter((j) => hasReachedStage(j, 'offer')).length
 
   const rateOverview = totalApplied ? Math.round((round1Jobs.length / totalApplied) * 100) : 0
   const rate1 = totalApplied ? Math.round((round1Jobs.length / totalApplied) * 100) : 0

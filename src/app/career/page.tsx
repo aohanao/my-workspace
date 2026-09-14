@@ -21,7 +21,7 @@ import {
 import Link from 'next/link'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
-import { isJobApplied } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
 import { KanbanBoard } from '@/components/career/kanban-board'
 import { JobTable } from '@/components/career/job-table'
 import { FeishuImporter } from '@/components/career/feishu-importer'
@@ -79,7 +79,40 @@ export default function CareerPage() {
   const handleUpdateStatus = (jobId: string, nextStatus: JobStatus) => {
     const job = jobs.find((j) => j.id === jobId)
     if (job) {
-      StorageService.updateJob({ ...job, status: nextStatus, updatedAt: new Date().toISOString() })
+      const updatedJob: JobApplication = {
+        ...job,
+        status: nextStatus,
+        updatedAt: new Date().toISOString(),
+      }
+
+      // 如果流转至流程终止/已挂，且此前在面试或笔试阶段，自动记录其终止前阶段与面试轮次，防止统计丢失
+      if (nextStatus === 'rejected' && job.status !== 'rejected') {
+        updatedJob.lastStage = job.status
+        const stageLabels: Record<string, string> = {
+          assessment: '笔试测评',
+          interview1: '技术一面',
+          interview2: '技术二面',
+          interview3: '技术三面',
+          hr: 'HR面/终面',
+        }
+        if (stageLabels[job.status]) {
+          const hasRecord = job.interviews?.some((i) => i.round.includes(stageLabels[job.status]))
+          if (!hasRecord) {
+            updatedJob.interviews = [
+              ...(job.interviews || []),
+              {
+                id: `iv-${Date.now()}`,
+                round: stageLabels[job.status],
+                date: getLocalDateKey(),
+                questions: [],
+                feedback: '流程终止已挂',
+              },
+            ]
+          }
+        }
+      }
+
+      StorageService.updateJob(updatedJob)
       loadData()
     }
   }
@@ -98,27 +131,11 @@ export default function CareerPage() {
   const offerCount = jobs.filter((j) => j.status === 'offer').length
   const rejectedCount = jobs.filter((j) => j.status === 'rejected').length
 
-  // 各轮次到达企业数（以实际已投递为基数进行转化率分析）
-  const round1Jobs = jobs.filter(
-    (j) =>
-      ['interview1', 'interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('一面') || i.round.includes('初面'))
-  )
-  const round2Jobs = jobs.filter(
-    (j) =>
-      ['interview2', 'interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('二面') || i.round.includes('复面') || i.round.includes('交叉'))
-  )
-  const round3Jobs = jobs.filter(
-    (j) =>
-      ['interview3', 'hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('三面') || i.round.includes('主管') || i.round.includes('业务'))
-  )
-  const hrJobs = jobs.filter(
-    (j) =>
-      ['hr', 'offer'].includes(j.status) ||
-      j.interviews?.some((i) => i.round.includes('HR') || i.round.includes('人事') || i.round.includes('终面'))
-  )
+  // 各轮次到达企业数（以实际已投递为基数进行转化率分析，严格计入已挂但经历过面试的流程）
+  const round1Jobs = jobs.filter((j) => hasReachedStage(j, 'round1'))
+  const round2Jobs = jobs.filter((j) => hasReachedStage(j, 'round2'))
+  const round3Jobs = jobs.filter((j) => hasReachedStage(j, 'round3'))
+  const hrJobs = jobs.filter((j) => hasReachedStage(j, 'hr'))
 
   const reachedInterviewCount = round1Jobs.length
   const interviewRate = appliedCount > 0 ? Math.round((reachedInterviewCount / appliedCount) * 100) : 0
