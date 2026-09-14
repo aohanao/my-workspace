@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Clock,
   Briefcase,
@@ -17,6 +17,7 @@ import {
   ListTodo,
   AlertCircle,
   ExternalLink,
+  ChevronDown,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
@@ -75,6 +76,18 @@ export default function DashboardPage() {
   const [priorityFilter, setPriorityFilter] = useState<'all' | TaskPriority>('all')
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [editingTaskText, setEditingTaskText] = useState('')
+  const [isPriorityMenuOpen, setIsPriorityMenuOpen] = useState(false)
+  const priorityMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (priorityMenuRef.current && !priorityMenuRef.current.contains(e.target as Node)) {
+        setIsPriorityMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const loadData = () => {
     setJobs(StorageService.getJobs())
@@ -374,48 +387,82 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 底部新增待办表单：集成四象限快速选择 */}
-          <form onSubmit={handleAddTask} className="pt-3 border-t border-white/[0.08] space-y-2.5">
-            <div className="flex gap-2.5">
+          {/* 底部新增待办表单：在输入窗口右边设置优先级下拉菜单 */}
+          <form onSubmit={handleAddTask} className="pt-3 border-t border-white/[0.08]">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               <input
                 type="text"
                 value={newTaskText}
                 onChange={(e) => setNewTaskText(e.target.value)}
                 placeholder="安排今日新事项（回车或点击添加）..."
-                className="flex-1 px-4 py-2.5 text-xs sm:text-sm rounded-full bg-black/40 border border-white/[0.1] text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30"
+                className="flex-1 min-w-0 px-4 py-2 sm:py-2.5 text-xs sm:text-sm rounded-full bg-black/40 border border-white/[0.1] text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30"
               />
+
+              {/* 输入窗口右边的优先级下拉菜单 */}
+              <div className="relative shrink-0" ref={priorityMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsPriorityMenuOpen(!isPriorityMenuOpen)}
+                  className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm border transition-all cursor-pointer ${
+                    PRIORITY_OPTIONS.find((opt) => opt.key === newTaskPriority)?.badgeClass || ''
+                  }`}
+                  title="选择任务优先级"
+                >
+                  <span className="w-2 h-2 rounded-full bg-current shrink-0" />
+                  <span className="font-semibold">{newTaskPriority}</span>
+                  <span className="hidden md:inline opacity-85 text-xs font-normal">
+                    ({PRIORITY_OPTIONS.find((opt) => opt.key === newTaskPriority)?.desc})
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-200 ${isPriorityMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* 展开的下拉菜单（向上弹出，避免被底部遮挡） */}
+                {isPriorityMenuOpen && (
+                  <div className="absolute bottom-full mb-2 right-0 sm:right-auto sm:left-0 w-60 rounded-2xl bg-[#0e121d] border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
+                    <div className="text-[10px] text-zinc-500 font-mono px-3 py-1.5 border-b border-white/[0.06] flex items-center justify-between">
+                      <span>选择优先级</span>
+                      <span>四象限法则</span>
+                    </div>
+                    <div className="space-y-1 mt-1">
+                      {PRIORITY_OPTIONS.map((opt) => {
+                        const isSelected = newTaskPriority === opt.key
+
+                        return (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => {
+                              setNewTaskPriority(opt.key)
+                              setIsPriorityMenuOpen(false)
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm transition-all text-left ${
+                              isSelected
+                                ? `${opt.badgeClass} font-bold shadow-sm`
+                                : 'text-zinc-300 hover:bg-white/[0.06] hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-current shrink-0" />
+                              <span className="font-semibold">{opt.label}</span>
+                              <span className="text-zinc-400 text-xs font-normal">({opt.desc})</span>
+                            </div>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-current shrink-0" />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 添加安排按钮 */}
               <button
                 type="submit"
-                className="px-5 py-2.5 linear-btn-primary text-xs sm:text-sm rounded-full font-semibold shrink-0 flex items-center gap-1.5"
+                className="px-4 sm:px-5 py-2 sm:py-2.5 linear-btn-primary text-xs sm:text-sm rounded-full font-semibold shrink-0 flex items-center gap-1.5 shadow-sm"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>添加安排</span>
               </button>
-            </div>
-
-            {/* 选择新增任务所属四象限 */}
-            <div className="flex items-center gap-2 text-xs text-zinc-400 flex-wrap">
-              <span className="font-mono text-[11px] text-zinc-500">优先级级别:</span>
-              <div className="flex items-center gap-1.5">
-                {PRIORITY_OPTIONS.map((opt) => {
-                  const isSelected = newTaskPriority === opt.key
-
-                  return (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => setNewTaskPriority(opt.key)}
-                      className={`px-3 py-1 rounded-full font-mono text-xs border transition-all ${
-                        isSelected
-                          ? `${opt.badgeClass} font-bold scale-105`
-                          : 'bg-black/30 border-white/[0.08] text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      {opt.label} ({opt.desc})
-                    </button>
-                  )
-                })}
-              </div>
             </div>
           </form>
         </div>
