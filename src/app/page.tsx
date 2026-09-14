@@ -29,6 +29,7 @@ import {
   HabitItem,
   TaskPriority,
 } from '@/types'
+import { getJobStageBadge } from '@/lib/feishu-parser'
 
 const PRIORITY_OPTIONS: { key: TaskPriority; label: string; desc: string; badgeClass: string; tabClass: string }[] = [
   {
@@ -594,7 +595,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <span className="font-medium text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full text-xs border border-amber-500/25">
-                      {latestIv?.round || job.status}
+                      {latestIv?.round || getJobStageBadge(job).text}
                     </span>
                     {latestIv?.date && (
                       <p className="text-xs text-zinc-500 font-mono mt-0.5">{latestIv.date}</p>

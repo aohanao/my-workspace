@@ -177,6 +177,23 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
             </div>
           </div>
 
+          {/* 飞书多维表格原始标签展示 */}
+          {formData.statusTags && formData.statusTags.length > 0 && (
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <span className="text-[11px] text-zinc-500 shrink-0">飞书原标签:</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {formData.statusTags.map((tag, tIdx) => (
+                  <span
+                    key={tIdx}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/[0.05] border border-white/10 text-zinc-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 状态阶段选择器 */}
           <div>
             <label className="text-zinc-400 font-medium block mb-2">当前进展阶段：</label>

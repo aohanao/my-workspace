@@ -38,6 +38,8 @@ export interface JobApplication {
   salary?: string          // 薪资 / 待遇
   source?: string          // 来源渠道
   lastStage?: JobStatus    // 终止前曾到达的最高阶段 (如 interview1, assessment 等)
+  rawStatus?: string       // 飞书原始状态/进展文本 (例如 "技术一面, 流程终止" 或 "笔试")
+  statusTags?: string[]    // 飞书状态多选标签列表 (例如 ["技术一面", "流程终止"])
   interviews?: InterviewRecord[]
   updatedAt: string
   tags?: string[]

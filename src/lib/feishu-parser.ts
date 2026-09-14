@@ -189,6 +189,77 @@ export function getJobStageBadge(job: JobApplication): { text: string; color: st
   }
 }
 
+// 提取飞书多选标签列表（支持逗号、分号、顿号、斜杠、换行、空格等多种分隔符）
+export function extractStatusTags(rawText?: string | null): string[] {
+  if (!rawText) return []
+  const text = String(rawText).trim()
+  if (!text || text === '-') return []
+
+  // 按常见标点与换行拆分多选标签
+  return text
+    .split(/[,，、;\/|\n\r]+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0 && t !== '-')
+}
+
+// 标签色彩分类器：根据标签中文语义自动配置精致的主题颜色
+export function getStatusTagStyle(tagText: string): string {
+  const t = tagText.toLowerCase()
+  if (/挂|淘汰|终止|不合适|感谢信|未通过|不通过|被拒|拒信|fail|reject|已拒绝|归档/i.test(t)) {
+    return 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+  }
+  if (/offer|录用|意向书|已oc|带薪实习|oc/i.test(t)) {
+    return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+  }
+  if (/hr|终面|人事|谈薪|综合面/i.test(t)) {
+    return 'bg-pink-500/15 text-pink-300 border-pink-500/30'
+  }
+  if (/三面|三轮|主管面|业务面/i.test(t)) {
+    return 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+  }
+  if (/二面|二轮|复面|交叉/i.test(t)) {
+    return 'bg-orange-500/15 text-orange-300 border-orange-500/30'
+  }
+  if (/一面|一轮|初面|专业面|群面|技术面|线上面试|现场面|面试/i.test(t)) {
+    return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+  }
+  if (/笔试|测评|性格测试|在线测评|做测评|测试/i.test(t)) {
+    return 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+  }
+  if (/意向|准备|未投|待投|想去|未申请/i.test(t)) {
+    return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+  }
+  if (/已投|初筛|筛选|评估|推进/i.test(t)) {
+    return 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+  }
+  return 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+}
+
+// 统一获取要在 UI 上展示的标签列表（100% 优先忠实还原用户给的飞书原始标签，杜绝任何英文）
+export function getJobDisplayTags(job: Partial<JobApplication>): Array<{ text: string; color: string }> {
+  // 1. 如果有明确提取出来的多选标签列表，直接按照用户给的标签展示！
+  const tags = (job.statusTags && job.statusTags.length > 0)
+    ? job.statusTags
+    : extractStatusTags(job.rawStatus)
+
+  if (tags && tags.length > 0) {
+    return tags.map((t) => ({
+      text: t,
+      color: getStatusTagStyle(t),
+    }))
+  }
+
+  // 2. 兜底策略：没有任何用户原始标签时，按业务状态映射为中文标签
+  const status = normalizeJobStatus(job.status)
+  if (status === 'rejected') {
+    const badge = getJobStageBadge(job as JobApplication)
+    return [{ text: badge.text, color: badge.color }]
+  }
+
+  const badge = getJobStageBadge(job as JobApplication)
+  return [{ text: badge.text, color: badge.color }]
+}
+
 // 智能解析飞书多维表格「多选状态」（如: "技术一面, 流程终止" 或 "笔试, 挂了" 或 "初筛, 已拒绝"）
 export function parseMultiSelectStatus(rawText?: string | null): {
   status: JobStatus
@@ -447,7 +518,10 @@ function parseSingleRow(
       else if (field === 'role') result.role = cell
       else if (field === 'industry') result.industry = cell
       else if (field === 'jobUrl') result.jobUrl = cell
-      else if (field === 'status') result.status = parseStatus(cell)
+      else if (field === 'status') {
+        result.status = parseStatus(cell)
+        result.rawStatus = cell
+      }
       else if (field === 'notes') result.notes = cell
     })
   }
@@ -592,6 +666,16 @@ function parseSingleRow(
   }
   if (result.status === 'wishlist') {
     result.applyStatus = '未投递'
+  }
+
+  // 保存原始飞书状态文本并提取多选标签列表（100% 优先忠实还原用户给的飞书原始标签）
+  result.rawStatus = rawStatusCell || result.rawStatus || ''
+  const extractedTags = extractStatusTags(result.rawStatus)
+  if (extractedTags.length > 0) {
+    result.statusTags = extractedTags
+  } else {
+    const badge = getJobStageBadge(result as JobApplication)
+    result.statusTags = [badge.text]
   }
 
   // 如果依然没有公司名或公司名包含无效字眼，舍弃

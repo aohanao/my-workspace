@@ -27,7 +27,7 @@ import {
 } from 'recharts'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
-import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage, getJobStageBadge } from '@/lib/feishu-parser'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
 
 const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444', '#06b6d4', '#6366f1']
@@ -424,9 +424,14 @@ export default function CareerAnalyticsPage() {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    {job.status}
-                  </span>
+                  {(() => {
+                    const badge = getJobStageBadge(job)
+                    return (
+                      <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium border ${badge.color}`}>
+                        {badge.text}
+                      </span>
+                    )
+                  })()}
                   {job.salary && (
                     <p className="text-[11px] text-emerald-400 mt-1 font-mono font-medium">
                       {job.salary}

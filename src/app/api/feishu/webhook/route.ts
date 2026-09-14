@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseCredentials } from '@/lib/supabase'
 import { JobApplication } from '@/types'
-import { parseMultiSelectStatus } from '@/lib/feishu-parser'
+import { parseMultiSelectStatus, extractStatusTags } from '@/lib/feishu-parser'
 
 // 供飞书多维表格「自动化 (Automation)」发送 Webhook 请求时调用的接口
 // 支持飞书事件校验 (challenge) 及记录变更数据直接同步到 Supabase
@@ -62,9 +62,10 @@ export async function POST(req: NextRequest) {
       role = role.replace(urlMatch[0], '').trim()
     }
 
-    // 解析多选状态
+    // 解析多选状态与标签
     const statusText = Array.isArray(rawStatus) ? rawStatus.join(', ') : String(rawStatus)
     const parsedStatus = parseMultiSelectStatus(statusText)
+    const statusTags = extractStatusTags(statusText)
 
     // 构建或匹配面试轮次
     let interviews = []
@@ -105,6 +106,8 @@ export async function POST(req: NextRequest) {
       jobUrl: finalJobUrl,
       status: parsedStatus.status,
       lastStage: parsedStatus.lastStage,
+      rawStatus: statusText,
+      statusTags: statusTags.length > 0 ? statusTags : undefined,
       notes,
       interviews: existingIndex >= 0 && currentJobs[existingIndex].interviews?.length ? currentJobs[existingIndex].interviews : interviews,
       updatedAt: new Date().toISOString(),

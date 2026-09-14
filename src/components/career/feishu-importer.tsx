@@ -10,7 +10,7 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
-import { parseFeishuClipboardText, parseFeishuExcelFile, isJobApplied } from '@/lib/feishu-parser'
+import { parseFeishuClipboardText, parseFeishuExcelFile, isJobApplied, getJobDisplayTags } from '@/lib/feishu-parser'
 import { FeishuImportResult } from '@/types'
 import { StorageService } from '@/lib/storage'
 
@@ -268,15 +268,16 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                             ) : '-'}
                           </td>
                           <td className="p-2.5 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                              job.status === 'rejected'
-                                ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 font-semibold'
-                                : job.status === 'offer'
-                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                                : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                            }`}>
-                              {job.status === 'rejected' ? '流程终止(已挂)' : job.status}
-                            </span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              {getJobDisplayTags(job).map((tag, tIdx) => (
+                                <span
+                                  key={tIdx}
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${tag.color}`}
+                                >
+                                  {tag.text}
+                                </span>
+                              ))}
+                            </div>
                           </td>
                           <td className="p-2.5 pr-3 text-zinc-400 truncate max-w-[120px] text-[11px]" title={job.notes}>
                             {job.notes || '-'}

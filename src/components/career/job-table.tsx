@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { JobApplication, JobStatus } from '@/types'
-import { isJobApplied, getJobStageBadge } from '@/lib/feishu-parser'
+import { isJobApplied, getJobStageBadge, getJobDisplayTags } from '@/lib/feishu-parser'
 import {
   Search,
   Download,
@@ -469,11 +469,18 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     {/* 状态 / 进展 */}
                     <td className="p-3.5 whitespace-nowrap">
                       {(() => {
-                        const badge = getJobStageBadge(job)
+                        const tags = getJobDisplayTags(job)
                         return (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}>
-                            {badge.text}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {tags.map((tag, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${tag.color}`}
+                              >
+                                {tag.text}
+                              </span>
+                            ))}
+                          </div>
                         )
                       })()}
                     </td>
