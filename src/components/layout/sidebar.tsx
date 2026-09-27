@@ -9,8 +9,6 @@ import {
   GraduationCap,
   Brain,
   Smile,
-  Download,
-  Upload,
   Layers,
   Cloud,
   Check,
@@ -20,7 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { StorageService, CloudSyncStatus } from '@/lib/storage'
 import { CloudConfigModal } from './cloud-config-modal'
 
@@ -40,7 +38,6 @@ interface SidebarProps {
 
 export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [syncInfo, setSyncInfo] = useState<{
     status: CloudSyncStatus
     isConfigured: boolean
@@ -76,34 +73,6 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
     }
     setSyncInfo(StorageService.getSyncStatus())
     setIsSyncing(false)
-  }
-
-  const handleExportData = () => {
-    const data = StorageService.exportAllData()
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workspace-backup-${new Date().toISOString().split('T')[0]}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      try {
-        const json = JSON.parse(event.target?.result as string)
-        await StorageService.importAllData(json)
-        alert('数据恢复成功并已同步！')
-        window.location.reload()
-      } catch (err) {
-        alert('文件格式错误，导入失败！')
-      }
-    }
-    reader.readAsText(file)
   }
 
   return (
@@ -230,33 +199,6 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                   : '多端数据实时云持久化'
                 : '点击可填入 Supabase Key 开启多端同步'}
             </p>
-          </div>
-
-          {/* 导入 / 导出 胶囊按钮 */}
-          <div className="flex items-center gap-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImportData}
-              accept=".json"
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title="恢复数据"
-              className="flex-1 py-1.5 px-2 rounded-full text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.08] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span>导入备份</span>
-            </button>
-            <button
-              onClick={handleExportData}
-              title="导出备份"
-              className="flex-1 py-1.5 px-2 rounded-full text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.08] flex items-center justify-center gap-1.5 border border-white/[0.08] transition-all"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>导出 JSON</span>
-            </button>
           </div>
         </div>
       </aside>

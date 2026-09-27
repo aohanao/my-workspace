@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Clock, Sparkles, Plus, Menu } from 'lucide-react'
 import { getDaysLeft, WORKSPACE_DEADLINES } from '@/lib/utils'
-import { StorageService, CloudSyncStatus } from '@/lib/storage'
-import { cn } from '@/lib/utils'
-import { CloudConfigModal } from './cloud-config-modal'
+import { StorageService } from '@/lib/storage'
 import { CalendarModal } from './calendar-modal'
 
 interface TopHeaderProps {
@@ -19,8 +17,6 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
   const [thesisDays, setThesisDays] = useState({ days: 0, isOverdue: false })
   const [quickNoteOpen, setQuickNoteOpen] = useState(false)
   const [quickNoteText, setQuickNoteText] = useState('')
-  const [syncStatus, setSyncStatus] = useState<CloudSyncStatus>('unconfigured')
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   useEffect(() => {
@@ -42,18 +38,9 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
     setCareerDays(getDaysLeft(WORKSPACE_DEADLINES.careerSprint))
     setThesisDays(getDaysLeft(thesisInfo.blindReviewDate || WORKSPACE_DEADLINES.blindReview))
 
-    const updateSync = () => {
-      setSyncStatus(StorageService.getSyncStatus().status)
-    }
-    updateSync()
-
     const handleOpenCalendar = () => setIsCalendarOpen(true)
-    window.addEventListener('workspace-sync-status', updateSync)
-    window.addEventListener('workspace-data-updated', updateSync)
     window.addEventListener('workspace-open-calendar', handleOpenCalendar)
     return () => {
-      window.removeEventListener('workspace-sync-status', updateSync)
-      window.removeEventListener('workspace-data-updated', updateSync)
       window.removeEventListener('workspace-open-calendar', handleOpenCalendar)
     }
   }, [])
@@ -110,26 +97,6 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
 
         {/* 右侧：双核心倒计时胶囊与白色高亮速记按钮 */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          {/* 云端连接状态胶囊 */}
-          <button
-            onClick={() => setIsConfigModalOpen(true)}
-            title="点击查看/配置云端数据库"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-xs text-zinc-400 hover:text-white transition-colors"
-          >
-            <span
-              className={cn(
-                'w-1.5 h-1.5 rounded-full',
-                syncStatus === 'synced' && 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]',
-                syncStatus === 'syncing' && 'bg-white animate-ping',
-                syncStatus === 'error' && 'bg-rose-400',
-                syncStatus === 'unconfigured' && 'bg-zinc-500'
-              )}
-            />
-            <span className="hidden sm:inline font-mono text-xs">
-              {syncStatus === 'synced' ? 'Supabase' : syncStatus === 'syncing' ? '同步中' : '云端同步'}
-            </span>
-          </button>
-
           {/* 秋招冲刺倒计时胶囊 */}
           <div className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300">
             <Clock className="w-3.5 h-3.5 text-zinc-400" />
@@ -201,15 +168,6 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           </div>
         </div>
       </header>
-
-      {/* 云端配置弹窗 */}
-      <CloudConfigModal
-        isOpen={isConfigModalOpen}
-        onClose={() => {
-          setIsConfigModalOpen(false)
-          setSyncStatus(StorageService.getSyncStatus().status)
-        }}
-      />
 
       {/* 交互式日历弹窗 */}
       <CalendarModal

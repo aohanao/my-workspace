@@ -22,7 +22,6 @@ import {
   INITIAL_MILESTONES,
   INITIAL_LEETCODE,
   INITIAL_FLASHCARDS,
-  INITIAL_TOP3,
   INITIAL_HABITS,
   INITIAL_NOTES,
   INITIAL_TIMEBLOCKS,
@@ -286,12 +285,30 @@ export const StorageService = {
 
   // 生活与日常待办事项 (支持每日独立刷新与历史按天归档)
   getAllTop3: (): DailyTop3Item[] => {
-    const list = getItem<DailyTop3Item[]>(STORAGE_KEYS.TOP3, INITIAL_TOP3)
-    return list.map((item) => ({
-      ...item,
-      // 向下兼容：若已有旧数据缺少 date，自动归档在昨天，保证今天为全新待办列表
-      date: item.date || '2026-09-26',
-    }))
+    const list = getItem<DailyTop3Item[]>(STORAGE_KEYS.TOP3, [])
+    const todayStr = getLocalDateKey()
+    const fallbackDate = todayStr === '2026-09-26' ? '2026-09-25' : '2026-09-26'
+
+    return list
+      .filter((item) => {
+        // 清理老旧版本硬编码注入的系统 mock 占位符，保持今日与历史记录绝对真实与纯净
+        if (!item.date && (item.id === 'top-1' || item.id === 'top-2' || item.id === 'top-3')) {
+          if (
+            item.text.includes('晚上投递简历') ||
+            item.text.includes('梳理地质参数') ||
+            item.text.includes('整理实习项目细节') ||
+            item.text.includes('力扣刷题')
+          ) {
+            return false
+          }
+        }
+        return true
+      })
+      .map((item) => ({
+        ...item,
+        // 向下兼容用户自定义历史：自动归档在过去历史日，保证今天严格为全新空白
+        date: item.date || fallbackDate,
+      }))
   },
 
   // 获取指定日期的待办列表（默认返回今天的待办）

@@ -69,7 +69,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
 
     const all = StorageService.getAllTop3()
     setAllTasks(all)
-    const dateTasks = all.filter((t) => (t.date || '2026-09-26') === dateStr)
+    const dateTasks = all.filter((t) => t.date === dateStr)
     setTasks(dateTasks)
   }
 
@@ -278,7 +278,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 const isToday = item.dateStr === todayStr
                 const isSelected = item.dateStr === selectedDate
                 const hasMoodLog = energyLogs.some((l) => l.date === item.dateStr)
-                const dayTasks = allTasks.filter((t) => (t.date || '2026-09-26') === item.dateStr)
+                const dayTasks = allTasks.filter((t) => t.date === item.dateStr)
                 const hasTasks = dayTasks.length > 0
                 const allTasksDone = hasTasks && dayTasks.every((t) => t.done)
 
