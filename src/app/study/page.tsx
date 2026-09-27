@@ -228,9 +228,9 @@ export default function StudyPage() {
       {/* 头部标题与 Tab 切换 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
-              <Brain className="w-5 h-5" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
+              <Brain className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span>知识与算法复盘中心</span>
           </h1>

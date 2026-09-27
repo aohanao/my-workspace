@@ -130,7 +130,7 @@ export default function CareerPage() {
       {/* 头部标题与操作区 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
             <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <Briefcase className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
@@ -145,18 +145,18 @@ export default function CareerPage() {
           {/* 大屏跳转 */}
           <Link
             href="/career/analytics"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white text-xs sm:text-sm font-medium border border-white/[0.08] transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white text-xs font-medium border border-white/[0.08] transition-all"
           >
-            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
             <span>量化大屏</span>
           </Link>
 
           {/* 飞书导入 */}
           <button
             onClick={() => setIsImporterOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs sm:text-sm font-medium border border-white/[0.08] transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs font-medium border border-white/[0.08] transition-colors"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>导入飞书</span>
           </button>
 
@@ -169,10 +169,10 @@ export default function CareerPage() {
                   setJobs([])
                 }
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs sm:text-sm font-medium border border-white/[0.08] transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
               title="一键清空所有投递记录"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
               <span>清空记录</span>
             </button>
           )}
@@ -180,119 +180,119 @@ export default function CareerPage() {
           {/* 新增投递 */}
           <button
             onClick={handleCreateNew}
-            className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full linear-btn-primary text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full linear-btn-primary text-xs font-semibold shadow-md shadow-blue-500/20"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>添加投递</span>
           </button>
         </div>
       </div>
 
       {/* 核心数据概览 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
         {/* 实际已投递企业 */}
-        <div className="p-4 sm:p-5 rounded-2xl linear-card flex items-center justify-between">
+        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <p className="text-xs sm:text-sm text-zinc-300 font-medium">实际已投递</p>
-              <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 font-mono">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs text-zinc-300 font-medium">实际已投递</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 font-mono">
                 已投
               </span>
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1 sm:mt-1.5">
-              <h3 className="text-2xl sm:text-3xl font-bold font-mono text-white">{appliedCount}</h3>
-              <span className="text-xs sm:text-sm text-zinc-400">家</span>
+            <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-white">{appliedCount}</h3>
+              <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
               储备待投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家 (共{totalCount}家)
             </p>
           </div>
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
-            <Layers className="w-5 h-5" />
+          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
+            <Layers className="w-4 h-4" />
           </div>
         </div>
 
         {/* 面试推进中流程 */}
-        <div className="p-4 sm:p-5 rounded-2xl linear-card flex items-center justify-between">
+        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium">面试推进中</p>
-            <div className="flex items-baseline gap-1.5 mt-1 sm:mt-1.5">
-              <h3 className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">{interviewCount}</h3>
-              <span className="text-xs sm:text-sm text-zinc-400">家</span>
+            <p className="text-xs text-zinc-300 font-medium">面试推进中</p>
+            <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-amber-400">{interviewCount}</h3>
+              <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
               待初筛/笔试 {screeningCount + assessmentCount} · 已挂 {rejectedCount}
             </p>
           </div>
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
-            <TrendingUp className="w-5 h-5" />
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
+            <TrendingUp className="w-4 h-4" />
           </div>
         </div>
 
         {/* 已获 Offer */}
-        <div className="p-4 sm:p-5 rounded-2xl linear-card flex items-center justify-between">
+        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium">已获 Offer</p>
-            <div className="flex items-baseline gap-1.5 mt-1 sm:mt-1.5">
-              <h3 className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">{offerCount}</h3>
-              <span className="text-xs sm:text-sm text-zinc-400">家</span>
+            <p className="text-xs text-zinc-300 font-medium">已获 Offer</p>
+            <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-emerald-400">{offerCount}</h3>
+              <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
               录用率 {appliedCount > 0 ? Math.round((offerCount / appliedCount) * 100) : 0}% · 终止 {rejectedCount}家
             </p>
           </div>
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
-            <Award className="w-5 h-5" />
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+            <Award className="w-4 h-4" />
           </div>
         </div>
 
         {/* 技术一面转化率 (点击弹窗查看各阶段详情) */}
         <div
           onClick={() => setIsConversionModalOpen(true)}
-          className="p-4 sm:p-5 rounded-2xl linear-card flex items-center justify-between cursor-pointer hover:border-indigo-500/40 hover:bg-white/[0.04] transition-all group relative overflow-hidden"
+          className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between cursor-pointer hover:border-indigo-500/40 hover:bg-white/[0.04] transition-all group relative overflow-hidden"
           title="点击弹窗查看一面、二面、三面、终面各阶段转化率与企业清单"
         >
           <div>
             <div className="flex items-center gap-1.5">
-              <p className="text-xs sm:text-sm text-zinc-300 font-medium">技术一面转化率</p>
-              <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-semibold flex items-center gap-1">
+              <p className="text-xs text-zinc-300 font-medium">技术一面转化率</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-semibold flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                各阶段明细
+                明细
               </span>
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1 sm:mt-1.5">
-              <h3 className="text-2xl sm:text-3xl font-bold font-mono text-indigo-400">{rate1}%</h3>
-              <span className="text-xs sm:text-sm text-zinc-400">({round1Jobs.length}家)</span>
+            <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-indigo-400">{rate1}%</h3>
+              <span className="text-xs text-zinc-400">({round1Jobs.length}家)</span>
             </div>
             <p className="text-xs text-indigo-300 mt-1 sm:mt-1.5 flex items-center gap-1 group-hover:text-indigo-200 transition-colors">
-              <span>点击查看各阶段漏斗转化 ↗</span>
+              <span>点击查看各阶段漏斗 ↗</span>
             </p>
           </div>
-          <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
-            <TrendingUp className="w-5 h-5" />
+          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
+            <TrendingUp className="w-4 h-4" />
           </div>
         </div>
       </div>
 
       {/* 投递全景流转与总数严格核验条 */}
-      <div className="px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <span className="text-zinc-300 font-medium flex items-center gap-2">
+      <div className="px-3.5 py-2.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-zinc-300 font-medium flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-400" />
-            全库求职总览 (共 <span className="font-mono font-bold text-white text-sm sm:text-base">{totalCount}</span> 家) =
+            全库求职总览 (共 <span className="font-mono font-bold text-white">{totalCount}</span> 家) =
           </span>
           <span className="text-zinc-200 font-medium">
-            实际已投递 <span className="font-mono font-bold text-blue-400 text-sm sm:text-base">{appliedCount}</span> 家
-            <span className="text-zinc-400 ml-1.5">
-              [待初筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试测评 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试中 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂/终止 <span className="font-mono">{rejectedCount}</span></span>]
+            实际已投递 <span className="font-mono font-bold text-blue-400">{appliedCount}</span> 家
+            <span className="text-zinc-400 ml-1">
+              [待初筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试中 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 <span className="font-mono">{rejectedCount}</span></span>]
             </span>
           </span>
           <span className="text-zinc-600 font-bold">＋</span>
           <span className="text-zinc-400">
-            储备待投 <span className="font-mono font-semibold text-amber-400 text-sm sm:text-base">{notAppliedCount}</span> 家
+            储备待投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家
           </span>
         </div>
-        <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20 font-semibold">
+        <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/20 font-semibold">
           总数核验 100% 对齐 ✓
         </div>
       </div>

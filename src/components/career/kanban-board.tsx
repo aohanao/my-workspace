@@ -79,39 +79,39 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
   return (
     <div className="space-y-3 select-none">
       {/* 看板全景数据核验与快速筛选横条 */}
-      <div className="p-3 sm:p-3.5 rounded-2xl bg-[#0d121f] border border-white/[0.08] shadow-sm space-y-2.5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 text-xs">
+      <div className="p-2.5 sm:p-3 rounded-2xl bg-[#0d121f] border border-white/[0.08] shadow-sm space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 text-xs">
           {/* 左侧总数核验公式 */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
             <span className="font-semibold text-white flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
               看板总数：
-              <span className="font-mono text-blue-400 font-bold text-sm sm:text-base">{totalJobs}</span>
-              <span className="text-zinc-400 text-xs sm:text-sm">家</span>
+              <span className="font-mono text-blue-400 font-bold text-xs sm:text-sm">{totalJobs}</span>
+              <span className="text-zinc-400 text-xs">家</span>
             </span>
             <span className="text-zinc-600">=</span>
-            <span className="text-zinc-200 font-medium text-xs sm:text-sm">
-              实际已投 <span className="font-mono font-bold text-white text-sm sm:text-base">{appliedCount}</span> 家
+            <span className="text-zinc-200 font-medium text-xs">
+              实际已投 <span className="font-mono font-bold text-white text-xs sm:text-sm">{appliedCount}</span> 家
             </span>
-            <span className="text-zinc-400 text-xs sm:text-sm">
-              (待筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试推进 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 {rejectedCount}</span>)
+            <span className="text-zinc-400 text-xs">
+              (待筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 {rejectedCount}</span>)
             </span>
             <span className="text-zinc-600">+</span>
-            <span className="text-zinc-400 text-xs sm:text-sm">
-              意向储备 <span className="font-mono font-semibold text-amber-400 text-sm sm:text-base">{wishlistCount}</span> 家
+            <span className="text-zinc-400 text-xs">
+              意向储备 <span className="font-mono font-semibold text-amber-400 text-xs sm:text-sm">{wishlistCount}</span> 家
             </span>
           </div>
 
           {/* 右侧快速泳道筛选标签 */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs sm:text-sm text-zinc-400 mr-1 hidden sm:inline flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="text-xs text-zinc-400 mr-1 hidden sm:inline flex items-center gap-1">
+              <Filter className="w-3 h-3" />
               泳道视图:
             </span>
             <button
               type="button"
               onClick={() => setFilterMode('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 filterMode === 'all'
                   ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -122,7 +122,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('applied_only')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 filterMode === 'applied_only'
                   ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -133,7 +133,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('rejected_only')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 filterMode === 'rejected_only'
                   ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10'
@@ -144,7 +144,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             <button
               type="button"
               onClick={() => setFilterMode('wishlist_only')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 filterMode === 'wishlist_only'
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -157,7 +157,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
       </div>
 
       {/* 看板泳道水平滚动区 */}
-      <div className="flex gap-4 overflow-x-auto pb-4 pt-1 select-none min-h-[calc(100vh-280px)]">
+      <div className="flex gap-3.5 overflow-x-auto pb-4 pt-1 select-none min-h-[calc(100vh-280px)]">
         {visibleColumns.map((col) => {
           const colJobs = normalizedJobs.filter((j) => j.status === col.id)
           const isRejectedCol = col.id === 'rejected'
@@ -171,14 +171,14 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
             >
               {/* 列头 */}
               <div
-                className={`px-4 py-3.5 border-b border-white/[0.06] flex items-center justify-between ${
+                className={`px-3.5 py-3 border-b border-white/[0.06] flex items-center justify-between ${
                   col.headerBg || 'bg-white/[0.02]'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
+                  <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
                   <h4
-                    className={`font-bold text-sm sm:text-base tracking-tight ${
+                    className={`font-bold text-xs sm:text-sm tracking-tight ${
                       isRejectedCol ? 'text-rose-300' : 'text-white'
                     }`}
                   >
@@ -187,7 +187,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span
-                    className={`text-xs sm:text-sm font-mono font-bold px-2.5 py-0.5 rounded-full ${
+                    className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
                       isRejectedCol
                         ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                         : 'bg-white/[0.06] text-zinc-200'
@@ -199,7 +199,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
               </div>
 
               {/* 卡片列表 */}
-              <div className="p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)]">
+              <div className="p-2.5 space-y-2.5 flex-1 overflow-y-auto max-h-[calc(100vh-340px)]">
                 {colJobs.map((job) => {
                   const latestInterview = job.interviews?.[job.interviews.length - 1]
                   const columnIndex = COLUMNS.findIndex((item) => item.id === col.id)
@@ -210,7 +210,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                     <div
                       key={job.id}
                       onClick={() => onSelectJob(job)}
-                      className={`p-4 rounded-xl cursor-pointer group relative overflow-hidden space-y-3 transition-all border ${
+                      className={`p-3 rounded-xl cursor-pointer group relative overflow-hidden space-y-2.5 transition-all border ${
                         isRejectedCol
                           ? 'bg-[#181116]/80 border-rose-500/25 hover:border-rose-500/50'
                           : 'linear-card hover:border-blue-500/40'
@@ -220,7 +220,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <h5
-                            className={`font-bold text-base transition-colors truncate ${
+                            className={`font-bold text-sm transition-colors truncate ${
                               isRejectedCol
                                 ? 'text-zinc-200 group-hover:text-rose-300'
                                 : 'text-white group-hover:text-blue-400'
@@ -229,23 +229,23 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                           >
                             {job.company}
                           </h5>
-                          <p className="text-xs sm:text-sm text-zinc-300 truncate mt-1" title={job.role}>
+                          <p className="text-xs text-zinc-400 truncate mt-0.5" title={job.role}>
                             {job.role}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           {(() => {
                             const tags = getJobDisplayTags(job)
                             if (tags.length === 0) return null
                             return (
-                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${tags[0].color}`}>
+                              <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium border whitespace-nowrap ${tags[0].color}`}>
                                 {tags[0].text}
                               </span>
                             )
                           })()}
                           {job.priority && (
                             <span
-                              className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${
+                              className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium border whitespace-nowrap ${
                                 job.priority === '高'
                                   ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                                   : job.priority === '中'
@@ -263,13 +263,13 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       <div className="flex items-center gap-3 text-xs text-zinc-300">
                         {job.location && (
                           <span className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                            <MapPin className="w-3 h-3 text-zinc-400" />
                             {job.location}
                           </span>
                         )}
                         {job.salary && (
                           <span className="flex items-center gap-1 font-mono text-emerald-400 font-semibold truncate">
-                            <DollarSign className="w-3.5 h-3.5" />
+                            <DollarSign className="w-3 h-3" />
                             {job.salary}
                           </span>
                         )}
@@ -278,7 +278,7 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                       {/* 面试/复盘提示 */}
                       {latestInterview && (
                         <div
-                          className={`p-2.5 rounded-lg border text-xs sm:text-sm ${
+                          className={`p-2 rounded-lg border text-xs ${
                             isRejectedCol
                               ? 'bg-rose-500/[0.08] border-rose-500/20 text-rose-200'
                               : 'bg-white/[0.04] border-white/[0.08] text-zinc-200'

@@ -214,19 +214,22 @@ export default function LifePage() {
       {/* 头部标题 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5 tracking-tight">
-            <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
-              <Smile className="w-5 h-5" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
+              <Smile className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span>生活管理</span>
           </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1.5">
+            生活作息规划 · 习惯打卡矩阵 · 每日能量与灵感记录
+          </p>
         </div>
 
         <button
           onClick={() => setIsAddHabitOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 linear-btn-primary text-xs sm:text-sm font-semibold shrink-0 self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full linear-btn-primary text-xs sm:text-sm font-semibold shrink-0 self-start sm:self-auto shadow-md"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>新增打卡项目</span>
         </button>
       </div>
@@ -234,35 +237,35 @@ export default function LifePage() {
       {/* 1. 周计划时间块结构 (Time-Blocking) —— 支持全方位自定义修改 */}
       <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 tracking-tight">
-            <Clock className="w-4 h-4 text-zinc-300" />
+          <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2.5 tracking-tight">
+            <Clock className="w-5 h-5 text-zinc-300" />
             结构化作息时间块 (Time-Blocking)
           </h3>
-          <span className="text-xs text-zinc-400">点击各时段卡片可编辑活动安排</span>
+          <span className="text-xs sm:text-sm text-zinc-400">点击各时段卡片可编辑活动安排</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {timeBlocks.map((block) => (
             <div
               key={block.id}
               onClick={() => setEditingTimeBlock(block)}
-              className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/20 transition-all cursor-pointer"
+              className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/20 transition-all cursor-pointer"
               title="点击编辑此时段规划"
             >
               <div>
                 <div className="flex items-center justify-between font-bold mb-1.5">
-                  <span className="text-white group-hover:text-zinc-200 transition-colors">{block.periodLabel}</span>
-                  <span className="text-xs font-mono text-zinc-400">{block.timeRange}</span>
+                  <span className="text-base font-bold text-white group-hover:text-zinc-200 transition-colors">{block.periodLabel}</span>
+                  <span className="text-xs sm:text-sm font-mono text-zinc-400">{block.timeRange}</span>
                 </div>
-                <p className="text-xs text-zinc-400 mb-2">{block.title}</p>
+                <p className="text-xs sm:text-sm text-zinc-400 mb-3">{block.title}</p>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {block.tasks.map((task, tIdx) => (
-                    <div key={tIdx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-1">
-                      <div className="flex justify-between text-[11px] text-zinc-400 font-mono font-medium">
+                    <div key={tIdx} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-1">
+                      <div className="flex justify-between text-xs text-zinc-400 font-mono font-medium">
                         <span>{task.time}</span>
                       </div>
-                      <div className="text-xs sm:text-sm text-zinc-200 leading-snug">
+                      <div className="text-sm text-zinc-200 leading-relaxed font-normal">
                         {task.activity}
                       </div>
                     </div>
@@ -278,36 +281,36 @@ export default function LifePage() {
       <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
           <div>
-            <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
-              <Flame className="w-4 h-4 text-zinc-300" />
+            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2.5 tracking-tight">
+              <Flame className="w-5 h-5 text-amber-400" />
               日常任务打卡矩阵 (Habit Matrix)
             </h3>
           </div>
-          <span className="text-xs font-mono text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
+          <span className="text-xs sm:text-sm font-mono text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
             共 {habits.length} 项习惯
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[700px]">
+          <table className="w-full text-left text-sm border-collapse min-w-[700px]">
             <thead className="bg-[#0c101b] text-zinc-300 border-b border-cyan-500/20 font-semibold">
               <tr>
-                <th className="p-3.5 pl-4 w-32">分类</th>
-                <th className="p-3.5 w-60">项目清单</th>
+                <th className="p-3.5 pl-4 w-32 text-xs sm:text-sm font-semibold text-zinc-300">分类</th>
+                <th className="p-3.5 w-60 text-xs sm:text-sm font-semibold text-zinc-300">项目清单</th>
                 {past7Days.map((d) => (
                   <th key={d.dateStr} className="p-3 text-center w-16">
-                    <div className="text-[11px] text-zinc-400">{d.weekday}</div>
-                    <div className="font-mono text-zinc-200 font-bold">{d.shortDate}</div>
+                    <div className="text-xs text-zinc-400">{d.weekday}</div>
+                    <div className="font-mono text-zinc-200 font-bold text-xs sm:text-sm">{d.shortDate}</div>
                   </th>
                 ))}
-                <th className="p-3 text-right pr-4 w-16">操作</th>
+                <th className="p-3 text-right pr-4 w-16 text-xs sm:text-sm font-semibold text-zinc-300">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {habits.map((habit) => (
                 <tr key={habit.id} className="hover:bg-white/[0.02] transition-colors group">
                   <td className="p-3.5 pl-4 whitespace-nowrap">
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-white/[0.04] text-zinc-300 border border-white/[0.08]">
+                    <span className="text-xs font-medium px-3 py-1 rounded-full bg-white/[0.05] text-zinc-300 border border-white/[0.08]">
                       {habit.category || '常规'}
                     </span>
                   </td>
@@ -318,7 +321,7 @@ export default function LifePage() {
                       title="点击修改此习惯名称与分类"
                     >
                       <span className="w-2.5 h-2.5 rounded-full shadow-[0_0_6px_currentColor] shrink-0" style={{ backgroundColor: habit.color, color: habit.color }} />
-                      <span className="text-xs sm:text-sm text-zinc-200 group-hover/name:text-white group-hover/name:underline underline-offset-4 transition-colors">
+                      <span className="text-sm sm:text-base font-semibold text-zinc-100 group-hover/name:text-cyan-300 group-hover/name:underline underline-offset-4 transition-colors">
                         {habit.name}
                       </span>
                     </div>
@@ -331,7 +334,7 @@ export default function LifePage() {
                       <td key={d.dateStr} className="p-3 text-center">
                         <button
                           onClick={() => handleToggleHabit(habit.id, d.dateStr)}
-                          className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all mx-auto ${
+                          className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto ${
                             isChecked
                               ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30 scale-105'
                               : isToday
@@ -339,7 +342,7 @@ export default function LifePage() {
                               : 'bg-transparent border-white/[0.08] text-transparent hover:border-white/20'
                           }`}
                         >
-                          {isChecked ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-xs">•</span>}
+                          {isChecked ? <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" /> : <span className="text-xs text-zinc-500">•</span>}
                         </button>
                       </td>
                     )
@@ -347,10 +350,10 @@ export default function LifePage() {
                   <td className="p-3.5 pr-4 text-right whitespace-nowrap">
                     <button
                       onClick={() => handleDeleteHabit(habit.id)}
-                      className="p-1 rounded text-zinc-500 hover:text-rose-400 transition-colors"
+                      className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                       title="删除习惯"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
@@ -365,18 +368,18 @@ export default function LifePage() {
         {/* 今日精力与状态日志 */}
         <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
-              <BatteryCharging className="w-4 h-4 text-cyan-400" />
+            <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2.5 tracking-tight">
+              <BatteryCharging className="w-5 h-5 text-cyan-400" />
               今日能量与状态自评
             </h3>
-            <span className="text-xs font-mono text-cyan-400">{today}</span>
+            <span className="text-xs sm:text-sm font-mono text-cyan-400">{today}</span>
           </div>
 
-          <div className="space-y-4 text-xs sm:text-sm">
+          <div className="space-y-4">
             <div>
-              <div className="flex justify-between mb-1.5 text-zinc-300">
+              <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>⚡ 专注精力等级:</span>
-                <span className="font-mono font-bold text-cyan-400">{energy} / 5</span>
+                <span className="font-mono font-bold text-base text-cyan-400">{energy} / 5</span>
               </div>
               <input
                 type="range"
@@ -388,14 +391,14 @@ export default function LifePage() {
                   setEnergy(val)
                   saveWellbeing({ energy: val })
                 }}
-                className="w-full accent-cyan-500 cursor-pointer"
+                className="w-full accent-cyan-500 cursor-pointer h-2 bg-black/40 rounded-lg"
               />
             </div>
 
             <div>
-              <div className="flex justify-between mb-1.5 text-zinc-300">
+              <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>😊 心情状态指数:</span>
-                <span className="font-mono font-bold text-blue-400">{mood} / 5</span>
+                <span className="font-mono font-bold text-base text-blue-400">{mood} / 5</span>
               </div>
               <input
                 type="range"
@@ -407,12 +410,12 @@ export default function LifePage() {
                   setMood(val)
                   saveWellbeing({ mood: val })
                 }}
-                className="w-full accent-blue-500 cursor-pointer"
+                className="w-full accent-blue-500 cursor-pointer h-2 bg-black/40 rounded-lg"
               />
             </div>
 
             <div>
-              <label className="text-zinc-300 block mb-1.5 font-medium">📝 今日心得与复盘笔记：</label>
+              <label className="text-sm font-medium text-zinc-200 block mb-1.5">📝 今日心得与复盘笔记：</label>
               <textarea
                 rows={3}
                 value={dailyJournal}
@@ -421,7 +424,7 @@ export default function LifePage() {
                   saveWellbeing({ journal: e.target.value })
                 }}
                 placeholder="记录今日学习心得、面试感受、算法感悟..."
-                className="w-full p-3 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500 resize-none text-xs sm:text-sm leading-relaxed"
+                className="w-full p-3.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500 resize-none text-sm leading-relaxed"
               />
             </div>
           </div>
@@ -431,8 +434,8 @@ export default function LifePage() {
         <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
-                <ListTodo className="w-4 h-4 text-purple-400" />
+              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2.5 tracking-tight">
+                <ListTodo className="w-5 h-5 text-purple-400" />
                 灵感速记箱 ({notes.length})
               </h3>
               <span className="text-xs text-zinc-400">可自由编辑 / 转入今日Top3</span>
@@ -445,11 +448,11 @@ export default function LifePage() {
                 value={newNoteContent}
                 onChange={(e) => setNewNoteContent(e.target.value)}
                 placeholder="快速记录一条灵感或即时备忘..."
-                className="flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500"
+                className="flex-1 px-4 py-2.5 text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500"
               />
               <button
                 type="submit"
-                className="px-4 py-2 linear-btn-primary text-xs sm:text-sm font-medium rounded-xl shrink-0"
+                className="px-4 py-2.5 linear-btn-primary text-xs sm:text-sm font-semibold rounded-xl shrink-0"
               >
                 保存
               </button>
@@ -459,15 +462,15 @@ export default function LifePage() {
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="p-3 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 text-xs sm:text-sm group hover:border-cyan-500/30 transition-colors"
+                  className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 text-sm group hover:border-cyan-500/30 transition-colors"
                 >
                   <p className="text-zinc-200 leading-relaxed break-words">{note.content}</p>
-                  <div className="flex items-center justify-between pt-1 text-[11px] text-zinc-400">
+                  <div className="flex items-center justify-between pt-1 text-xs text-zinc-400">
                     <span className="font-mono">{note.createdAt}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <button
                         onClick={() => handleConvertNoteToTask(note)}
-                        className="text-cyan-400 hover:text-cyan-300 hover:underline"
+                        className="text-cyan-400 hover:text-cyan-300 font-medium hover:underline"
                       >
                         转为今日待办 ➔
                       </button>

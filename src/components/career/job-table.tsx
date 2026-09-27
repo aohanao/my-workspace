@@ -311,12 +311,12 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
           ref={scrollContainerRef}
           className="flex-1 overflow-x-auto overflow-y-auto relative divide-y divide-white/[0.05]"
         >
-          <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[1180px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[1100px]">
             {/* 表头固定在二级窗口顶部 */}
             <thead className="sticky top-0 z-20 bg-[#090d18]/95 backdrop-blur-md text-zinc-300 border-b border-cyan-500/20 font-semibold shadow-sm">
               <tr>
                 {/* 勾选列 */}
-                <th className="p-3.5 pl-4 sticky left-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] w-10 text-center">
+                <th className="py-2.5 px-3 pl-3.5 sticky left-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] w-10 text-center">
                   <input
                     type="checkbox"
                     checked={filtered.length > 0 && selectedIds.size === filtered.length}
@@ -325,25 +325,25 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     title="全选/取消全选"
                   />
                 </th>
-                <th className="p-3.5 sticky left-10 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[160px]">
+                <th className="py-2.5 px-3 sticky left-10 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[150px]">
                   投递公司
                 </th>
-                <th className="p-3.5 min-w-[110px]">
+                <th className="py-2.5 px-3 min-w-[105px]">
                   <div className="flex items-center gap-1">
                     <span>投递状态</span>
                     <Sparkles className="w-3 h-3 text-cyan-400" />
                   </div>
                 </th>
-                <th className="p-3.5 min-w-[80px]">优先级</th>
-                <th className="p-3.5 min-w-[110px]">投递日期</th>
-                <th className="p-3.5 min-w-[120px]">类型与岗位</th>
-                <th className="p-3.5 min-w-[90px]">Base地</th>
-                <th className="p-3.5 min-w-[200px]">职位名称</th>
-                <th className="p-3.5 min-w-[120px]">所属行业</th>
-                <th className="p-3.5 min-w-[80px]">官网</th>
-                <th className="p-3.5 min-w-[120px]">当前进展</th>
-                <th className="p-3.5 min-w-[220px]">复盘与备注</th>
-                <th className="p-3.5 pr-4 text-right min-w-[90px] sticky right-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[-2px_0_8px_rgba(0,0,0,0.5)]">
+                <th className="py-2.5 px-3 min-w-[75px]">优先级</th>
+                <th className="py-2.5 px-3 min-w-[100px]">投递日期</th>
+                <th className="py-2.5 px-3 min-w-[110px]">类型与岗位</th>
+                <th className="py-2.5 px-3 min-w-[85px]">Base地</th>
+                <th className="py-2.5 px-3 min-w-[180px]">职位名称</th>
+                <th className="py-2.5 px-3 min-w-[110px]">所属行业</th>
+                <th className="py-2.5 px-3 min-w-[75px]">官网</th>
+                <th className="py-2.5 px-3 min-w-[110px]">当前进展</th>
+                <th className="py-2.5 px-3 min-w-[200px]">复盘与备注</th>
+                <th className="py-2.5 px-3 pr-3.5 text-right min-w-[80px] sticky right-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[-2px_0_8px_rgba(0,0,0,0.5)]">
                   操作
                 </th>
               </tr>
@@ -364,7 +364,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                   >
                     {/* 勾选框 */}
                     <td
-                      className="p-3.5 pl-4 sticky left-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] text-center"
+                      className="py-2 px-3 pl-3.5 sticky left-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] text-center"
                       onClick={(e) => handleToggleSelectRow(job.id, e)}
                     >
                       <input
@@ -376,8 +376,8 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 投递公司 (左侧固定微粘滞) */}
-                    <td className="p-3.5 sticky left-10 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] font-bold text-white text-sm sm:text-base whitespace-nowrap">
-                      <div className="flex items-center gap-2">
+                    <td className="py-2 px-3 sticky left-10 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] font-semibold text-white text-xs sm:text-sm whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
                         <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-cyan-400' : 'bg-amber-400'} group-hover:scale-125 transition-transform`} />
                         <span>{job.company}</span>
                       </div>
@@ -385,13 +385,13 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
 
                     {/* 投递状态 (交互式徽章，点击直接一键切换) */}
                     <td
-                      className="p-3.5 whitespace-nowrap"
+                      className="py-2 px-3 whitespace-nowrap"
                       onClick={(e) => handleToggleApplyStatus(job, e)}
                     >
                       <button
                         type="button"
                         title="点击直接切换状态：已投递 ⇄ 未投递"
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all hover:scale-105 active:scale-95 ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all hover:scale-105 active:scale-95 ${
                           applied
                             ? 'bg-blue-500/15 text-blue-300 border-blue-500/30 hover:bg-blue-500/25'
                             : 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
@@ -404,9 +404,9 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 优先级 */}
-                    <td className="p-3.5 whitespace-nowrap">
+                    <td className="py-2 px-3 whitespace-nowrap">
                       {job.priority ? (
-                        <span className={`text-xs px-2.5 py-0.5 rounded-md font-semibold border ${
+                        <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border ${
                           job.priority === '高'
                             ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
                             : job.priority === '中'
@@ -421,40 +421,40 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 投递日期 */}
-                    <td className="p-3.5 font-mono text-zinc-300 text-xs sm:text-sm whitespace-nowrap">
+                    <td className="py-2 px-3 font-mono text-zinc-300 text-xs whitespace-nowrap">
                       {job.applyDate}
                     </td>
 
                     {/* 类型与岗位 */}
-                    <td className="p-3.5 text-zinc-300 text-xs sm:text-sm whitespace-nowrap">
+                    <td className="py-2 px-3 text-zinc-300 text-xs whitespace-nowrap">
                       {job.category || '-'}
                     </td>
 
                     {/* base地 */}
-                    <td className="p-3.5 text-zinc-200 text-xs sm:text-sm whitespace-nowrap">
+                    <td className="py-2 px-3 text-zinc-200 text-xs whitespace-nowrap">
                       {job.location || '-'}
                     </td>
 
                     {/* 职位 */}
-                    <td className="p-3.5 font-bold text-white text-sm sm:text-base max-w-[240px] truncate" title={job.role}>
+                    <td className="py-2 px-3 font-medium text-zinc-100 text-xs max-w-[200px] truncate" title={job.role}>
                       {job.role}
                     </td>
 
                     {/* 行业 */}
-                    <td className="p-3.5 text-zinc-300 text-xs sm:text-sm max-w-[150px] truncate" title={job.industry}>
+                    <td className="py-2 px-3 text-zinc-300 text-xs max-w-[140px] truncate" title={job.industry}>
                       {job.industry || '-'}
                     </td>
 
                     {/* 官网 */}
-                    <td className="p-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-2 px-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       {job.jobUrl ? (
                         <a
                           href={job.jobUrl.startsWith('http') ? job.jobUrl : `https://${job.jobUrl}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
                         >
-                          <Globe className="w-4 h-4" />
+                          <Globe className="w-3.5 h-3.5" />
                           <span>投递官网</span>
                         </a>
                       ) : (
@@ -463,15 +463,15 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 状态 / 进展 */}
-                    <td className="p-3.5 whitespace-nowrap">
+                    <td className="py-2 px-3 whitespace-nowrap">
                       {(() => {
                         const tags = getJobDisplayTags(job)
                         return (
-                          <div className="flex flex-wrap items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1">
                             {tags.map((tag, tIdx) => (
                               <span
                                 key={tIdx}
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold border ${tag.color}`}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${tag.color}`}
                               >
                                 {tag.text}
                               </span>
@@ -482,22 +482,22 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                     </td>
 
                     {/* 备注 */}
-                    <td className="p-3.5 text-zinc-300 max-w-[260px] truncate text-xs sm:text-sm" title={job.notes}>
+                    <td className="py-2 px-3 text-zinc-300 max-w-[220px] truncate text-xs" title={job.notes}>
                       {job.notes || '-'}
                     </td>
 
                     {/* 操作 (右侧固定微粘滞) */}
                     <td
-                      className="p-3.5 pr-4 text-right whitespace-nowrap sticky right-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[-2px_0_8px_rgba(0,0,0,0.4)]"
+                      className="py-2 px-3 pr-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[-2px_0_8px_rgba(0,0,0,0.4)]"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => onSelectJob(job)}
-                          className="p-1.5 text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.08] rounded-lg transition-colors"
+                          className="p-1 text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.08] rounded-lg transition-colors"
                           title="编辑详情"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         {onDeleteJob && (
                           <button
@@ -506,10 +506,10 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                                 onDeleteJob(job.id)
                               }
                             }}
-                            className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.08] rounded-lg transition-colors"
+                            className="p-1 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.08] rounded-lg transition-colors"
                             title="删除记录"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>

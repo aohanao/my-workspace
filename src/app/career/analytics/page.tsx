@@ -202,7 +202,7 @@ export default function CareerAnalyticsPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
               <div className="p-2 sm:p-2.5 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <BarChart3 className="w-5 sm:w-6 h-5 sm:h-6" />
               </div>
@@ -215,26 +215,26 @@ export default function CareerAnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs sm:text-sm bg-emerald-500/10 text-emerald-400 font-semibold px-3.5 py-1.5 rounded-full flex items-center gap-2 border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="text-xs bg-emerald-500/10 text-emerald-400 font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             数据实时统计
           </span>
         </div>
       </div>
 
       {/* 核心指标统计横幅 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-3.5">
         {/* 实际已投递企业 */}
-        <div className="linear-card p-4 sm:p-5 rounded-2xl">
-          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-400" />
+        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+          <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-blue-400" />
             实际已投递
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
-            <span className="text-3xl sm:text-4xl font-bold font-mono text-white">{totalApplied}</span>
-            <span className="text-xs sm:text-sm text-zinc-400">家</span>
+          <div className="flex items-baseline gap-1 mt-1.5">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-white">{totalApplied}</span>
+            <span className="text-xs text-zinc-400">家</span>
           </div>
-          <p className="text-xs text-zinc-400 mt-2">
+          <p className="text-xs text-zinc-400 mt-1.5">
             储备未投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家 (共{jobs.length}家)
           </p>
         </div>
@@ -242,54 +242,54 @@ export default function CareerAnalyticsPage() {
         {/* 技术一面转化率 (点击弹窗查看多轮面试全景漏斗) */}
         <div
           onClick={() => setIsConversionModalOpen(true)}
-          className="linear-card p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
+          className="linear-card p-3.5 sm:p-4 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
           title="点击弹窗查看一面、二面、三面、终面各阶段全景转化率与企业明细"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-400" />
+            <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
               <span>技术一面转化率</span>
             </p>
-            <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold flex items-center gap-1">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              各阶段明细 ↗
+              明细 ↗
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
-            <span className="text-3xl sm:text-4xl font-bold font-mono text-amber-400">{rate1}%</span>
-            <span className="text-xs sm:text-sm text-zinc-400">({round1Jobs.length}家到达)</span>
+          <div className="flex items-baseline gap-1 mt-1.5">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">{rate1}%</span>
+            <span className="text-xs text-zinc-400">({round1Jobs.length}家)</span>
           </div>
-          <p className="text-xs text-zinc-400 mt-2 group-hover:text-amber-300/90 transition-colors">
-            占已投递 {rate1}% · 点击弹窗查看各阶段转化率
+          <p className="text-xs text-zinc-400 mt-1.5 group-hover:text-amber-300/90 transition-colors">
+            占已投递 {rate1}% · 点击查看转化率
           </p>
         </div>
 
         {/* 斩获 Offer */}
-        <div className="linear-card p-4 sm:p-5 rounded-2xl">
-          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
-            <Award className="w-4 h-4 text-emerald-400" />
+        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+          <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-emerald-400" />
             斩获 Offer
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
-            <span className="text-3xl sm:text-4xl font-bold font-mono text-emerald-400">{offers}</span>
-            <span className="text-xs sm:text-sm text-zinc-400">份</span>
+          <div className="flex items-baseline gap-1 mt-1.5">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">{offers}</span>
+            <span className="text-xs text-zinc-400">份</span>
           </div>
-          <p className="text-xs text-emerald-400 mt-2 font-medium">
+          <p className="text-xs text-emerald-400 mt-1.5 font-medium">
             全投递录用率 {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
           </p>
         </div>
 
         {/* 沉淀考点真题 */}
-        <div className="linear-card p-4 sm:p-5 rounded-2xl">
-          <p className="text-xs sm:text-sm text-zinc-300 font-medium flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
+        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+          <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
             沉淀考点真题
           </p>
-          <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2">
-            <span className="text-3xl sm:text-4xl font-bold font-mono text-indigo-400">{totalQuestionsCount}</span>
-            <span className="text-xs sm:text-sm text-zinc-400">道</span>
+          <div className="flex items-baseline gap-1 mt-1.5">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-indigo-400">{totalQuestionsCount}</span>
+            <span className="text-xs text-zinc-400">道</span>
           </div>
-          <p className="text-xs text-indigo-300 mt-2 font-medium">专属面经复盘考点库</p>
+          <p className="text-xs text-indigo-300 mt-1.5 font-medium">专属面经复盘考点库</p>
         </div>
       </div>
 
