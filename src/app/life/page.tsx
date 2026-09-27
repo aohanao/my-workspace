@@ -237,25 +237,21 @@ export default function LifePage() {
             <Clock className="w-4 h-4 text-zinc-300" />
             结构化作息时间块 (Time-Blocking)
           </h3>
-          <span className="text-xs text-zinc-400">点击各时段右上角图标可随时编辑修改活动安排</span>
+          <span className="text-xs text-zinc-400">点击各时段卡片可编辑活动安排</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
           {timeBlocks.map((block) => (
-            <div key={block.id} className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/[0.14] transition-colors">
+            <div
+              key={block.id}
+              onClick={() => setEditingTimeBlock(block)}
+              className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/20 transition-all cursor-pointer"
+              title="点击编辑此时段规划"
+            >
               <div>
                 <div className="flex items-center justify-between font-bold mb-1.5">
-                  <span className="text-white">{block.periodLabel}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-mono text-zinc-400">{block.timeRange}</span>
-                    <button
-                      onClick={() => setEditingTimeBlock(block)}
-                      className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
-                      title="编辑此时段规划"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  <span className="text-white group-hover:text-zinc-200 transition-colors">{block.periodLabel}</span>
+                  <span className="text-xs font-mono text-zinc-400">{block.timeRange}</span>
                 </div>
                 <p className="text-xs text-zinc-400 mb-2">{block.title}</p>
 

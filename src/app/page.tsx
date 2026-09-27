@@ -19,6 +19,7 @@ import {
   ExternalLink,
   ChevronDown,
   Calendar,
+  X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
@@ -70,7 +71,17 @@ export default function DashboardPage() {
   const [dailyTasks, setDailyTasks] = useState<DailyTop3Item[]>([])
   const [leetcode, setLeetcode] = useState<LeetCodeItem[]>([])
   const [habits, setHabits] = useState<HabitItem[]>([])
+  const [careerDeadline, setCareerDeadline] = useState('2026-11-20')
+  const [thesisDeadline, setThesisDeadline] = useState('2026-12-20')
   
+  // 倒计时修改弹窗状态
+  const [editingDeadline, setEditingDeadline] = useState<{
+    type: 'career' | 'thesis'
+    title: string
+    currentDate: string
+  } | null>(null)
+  const [tempDate, setTempDate] = useState('')
+
   // 待办添加与编辑状态
   const [newTaskText, setNewTaskText] = useState('')
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('重急')
@@ -96,6 +107,8 @@ export default function DashboardPage() {
     setDailyTasks(StorageService.getTop3())
     setLeetcode(StorageService.getLeetCode())
     setHabits(StorageService.getHabits())
+    setCareerDeadline(StorageService.getCareerDeadline())
+    setThesisDeadline(StorageService.getThesisDraftDeadline())
   }
 
   useEffect(() => {
@@ -103,6 +116,38 @@ export default function DashboardPage() {
     window.addEventListener('workspace-data-updated', loadData)
     return () => window.removeEventListener('workspace-data-updated', loadData)
   }, [])
+
+  const handleOpenEditCareer = () => {
+    const current = StorageService.getCareerDeadline()
+    setTempDate(current)
+    setEditingDeadline({
+      type: 'career',
+      title: '调整秋招冲刺目标日期',
+      currentDate: current,
+    })
+  }
+
+  const handleOpenEditThesis = () => {
+    const current = StorageService.getThesisDraftDeadline()
+    setTempDate(current)
+    setEditingDeadline({
+      type: 'thesis',
+      title: '调整论文送审目标日期',
+      currentDate: current,
+    })
+  }
+
+  const handleSaveDeadline = () => {
+    if (!tempDate || !editingDeadline) return
+    if (editingDeadline.type === 'career') {
+      StorageService.saveCareerDeadline(tempDate)
+    } else {
+      StorageService.saveThesisDraftDeadline(tempDate)
+    }
+    loadData()
+    setEditingDeadline(null)
+    window.dispatchEvent(new CustomEvent('workspace-data-updated'))
+  }
 
   const handleToggleTask = (id: string) => {
     const updated = dailyTasks.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
@@ -160,8 +205,8 @@ export default function DashboardPage() {
     StorageService.saveTop3ForDate(getLocalDateKey(), updated)
   }
 
-  const careerCountdown = getDaysLeft(WORKSPACE_DEADLINES.careerSprint)
-  const thesisCountdown = getDaysLeft(thesis?.blindReviewDate || WORKSPACE_DEADLINES.blindReview)
+  const careerCountdown = getDaysLeft(careerDeadline)
+  const thesisCountdown = getDaysLeft(thesisDeadline)
 
   const totalJobs = jobs.length
   const activeInterviews = jobs.filter((j) => ['interview1', 'interview2', 'hr'].includes(j.status))
@@ -205,25 +250,33 @@ export default function DashboardPage() {
           {/* 双核心关键倒计时胶囊 */}
           <div className="grid grid-cols-2 gap-3.5 sm:gap-4 shrink-0 w-full lg:w-auto">
             {/* 秋招倒计时 */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/[0.18] transition-colors sm:min-w-[155px]">
+            <div
+              onClick={handleOpenEditCareer}
+              className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/20 transition-all cursor-pointer sm:min-w-[155px]"
+              title="点击调整秋招冲刺目标日期"
+            >
               <span className="text-xs font-medium text-zinc-400 block mb-1">
                 秋招冲刺截止
               </span>
               <div className="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
                 {careerCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
-              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{WORKSPACE_DEADLINES.careerSprint.replaceAll('-', '.')}</span>
+              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{careerDeadline.replaceAll('-', '.')}</span>
             </div>
 
             {/* 论文初稿完成送审倒计时 */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/[0.18] transition-colors sm:min-w-[155px]">
+            <div
+              onClick={handleOpenEditThesis}
+              className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/20 transition-all cursor-pointer sm:min-w-[155px]"
+              title="点击调整论文送审目标日期"
+            >
               <span className="text-xs font-medium text-zinc-400 block mb-1">
                 初稿完成送审
               </span>
               <div className="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
                 {thesisCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
-              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{(thesis?.blindReviewDate || WORKSPACE_DEADLINES.blindReview).replaceAll('-', '.')}</span>
+              <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{thesisDeadline.replaceAll('-', '.')}</span>
             </div>
           </div>
         </div>
@@ -700,6 +753,57 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* 修改倒计时目标日期轻量模态框 */}
+      {editingDeadline && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-[#0e121a] border border-white/[0.12] rounded-2xl p-5 w-full max-w-sm shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-cyan-400" />
+                <span>{editingDeadline.title}</span>
+              </h3>
+              <button
+                onClick={() => setEditingDeadline(null)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400 block">选择新的截止/目标日期：</label>
+              <input
+                type="date"
+                value={tempDate}
+                onChange={(e) => setTempDate(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm bg-black/50 border border-white/[0.1] rounded-xl text-white focus:outline-none focus:border-white/30 font-mono"
+              />
+              {tempDate && (
+                <p className="text-[11px] text-zinc-500 font-mono">
+                  设定后距今倒计：{getDaysLeft(tempDate).days} 天
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]">
+              <button
+                onClick={() => setEditingDeadline(null)}
+                className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSaveDeadline}
+                className="px-4 py-1.5 text-xs font-semibold linear-btn-primary rounded-full flex items-center gap-1.5 shadow-md"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>确认修改</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, Sparkles, Menu, Edit2, X, Check } from 'lucide-react'
+import { Calendar, Clock, Sparkles, Menu, X, Check } from 'lucide-react'
 import { getDaysLeft } from '@/lib/utils'
 import { StorageService } from '@/lib/storage'
 import { CalendarModal } from './calendar-modal'
@@ -141,7 +141,6 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
             <span className="font-mono font-bold text-white">
               {careerDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
             </span>
-            <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 group-hover:opacity-100 group-hover:text-zinc-300 transition-all ml-0.5" />
           </button>
 
           {/* 论文初稿倒计时胶囊 (点击修改目标日期) */}
@@ -155,7 +154,6 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
             <span className="font-mono font-bold text-white">
               {thesisDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
             </span>
-            <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 group-hover:opacity-100 group-hover:text-zinc-300 transition-all ml-0.5" />
           </button>
         </div>
       </header>
