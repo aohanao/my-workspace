@@ -114,7 +114,11 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData()
     window.addEventListener('workspace-data-updated', loadData)
-    return () => window.removeEventListener('workspace-data-updated', loadData)
+    window.addEventListener('storage', loadData)
+    return () => {
+      window.removeEventListener('workspace-data-updated', loadData)
+      window.removeEventListener('storage', loadData)
+    }
   }, [])
 
   const handleOpenEditCareer = () => {
