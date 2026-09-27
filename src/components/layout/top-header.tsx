@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, Sparkles, Plus, Menu } from 'lucide-react'
-import { getDaysLeft, WORKSPACE_DEADLINES } from '@/lib/utils'
+import { Calendar, Clock, Sparkles, Menu, Edit2, X, Check } from 'lucide-react'
+import { getDaysLeft } from '@/lib/utils'
 import { StorageService } from '@/lib/storage'
 import { CalendarModal } from './calendar-modal'
 
@@ -15,9 +15,22 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
   const [currentDate, setCurrentDate] = useState('')
   const [careerDays, setCareerDays] = useState({ days: 0, isOverdue: false })
   const [thesisDays, setThesisDays] = useState({ days: 0, isOverdue: false })
-  const [quickNoteOpen, setQuickNoteOpen] = useState(false)
-  const [quickNoteText, setQuickNoteText] = useState('')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+
+  // 倒计时日期修改弹窗
+  const [editingDeadline, setEditingDeadline] = useState<{
+    type: 'career' | 'thesis'
+    title: string
+    currentDate: string
+  } | null>(null)
+  const [tempDate, setTempDate] = useState('')
+
+  const refreshDeadlines = () => {
+    const careerDate = StorageService.getCareerDeadline()
+    const thesisDate = StorageService.getThesisDraftDeadline()
+    setCareerDays(getDaysLeft(careerDate))
+    setThesisDays(getDaysLeft(thesisDate))
+  }
 
   useEffect(() => {
     const now = new Date()
@@ -34,29 +47,49 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
     }
     setCurrentDate(now.toLocaleDateString('zh-CN', dateOptions))
 
-    const thesisInfo = StorageService.getThesis()
-    setCareerDays(getDaysLeft(WORKSPACE_DEADLINES.careerSprint))
-    setThesisDays(getDaysLeft(thesisInfo.blindReviewDate || WORKSPACE_DEADLINES.blindReview))
+    refreshDeadlines()
 
     const handleOpenCalendar = () => setIsCalendarOpen(true)
+    const handleDataUpdate = () => refreshDeadlines()
+
     window.addEventListener('workspace-open-calendar', handleOpenCalendar)
+    window.addEventListener('workspace-data-updated', handleDataUpdate)
     return () => {
       window.removeEventListener('workspace-open-calendar', handleOpenCalendar)
+      window.removeEventListener('workspace-data-updated', handleDataUpdate)
     }
   }, [])
 
-  const handleSaveQuickNote = () => {
-    if (!quickNoteText.trim()) return
-    const notes = StorageService.getNotes()
-    const newNote = {
-      id: `note-${Date.now()}`,
-      content: quickNoteText.trim(),
-      createdAt: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-      tags: ['速记'],
+  const handleOpenEditCareer = () => {
+    const current = StorageService.getCareerDeadline()
+    setTempDate(current)
+    setEditingDeadline({
+      type: 'career',
+      title: '调整秋招冲刺目标日期',
+      currentDate: current,
+    })
+  }
+
+  const handleOpenEditThesis = () => {
+    const current = StorageService.getThesisDraftDeadline()
+    setTempDate(current)
+    setEditingDeadline({
+      type: 'thesis',
+      title: '调整论文初稿目标日期',
+      currentDate: current,
+    })
+  }
+
+  const handleSaveDeadline = () => {
+    if (!tempDate || !editingDeadline) return
+    if (editingDeadline.type === 'career') {
+      StorageService.saveCareerDeadline(tempDate)
+    } else {
+      StorageService.saveThesisDraftDeadline(tempDate)
     }
-    StorageService.saveNotes([newNote, ...notes])
-    setQuickNoteText('')
-    setQuickNoteOpen(false)
+    refreshDeadlines()
+    setEditingDeadline(null)
+    window.dispatchEvent(new CustomEvent('workspace-data-updated'))
   }
 
   return (
@@ -95,79 +128,88 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           </div>
         </div>
 
-        {/* 右侧：双核心倒计时胶囊与白色高亮速记按钮 */}
+        {/* 右侧：双核心可点击修改日期倒计时胶囊 */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          {/* 秋招冲刺倒计时胶囊 */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300">
-            <Clock className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-zinc-400 font-normal hidden md:inline">秋招冲刺:</span>
+          {/* 秋招冲刺倒计时胶囊 (点击修改目标日期) */}
+          <button
+            onClick={handleOpenEditCareer}
+            title="点击修改秋招冲刺目标日期"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer"
+          >
+            <Clock className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+            <span className="text-zinc-400 group-hover:text-zinc-200 font-normal hidden sm:inline">秋招冲刺:</span>
             <span className="font-mono font-bold text-white">
               {careerDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
             </span>
-          </div>
+            <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 group-hover:opacity-100 group-hover:text-zinc-300 transition-all ml-0.5" />
+          </button>
 
-          {/* 论文初稿倒计时胶囊 */}
-          <div className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300">
-            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-zinc-400 font-normal">论文初稿:</span>
+          {/* 论文初稿倒计时胶囊 (点击修改目标日期) */}
+          <button
+            onClick={handleOpenEditThesis}
+            title="点击修改论文初稿目标日期"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+            <span className="text-zinc-400 group-hover:text-zinc-200 font-normal hidden sm:inline">论文初稿:</span>
             <span className="font-mono font-bold text-white">
               {thesisDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
             </span>
-          </div>
-
-          {/* 灵感速记按钮 (纯白胶囊风格) */}
-          <div className="relative">
-            <button
-              onClick={() => setQuickNoteOpen(!quickNoteOpen)}
-              className="flex items-center gap-1.5 px-4 py-1.5 linear-btn-primary text-xs sm:text-sm font-semibold shadow-md"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span className="hidden xs:inline">速记一条</span>
-              <span className="inline xs:hidden">速记</span>
-            </button>
-
-            {/* 速记弹窗 */}
-            {quickNoteOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40 bg-black/50"
-                  onClick={() => setQuickNoteOpen(false)}
-                />
-                <div className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-12 left-3 sm:left-auto sm:w-84 p-4 bg-[#0e121a] border border-white/[0.12] shadow-2xl rounded-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-zinc-300" /> 快速捕获灵感 / 备忘
-                    </span>
-                    <span className="text-[10px] text-zinc-500 font-mono">INBOX</span>
-                  </div>
-                  <textarea
-                    value={quickNoteText}
-                    onChange={(e) => setQuickNoteText(e.target.value)}
-                    placeholder="记录导师交代、面试考点、临时安排..."
-                    rows={3}
-                    className="w-full text-xs p-3 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-white/30 resize-none placeholder:text-zinc-500 leading-relaxed"
-                    autoFocus
-                  />
-                  <div className="flex items-center justify-end gap-2 mt-3">
-                    <button
-                      onClick={() => setQuickNoteOpen(false)}
-                      className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white"
-                    >
-                      取消
-                    </button>
-                    <button
-                      onClick={handleSaveQuickNote}
-                      className="px-4 py-1.5 text-xs font-semibold linear-btn-primary rounded-full"
-                    >
-                      保存便签
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+            <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 group-hover:opacity-100 group-hover:text-zinc-300 transition-all ml-0.5" />
+          </button>
         </div>
       </header>
+
+      {/* 修改倒计时目标日期轻量模态框 */}
+      {editingDeadline && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-[#0e121a] border border-white/[0.12] rounded-2xl p-5 w-full max-w-sm shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-cyan-400" />
+                <span>{editingDeadline.title}</span>
+              </h3>
+              <button
+                onClick={() => setEditingDeadline(null)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400 block">选择新的截止/目标日期：</label>
+              <input
+                type="date"
+                value={tempDate}
+                onChange={(e) => setTempDate(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm bg-black/50 border border-white/[0.1] rounded-xl text-white focus:outline-none focus:border-white/30 font-mono"
+              />
+              {tempDate && (
+                <p className="text-[11px] text-zinc-500 font-mono">
+                  设定后距今倒计：{getDaysLeft(tempDate).days} 天
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]">
+              <button
+                onClick={() => setEditingDeadline(null)}
+                className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSaveDeadline}
+                className="px-4 py-1.5 text-xs font-semibold linear-btn-primary rounded-full flex items-center gap-1.5 shadow-md"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>确认修改</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 交互式日历弹窗 */}
       <CalendarModal

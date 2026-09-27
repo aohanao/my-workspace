@@ -395,7 +395,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 </div>
                 <input
                   type="range"
-                  min="1"
+                  min="0"
                   max="5"
                   value={energy}
                   onChange={(e) => setEnergy(Number(e.target.value))}
@@ -410,7 +410,7 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 </div>
                 <input
                   type="range"
-                  min="1"
+                  min="0"
                   max="5"
                   value={mood}
                   onChange={(e) => setMood(Number(e.target.value))}

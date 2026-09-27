@@ -43,6 +43,8 @@ export const STORAGE_KEYS = {
   NOTES: 'workspace_notes_v4',
   ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v4',
   TIMEBLOCKS: 'workspace_timeblocks_v4',
+  CAREER_DEADLINE: 'workspace_career_deadline_v4',
+  THESIS_DRAFT_DEADLINE: 'workspace_thesis_draft_deadline_v4',
 }
 
 export type CloudSyncStatus = 'unconfigured' | 'syncing' | 'synced' | 'error'
@@ -261,6 +263,23 @@ export const StorageService = {
     const toAdd = newJobs.filter((j) => !existingIds.has(`${j.company.toLowerCase()}_${j.role.toLowerCase()}`))
     StorageService.saveJobs([...toAdd, ...existing])
     return { added: toAdd.length, skipped: newJobs.length - toAdd.length }
+  },
+
+  // 倒计时重要里程碑日期
+  getCareerDeadline: (): string => getItem(STORAGE_KEYS.CAREER_DEADLINE, '2026-11-20'),
+  saveCareerDeadline: (date: string) => setItem(STORAGE_KEYS.CAREER_DEADLINE, date),
+
+  getThesisDraftDeadline: (): string => {
+    const custom = getItem<string | null>(STORAGE_KEYS.THESIS_DRAFT_DEADLINE, null)
+    if (custom) return custom
+    const thesis = StorageService.getThesis()
+    return thesis.blindReviewDate || '2026-12-20'
+  },
+  saveThesisDraftDeadline: (date: string) => {
+    setItem(STORAGE_KEYS.THESIS_DRAFT_DEADLINE, date)
+    const thesis = StorageService.getThesis()
+    thesis.blindReviewDate = date
+    StorageService.saveThesis(thesis)
   },
 
   // 毕业与科研数据

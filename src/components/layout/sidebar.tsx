@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3 },
   { href: '/research', label: '硕士毕业管理', sub: 'Thesis & System', icon: GraduationCap },
   { href: '/study', label: '知识与算法复盘', sub: 'Study & LeetCode', icon: Brain },
-  { href: '/life', label: '生活与习惯管理', sub: 'Life & Habits', icon: Smile },
+  { href: '/life', label: '生活管理', sub: 'Life & Daily', icon: Smile },
 ]
 
 interface SidebarProps {

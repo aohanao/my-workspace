@@ -217,11 +217,8 @@ export default function LifePage() {
             <div className="p-2 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
               <Smile className="w-5 h-5" />
             </div>
-            <span>生活与习惯管理</span>
+            <span>生活管理</span>
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-            作息时间块结构 · 7大日常打卡矩阵 · 专注精力与状态日志 · 全面支持修改自定义
-          </p>
         </div>
 
         <button
@@ -390,7 +387,7 @@ export default function LifePage() {
               </div>
               <input
                 type="range"
-                min="1"
+                min="0"
                 max="5"
                 value={energy}
                 onChange={(e) => {
@@ -409,7 +406,7 @@ export default function LifePage() {
               </div>
               <input
                 type="range"
-                min="1"
+                min="0"
                 max="5"
                 value={mood}
                 onChange={(e) => {
@@ -454,7 +451,7 @@ export default function LifePage() {
                 type="text"
                 value={newNoteContent}
                 onChange={(e) => setNewNoteContent(e.target.value)}
-                placeholder="快速记录一条灵感或导师指导意见..."
+                placeholder="快速记录一条灵感或即时备忘..."
                 className="flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500"
               />
               <button

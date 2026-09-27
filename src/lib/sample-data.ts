@@ -933,9 +933,9 @@ export const INITIAL_TIMEBLOCKS: TimeBlockItem[] = [
 export const INITIAL_NOTES: QuickCaptureNote[] = [
   {
     id: 'note-1',
-    content: '导师指导要点：硕士论文核心是构建高维非线性映射神经网络，找到地质参数、围岩等级与支护参数及结构安全性之间的本质对应关系，并在机械化大系统中落地。',
+    content: '论文核心规划：重点构建高维非线性映射神经网络，找到地质参数、围岩等级与支护参数及结构安全性之间的本质对应关系，并在机械化大系统中落地。',
     createdAt: '2026-09-02 10:00',
-    tags: ['导师意见', '核心算法'],
+    tags: ['科研规划', '核心算法'],
   },
   {
     id: 'note-2',
