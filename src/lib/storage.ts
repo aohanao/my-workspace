@@ -356,8 +356,29 @@ export const StorageService = {
     StorageService.saveTop3([...others, ...normalizedDateItems])
   },
 
-  getHabits: (): HabitItem[] => getItem(STORAGE_KEYS.HABITS, INITIAL_HABITS),
-  saveHabits: (habits: HabitItem[]) => setItem(STORAGE_KEYS.HABITS, habits),
+  getHabits: (): HabitItem[] => {
+    const list = getItem<HabitItem[]>(STORAGE_KEYS.HABITS, INITIAL_HABITS)
+    return StorageService.groupHabitsByCategory(list)
+  },
+  saveHabits: (habits: HabitItem[]) => {
+    const sorted = StorageService.groupHabitsByCategory(habits)
+    setItem(STORAGE_KEYS.HABITS, sorted)
+  },
+  groupHabitsByCategory: (list: HabitItem[]): HabitItem[] => {
+    const categoryMap = new Map<string, HabitItem[]>()
+    for (const habit of list) {
+      const cat = habit.category?.trim() || '常规'
+      if (!categoryMap.has(cat)) {
+        categoryMap.set(cat, [])
+      }
+      categoryMap.get(cat)!.push(habit)
+    }
+    const result: HabitItem[] = []
+    categoryMap.forEach((items) => {
+      result.push(...items)
+    })
+    return result
+  },
 
   getTimeBlocks: (): TimeBlockItem[] => getItem(STORAGE_KEYS.TIMEBLOCKS, INITIAL_TIMEBLOCKS),
   saveTimeBlocks: (blocks: TimeBlockItem[]) => setItem(STORAGE_KEYS.TIMEBLOCKS, blocks),

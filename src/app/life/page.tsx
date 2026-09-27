@@ -16,7 +16,6 @@ import {
   Dumbbell,
   Cpu,
   GraduationCap,
-  Edit3,
   Check,
 } from 'lucide-react'
 import { EnergyMoodLog, HabitItem, QuickCaptureNote, TimeBlockItem } from '@/types'
@@ -109,12 +108,12 @@ export default function LifePage() {
     const item: HabitItem = {
       id: `h-${Date.now()}`,
       name: newHabitName.trim(),
-      category: newHabitCategory,
+      category: newHabitCategory.trim() || '常规',
       color: colors[habits.length % colors.length],
       icon: 'Flame',
       logs: { [today]: true },
     }
-    const updated = [...habits, item]
+    const updated = StorageService.groupHabitsByCategory([...habits, item])
     setHabits(updated)
     StorageService.saveHabits(updated)
     setNewHabitName('')
@@ -124,7 +123,9 @@ export default function LifePage() {
   const handleUpdateHabit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingHabit) return
-    const updated = habits.map((h) => (h.id === editingHabit.id ? editingHabit : h))
+    const updated = StorageService.groupHabitsByCategory(
+      habits.map((h) => (h.id === editingHabit.id ? editingHabit : h))
+    )
     setHabits(updated)
     StorageService.saveHabits(updated)
     setEditingHabit(null)
@@ -132,7 +133,7 @@ export default function LifePage() {
 
   const handleDeleteHabit = (id: string) => {
     if (confirm('确定删除该日常打卡项吗？')) {
-      const updated = habits.filter((h) => h.id !== id)
+      const updated = StorageService.groupHabitsByCategory(habits.filter((h) => h.id !== id))
       setHabits(updated)
       StorageService.saveHabits(updated)
     }
@@ -281,7 +282,6 @@ export default function LifePage() {
               <Flame className="w-4 h-4 text-zinc-300" />
               日常任务打卡矩阵 (Habit Matrix)
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">点击方格打卡 / 点击编辑图标随时修改名称与所属分类</p>
           </div>
           <span className="text-xs font-mono text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
             共 {habits.length} 项习惯
@@ -300,7 +300,7 @@ export default function LifePage() {
                     <div className="font-mono text-zinc-200 font-bold">{d.shortDate}</div>
                   </th>
                 ))}
-                <th className="p-3 text-right pr-4 w-20">操作</th>
+                <th className="p-3 text-right pr-4 w-16">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -312,9 +312,15 @@ export default function LifePage() {
                     </span>
                   </td>
                   <td className="p-3.5 font-semibold text-white whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-2.5 h-2.5 rounded-full shadow-[0_0_6px_currentColor]" style={{ backgroundColor: habit.color, color: habit.color }} />
-                      <span className="text-xs sm:text-sm">{habit.name}</span>
+                    <div
+                      onClick={() => setEditingHabit(habit)}
+                      className="flex items-center gap-2.5 cursor-pointer group/name"
+                      title="点击修改此习惯名称与分类"
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full shadow-[0_0_6px_currentColor] shrink-0" style={{ backgroundColor: habit.color, color: habit.color }} />
+                      <span className="text-xs sm:text-sm text-zinc-200 group-hover/name:text-white group-hover/name:underline underline-offset-4 transition-colors">
+                        {habit.name}
+                      </span>
                     </div>
                   </td>
                   {past7Days.map((d) => {
@@ -339,22 +345,13 @@ export default function LifePage() {
                     )
                   })}
                   <td className="p-3.5 pr-4 text-right whitespace-nowrap">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => setEditingHabit(habit)}
-                        className="text-zinc-400 hover:text-cyan-300 p-1 rounded transition-colors"
-                        title="修改习惯"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteHabit(habit.id)}
-                        className="text-zinc-500 hover:text-rose-400 p-1 rounded transition-colors"
-                        title="删除习惯"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDeleteHabit(habit.id)}
+                      className="p-1 rounded text-zinc-500 hover:text-rose-400 transition-colors"
+                      title="删除习惯"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -504,7 +501,7 @@ export default function LifePage() {
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-cyan-400" />
+              <Flame className="w-4 h-4 text-cyan-400" />
               修改习惯项目
             </h3>
             <form onSubmit={handleUpdateHabit} className="space-y-3.5 text-xs sm:text-sm">
@@ -608,7 +605,7 @@ export default function LifePage() {
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-cyan-400" />
+              <Clock className="w-4 h-4 text-cyan-400" />
               自定义时间块与作息规划
             </h3>
             <form onSubmit={handleSaveTimeBlock} className="space-y-3.5 text-xs sm:text-sm">
@@ -698,7 +695,7 @@ export default function LifePage() {
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-cyan-400" />
+              <ListTodo className="w-4 h-4 text-cyan-400" />
               修改速记内容
             </h3>
             <form onSubmit={handleSaveEditNote} className="space-y-3.5 text-xs sm:text-sm">
