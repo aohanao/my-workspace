@@ -46,11 +46,15 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
       setSyncStatus(StorageService.getSyncStatus().status)
     }
     updateSync()
+
+    const handleOpenCalendar = () => setIsCalendarOpen(true)
     window.addEventListener('workspace-sync-status', updateSync)
     window.addEventListener('workspace-data-updated', updateSync)
+    window.addEventListener('workspace-open-calendar', handleOpenCalendar)
     return () => {
       window.removeEventListener('workspace-sync-status', updateSync)
       window.removeEventListener('workspace-data-updated', updateSync)
+      window.removeEventListener('workspace-open-calendar', handleOpenCalendar)
     }
   }, [])
 

@@ -190,11 +190,21 @@ export default function LifePage() {
   }
 
   const handleConvertNoteToTask = (note: QuickCaptureNote) => {
-    const top3 = StorageService.getTop3()
-    StorageService.saveTop3([
+    const todayStr = getLocalDateKey()
+    const top3 = StorageService.getTop3(todayStr)
+    const updated = [
       ...top3,
-      { id: `top-${Date.now()}`, text: note.content, done: false, category: 'life' },
-    ])
+      {
+        id: `top-${Date.now()}`,
+        text: note.content,
+        done: false,
+        category: 'life' as const,
+        priority: '重缓' as const,
+        date: todayStr,
+        createdAt: new Date().toISOString(),
+      },
+    ]
+    StorageService.saveTop3ForDate(todayStr, updated)
     handleDeleteNote(note.id)
   }
 

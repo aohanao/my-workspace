@@ -18,6 +18,7 @@ import {
   AlertCircle,
   ExternalLink,
   ChevronDown,
+  Calendar,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
@@ -106,7 +107,7 @@ export default function DashboardPage() {
   const handleToggleTask = (id: string) => {
     const updated = dailyTasks.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
     setDailyTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(getLocalDateKey(), updated)
   }
 
   const handleAddTask = (e: React.FormEvent) => {
@@ -116,11 +117,13 @@ export default function DashboardPage() {
       id: `task-${Date.now()}`,
       text: newTaskText.trim(),
       done: false,
+      date: getLocalDateKey(),
       priority: newTaskPriority,
+      createdAt: new Date().toISOString(),
     }
     const updated = [...dailyTasks, newItem]
     setDailyTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(getLocalDateKey(), updated)
     setNewTaskText('')
   }
 
@@ -135,7 +138,7 @@ export default function DashboardPage() {
     const nextPriority = cycleMap[current || '重急']
     const updated = dailyTasks.map((item) => (item.id === id ? { ...item, priority: nextPriority } : item))
     setDailyTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(getLocalDateKey(), updated)
   }
 
   const handleStartEditTask = (item: DailyTop3Item) => {
@@ -147,14 +150,14 @@ export default function DashboardPage() {
     if (!editingTaskText.trim()) return
     const updated = dailyTasks.map((item) => (item.id === id ? { ...item, text: editingTaskText.trim() } : item))
     setDailyTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(getLocalDateKey(), updated)
     setEditingTaskId(null)
   }
 
   const handleDeleteTask = (id: string) => {
     const updated = dailyTasks.filter((item) => item.id !== id)
     setDailyTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(getLocalDateKey(), updated)
   }
 
   const careerCountdown = getDaysLeft(WORKSPACE_DEADLINES.careerSprint)
@@ -248,37 +251,50 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* 四象限快速筛选胶囊 */}
-              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/[0.08] text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* 查看历史待办日历 */}
                 <button
-                  onClick={() => setPriorityFilter('all')}
-                  className={`px-3 py-1 rounded-full font-medium transition-all ${
-                    priorityFilter === 'all'
-                      ? 'bg-white text-black font-semibold shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('workspace-open-calendar'))}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.09] transition-all cursor-pointer shadow-sm group"
+                  title="点击查看往日历史待办与完成归档"
                 >
-                  全部 ({dailyTasks.length})
+                  <Calendar className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                  <span>历史待办日历</span>
                 </button>
-                {PRIORITY_OPTIONS.map((opt) => {
-                  const count = dailyTasks.filter((t) => (t.priority || '重急') === opt.key).length
-                  const isActive = priorityFilter === opt.key
 
-                  return (
-                    <button
-                      key={opt.key}
-                      onClick={() => setPriorityFilter(opt.key)}
-                      className={`px-2.5 py-1 rounded-full font-medium transition-all ${
-                        isActive
-                          ? `${opt.badgeClass} font-bold`
-                          : `text-zinc-400 ${opt.tabClass}`
-                      }`}
-                      title={opt.desc}
-                    >
-                      {opt.label} ({count})
-                    </button>
-                  )
-                })}
+                {/* 四象限快速筛选胶囊 */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/[0.08] text-xs">
+                  <button
+                    onClick={() => setPriorityFilter('all')}
+                    className={`px-3 py-1 rounded-full font-medium transition-all ${
+                      priorityFilter === 'all'
+                        ? 'bg-white text-black font-semibold shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    全部 ({dailyTasks.length})
+                  </button>
+                  {PRIORITY_OPTIONS.map((opt) => {
+                    const count = dailyTasks.filter((t) => (t.priority || '重急') === opt.key).length
+                    const isActive = priorityFilter === opt.key
+
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => setPriorityFilter(opt.key)}
+                        className={`px-2.5 py-1 rounded-full font-medium transition-all ${
+                          isActive
+                            ? `${opt.badgeClass} font-bold`
+                            : `text-zinc-400 ${opt.tabClass}`
+                        }`}
+                        title={opt.desc}
+                      >
+                        {opt.label} ({count})
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
 
@@ -381,10 +397,15 @@ export default function DashboardPage() {
               })}
 
               {filteredTasks.length === 0 && (
-                <div className="p-8 text-center text-zinc-500 border border-dashed border-white/[0.08] rounded-2xl">
-                  {priorityFilter === 'all'
-                    ? '今日暂无安排，在下方输入框添加一天的核心事项'
-                    : `暂无【${priorityFilter}】级别的待办任务`}
+                <div className="p-8 text-center text-zinc-500 border border-dashed border-white/[0.08] rounded-2xl space-y-1.5">
+                  <p className="text-xs sm:text-sm text-zinc-300 font-medium">
+                    {priorityFilter === 'all'
+                      ? '今日暂无安排，在下方输入框添加一天的核心事项'
+                      : `暂无【${priorityFilter}】级别的待办任务`}
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    💡 每日控制中枢独立刷新，往日历史待办已自动妥善归档至日历，可随时查阅
+                  </p>
                 </div>
               )}
             </div>

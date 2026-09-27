@@ -29,6 +29,7 @@ import {
 } from './sample-data'
 import { getSupabase, isSupabaseConfigured } from './supabase'
 import { normalizeJobStatus } from './feishu-parser'
+import { getLocalDateKey } from './utils'
 
 export const STORAGE_KEYS = {
   JOBS: 'workspace_jobs_v4',
@@ -283,9 +284,41 @@ export const StorageService = {
   getFlashcards: (): KnowledgeFlashcard[] => getItem(STORAGE_KEYS.FLASHCARDS, INITIAL_FLASHCARDS),
   saveFlashcards: (cards: KnowledgeFlashcard[]) => setItem(STORAGE_KEYS.FLASHCARDS, cards),
 
-  // 生活与日常
-  getTop3: (): DailyTop3Item[] => getItem(STORAGE_KEYS.TOP3, INITIAL_TOP3),
+  // 生活与日常待办事项 (支持每日独立刷新与历史按天归档)
+  getAllTop3: (): DailyTop3Item[] => {
+    const list = getItem<DailyTop3Item[]>(STORAGE_KEYS.TOP3, INITIAL_TOP3)
+    return list.map((item) => ({
+      ...item,
+      // 向下兼容：若已有旧数据缺少 date，自动归档在昨天，保证今天为全新待办列表
+      date: item.date || '2026-09-26',
+    }))
+  },
+
+  // 获取指定日期的待办列表（默认返回今天的待办）
+  getTop3: (dateStr?: string): DailyTop3Item[] => {
+    const targetDate = dateStr || getLocalDateKey()
+    const all = StorageService.getAllTop3()
+    return all.filter((item) => item.date === targetDate)
+  },
+
+  // 获取指定日期的待办列表
+  getTop3ByDate: (dateStr: string): DailyTop3Item[] => {
+    return StorageService.getTop3(dateStr)
+  },
+
+  // 保存全量待办事项
   saveTop3: (top3: DailyTop3Item[]) => setItem(STORAGE_KEYS.TOP3, top3),
+
+  // 保存或更新指定日期的待办事项（保留其他日期的历史待办）
+  saveTop3ForDate: (dateStr: string, dateItems: DailyTop3Item[]) => {
+    const all = StorageService.getAllTop3()
+    const others = all.filter((item) => item.date !== dateStr)
+    const normalizedDateItems = dateItems.map((item) => ({
+      ...item,
+      date: dateStr,
+    }))
+    StorageService.saveTop3([...others, ...normalizedDateItems])
+  },
 
   getHabits: (): HabitItem[] => getItem(STORAGE_KEYS.HABITS, INITIAL_HABITS),
   saveHabits: (habits: HabitItem[]) => setItem(STORAGE_KEYS.HABITS, habits),

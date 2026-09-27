@@ -135,8 +135,10 @@ export interface DailyTop3Item {
   id: string
   text: string
   done: boolean
+  date?: string // 归属日期 (YYYY-MM-DD)，实现每日独立刷新与历史日历溯源
   category?: 'research' | 'career' | 'study' | 'life'
   priority?: TaskPriority
+  createdAt?: string
 }
 
 export interface TimeBlockItem {

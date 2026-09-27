@@ -12,6 +12,7 @@ import {
   Trash2,
   Save,
   Check,
+  CheckCircle2,
 } from 'lucide-react'
 import { StorageService } from '@/lib/storage'
 import { getLocalDateKey } from '@/lib/utils'
@@ -33,7 +34,8 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
   const [journal, setJournal] = useState('')
   const [moodSaved, setMoodSaved] = useState(false)
 
-  // 待办列表
+  // 待办列表 (全量与选中日期)
+  const [allTasks, setAllTasks] = useState<DailyTop3Item[]>([])
   const [tasks, setTasks] = useState<DailyTop3Item[]>([])
   const [newTaskText, setNewTaskText] = useState('')
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('重急')
@@ -49,6 +51,12 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
     const todayStr = getLocalDateKey()
     setSelectedDate(todayStr)
     loadDateData(todayStr)
+
+    const handleUpdate = () => {
+      loadDateData(selectedDate)
+    }
+    window.addEventListener('workspace-data-updated', handleUpdate)
+    return () => window.removeEventListener('workspace-data-updated', handleUpdate)
   }, [isOpen])
 
   const loadDateData = (dateStr: string) => {
@@ -59,8 +67,10 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
     setMood(log?.mood ?? 4)
     setJournal(log?.journal ?? '')
 
-    const top3 = StorageService.getTop3()
-    setTasks(top3)
+    const all = StorageService.getAllTop3()
+    setAllTasks(all)
+    const dateTasks = all.filter((t) => (t.date || '2026-09-26') === dateStr)
+    setTasks(dateTasks)
   }
 
   const handleSelectDate = (dateStr: string) => {
@@ -91,24 +101,45 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
       id: `task-${Date.now()}`,
       text: newTaskText.trim(),
       done: false,
+      date: selectedDate,
       priority: newTaskPriority,
+      createdAt: new Date().toISOString(),
     }
     const updated = [...tasks, newItem]
     setTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(selectedDate, updated)
+    setAllTasks(StorageService.getAllTop3())
     setNewTaskText('')
   }
 
   const handleToggleTask = (id: string) => {
     const updated = tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     setTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(selectedDate, updated)
+    setAllTasks(StorageService.getAllTop3())
   }
+
+  const handleCyclePriority = (id: string, current?: TaskPriority) => {
+    const cycleMap: Record<TaskPriority, TaskPriority> = {
+      重急: '重缓',
+      重缓: '轻急',
+      轻急: '轻缓',
+      轻缓: '重急',
+    }
+    const nextPriority = cycleMap[current || '重急']
+    const updated = tasks.map((t) => (t.id === id ? { ...t, priority: nextPriority } : itemPriorityHelper(t, nextPriority)))
+    setTasks(updated)
+    StorageService.saveTop3ForDate(selectedDate, updated)
+    setAllTasks(StorageService.getAllTop3())
+  }
+
+  const itemPriorityHelper = (t: DailyTop3Item, p: TaskPriority) => ({ ...t, priority: p })
 
   const handleDeleteTask = (id: string) => {
     const updated = tasks.filter((t) => t.id !== id)
     setTasks(updated)
-    StorageService.saveTop3(updated)
+    StorageService.saveTop3ForDate(selectedDate, updated)
+    setAllTasks(StorageService.getAllTop3())
   }
 
   if (!isOpen) return null
@@ -247,12 +278,15 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 const isToday = item.dateStr === todayStr
                 const isSelected = item.dateStr === selectedDate
                 const hasMoodLog = energyLogs.some((l) => l.date === item.dateStr)
+                const dayTasks = allTasks.filter((t) => (t.date || '2026-09-26') === item.dateStr)
+                const hasTasks = dayTasks.length > 0
+                const allTasksDone = hasTasks && dayTasks.every((t) => t.done)
 
                 return (
                   <button
                     key={idx}
                     onClick={() => handleSelectDate(item.dateStr)}
-                    className={`h-10 sm:h-12 rounded-2xl flex flex-col items-center justify-center font-mono font-medium transition-all relative border ${
+                    className={`h-11 sm:h-12 rounded-2xl flex flex-col items-center justify-center font-mono font-medium transition-all relative border ${
                       isSelected
                         ? 'bg-white text-black border-white shadow-lg font-bold scale-105 z-10'
                         : isToday
@@ -261,19 +295,46 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                     }`}
                   >
                     <span>{item.day}</span>
-                    {hasMoodLog && (
-                      <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-black' : 'bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]'}`} />
-                    )}
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {hasMoodLog && (
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-black' : 'bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]'}`}
+                          title="状态心情"
+                        />
+                      )}
+                      {hasTasks && (
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            isSelected
+                              ? allTasksDone ? 'bg-emerald-600' : 'bg-cyan-600'
+                              : allTasksDone
+                              ? 'bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]'
+                              : 'bg-cyan-400 shadow-[0_0_4px_rgba(34,211,238,0.8)]'
+                          }`}
+                          title={allTasksDone ? '待办全部达成' : '待办推进中'}
+                        />
+                      )}
+                    </div>
                   </button>
                 )
               })}
             </div>
           </div>
 
-          <div className="pt-4 text-xs text-zinc-400 flex items-center justify-between border-t border-white/[0.06] mt-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
-              <span>当日有状态记录</span>
+          <div className="pt-4 text-xs text-zinc-400 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] mt-4">
+            <div className="flex items-center gap-3 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
+                <span>状态心情</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
+                <span>待办推进</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />
+                <span>待办达成</span>
+              </div>
             </div>
             <span className="text-zinc-500 font-mono text-[11px]">CALENDAR · DEEPSEEK OS</span>
           </div>
@@ -285,7 +346,22 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
             {/* 顶栏：选中日期标题与关闭按钮 */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
               <div>
-                <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">SELECTED DATE</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">SELECTED DATE</span>
+                  {selectedDate === todayStr ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-semibold">
+                      今日中枢
+                    </span>
+                  ) : selectedDate < todayStr ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-zinc-800/80 text-zinc-400 border border-zinc-700/60 font-semibold">
+                      历史归档
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-950/80 text-purple-300 border border-purple-800/60 font-semibold">
+                      未来日程
+                    </span>
+                  )}
+                </div>
                 <h4 className="font-bold text-base sm:text-lg text-white font-mono">{selectedDate}</h4>
               </div>
 
@@ -363,9 +439,15 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
 
             {/* 2. 当日待办事项 */}
             <div className="space-y-2.5 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.07] text-xs">
-              <span className="font-semibold text-white block">
-                📋 核心待办安排 ({tasks.filter((t) => t.done).length}/{tasks.length})
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                  {selectedDate === todayStr ? '今日待办清单' : selectedDate < todayStr ? '历史待办归档' : '未来日程规划'}
+                </span>
+                <span className="font-mono text-zinc-400 text-[11px]">
+                  {tasks.filter((t) => t.done).length} / {tasks.length} 已达成
+                </span>
+              </div>
 
               {/* 任务添加 */}
               <form onSubmit={handleAddTask} className="space-y-2">
@@ -453,7 +535,13 @@ export function CalendarModal({ isOpen, onClose }: CalendarModalProps) {
                 })}
 
                 {tasks.length === 0 && (
-                  <p className="text-zinc-500 py-3 text-center text-xs">暂无待办，输入上方即可添加</p>
+                  <p className="text-zinc-500 py-3 text-center text-xs">
+                    {selectedDate === todayStr
+                      ? '今日暂无待办，输入上方即可添加'
+                      : selectedDate < todayStr
+                      ? '该历史日期未记录待办事项'
+                      : '未来暂无规划，可提前在此添加'}
+                  </p>
                 )}
               </div>
             </div>
