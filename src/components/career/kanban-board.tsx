@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { JobApplication, JobStatus } from '@/types'
-import { normalizeJobStatus, isJobApplied, getJobStageBadge, getStatusTagStyle } from '@/lib/feishu-parser'
+import { normalizeJobStatus, isJobApplied, getJobStageBadge, getStatusTagStyle, getJobDisplayTags } from '@/lib/feishu-parser'
 import {
   MapPin,
   Calendar,
@@ -234,15 +234,15 @@ export function KanbanBoard({ jobs, onSelectJob, onUpdateStatus }: Props) {
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {isRejectedCol ? (
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${getJobStageBadge(job).color}`}>
-                              {getJobStageBadge(job).text}
-                            </span>
-                          ) : job.statusTags && job.statusTags.length > 0 ? (
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${getStatusTagStyle(job.statusTags[0])}`}>
-                              {job.statusTags[0]}
-                            </span>
-                          ) : null}
+                          {(() => {
+                            const tags = getJobDisplayTags(job)
+                            if (tags.length === 0) return null
+                            return (
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${tags[0].color}`}>
+                                {tags[0].text}
+                              </span>
+                            )
+                          })()}
                           {job.priority && (
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full font-medium border whitespace-nowrap ${

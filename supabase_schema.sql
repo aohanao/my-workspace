@@ -58,4 +58,8 @@ CREATE TRIGGER set_workspace_storage_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
+-- 5. 开启 Supabase Realtime 实时数据监听广播（飞书 Webhook 写入后网页秒级自动响应更新）
+ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_storage;
+ALTER TABLE public.workspace_storage REPLICA IDENTITY FULL;
+
 -- 完成！

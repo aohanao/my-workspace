@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { JobApplication, JobStatus } from '@/types'
-import { isJobApplied, getJobStageBadge, getJobDisplayTags } from '@/lib/feishu-parser'
+import { isJobApplied, getJobStageBadge, getJobDisplayTags, smartTransformJob } from '@/lib/feishu-parser'
 import {
   Search,
   Download,
@@ -81,12 +81,10 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
       ? (job.status === 'wishlist' ? 'applied' : job.status)
       : 'wishlist'
 
-    const updatedJob: JobApplication = {
-      ...job,
+    const updatedJob = smartTransformJob(job, {
       applyStatus: nextApplied ? '已投递' : '未投递',
       status: nextStatus,
-      updatedAt: new Date().toISOString(),
-    }
+    })
     onUpdateJob?.(updatedJob)
   }
 
@@ -119,12 +117,10 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
         const nextStatus: JobStatus = nextApplied
           ? (j.status === 'wishlist' ? 'applied' : j.status)
           : 'wishlist'
-        return {
-          ...j,
+        return smartTransformJob(j, {
           applyStatus: nextApplied ? '已投递' : '未投递',
           status: nextStatus,
-          updatedAt: new Date().toISOString(),
-        }
+        })
       }
       return j
     })

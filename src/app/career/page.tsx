@@ -21,22 +21,18 @@ import {
 import Link from 'next/link'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
-import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage, smartTransformJob } from '@/lib/feishu-parser'
 import { KanbanBoard } from '@/components/career/kanban-board'
 import { JobTable } from '@/components/career/job-table'
 import { FeishuImporter } from '@/components/career/feishu-importer'
 import { JobDetailModal } from '@/components/career/job-detail-modal'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
 import { getLocalDateKey } from '@/lib/utils'
-import { getSupabase } from '@/lib/supabase'
-import { FeishuSyncModal } from '@/components/career/feishu-sync-modal'
-import { Zap } from 'lucide-react'
 
 export default function CareerPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban')
   const [isImporterOpen, setIsImporterOpen] = useState(false)
-  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
@@ -46,33 +42,14 @@ export default function CareerPage() {
 
   useEffect(() => {
     loadData()
-    // 首次进入自动拉取云端最新数据
+    // 首次进入自动拉取云端数据（如果已配置）
     StorageService.initCloudSync()
 
     const handleUpdate = () => loadData()
     window.addEventListener('workspace-data-updated', handleUpdate)
 
-    // 订阅 Supabase Realtime 变更（飞书 Webhook 同步写入后，网页端秒级自动响应刷新）
-    const supabase = getSupabase()
-    let channel: any = null
-    if (supabase) {
-      channel = supabase
-        .channel('workspace_realtime_jobs_channel')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'workspace_storage', filter: 'key=eq.workspace_jobs_v4' },
-          () => {
-            StorageService.initCloudSync()
-          }
-        )
-        .subscribe()
-    }
-
     return () => {
       window.removeEventListener('workspace-data-updated', handleUpdate)
-      if (channel && supabase) {
-        supabase.removeChannel(channel)
-      }
     }
   }, [])
 
@@ -91,11 +68,12 @@ export default function CareerPage() {
   }
 
   const handleSaveJob = (job: JobApplication) => {
-    const exists = jobs.some((j) => j.id === job.id)
+    const transformed = smartTransformJob(job, {})
+    const exists = jobs.some((j) => j.id === transformed.id)
     if (exists) {
-      StorageService.updateJob(job)
+      StorageService.updateJob(transformed)
     } else {
-      StorageService.addJob(job)
+      StorageService.addJob(transformed)
     }
     loadData()
   }
@@ -108,39 +86,7 @@ export default function CareerPage() {
   const handleUpdateStatus = (jobId: string, nextStatus: JobStatus) => {
     const job = jobs.find((j) => j.id === jobId)
     if (job) {
-      const updatedJob: JobApplication = {
-        ...job,
-        status: nextStatus,
-        updatedAt: new Date().toISOString(),
-      }
-
-      // 如果流转至流程终止/已挂，且此前在面试或笔试阶段，自动记录其终止前阶段与面试轮次，防止统计丢失
-      if (nextStatus === 'rejected' && job.status !== 'rejected') {
-        updatedJob.lastStage = job.status
-        const stageLabels: Record<string, string> = {
-          assessment: '笔试测评',
-          interview1: '技术一面',
-          interview2: '技术二面',
-          interview3: '技术三面',
-          hr: 'HR面/终面',
-        }
-        if (stageLabels[job.status]) {
-          const hasRecord = job.interviews?.some((i) => i.round.includes(stageLabels[job.status]))
-          if (!hasRecord) {
-            updatedJob.interviews = [
-              ...(job.interviews || []),
-              {
-                id: `iv-${Date.now()}`,
-                round: stageLabels[job.status],
-                date: getLocalDateKey(),
-                questions: [],
-                feedback: '流程终止已挂',
-              },
-            ]
-          }
-        }
-      }
-
+      const updatedJob = smartTransformJob(job, { status: nextStatus })
       StorageService.updateJob(updatedJob)
       loadData()
     }
@@ -204,16 +150,6 @@ export default function CareerPage() {
             <BarChart3 className="w-4 h-4 text-emerald-400" />
             <span>量化大屏</span>
           </Link>
-
-          {/* 飞书实时同步 (Webhook) */}
-          <button
-            onClick={() => setIsSyncModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 text-xs sm:text-sm font-medium border border-cyan-500/30 transition-colors shadow-sm"
-            title="配置飞书多维表格自动化 Webhook，实现变更秒级自动同步"
-          >
-            <Zap className="w-4 h-4 text-cyan-400" />
-            <span>实时同步</span>
-          </button>
 
           {/* 飞书导入 */}
           <button
@@ -451,13 +387,6 @@ export default function CareerPage() {
           setSelectedJob(job)
           setIsDetailOpen(true)
         }}
-      />
-
-      {/* 飞书实时同步配置弹窗 */}
-      <FeishuSyncModal
-        isOpen={isSyncModalOpen}
-        onClose={() => setIsSyncModalOpen(false)}
-        onSyncTriggered={() => loadData()}
       />
     </div>
   )

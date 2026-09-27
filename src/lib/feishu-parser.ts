@@ -235,27 +235,28 @@ export function getStatusTagStyle(tagText: string): string {
   return 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
 }
 
-// 统一获取要在 UI 上展示的标签列表（100% 优先忠实还原用户给的飞书原始标签，杜绝任何英文）
+// 统一获取要在 UI 上展示的标签列表（智能联动最新状态与标签）
 export function getJobDisplayTags(job: Partial<JobApplication>): Array<{ text: string; color: string }> {
-  // 1. 如果有明确提取出来的多选标签列表，直接按照用户给的标签展示！
+  const currentStatus = normalizeJobStatus(job.status)
+  const isRejected = currentStatus === 'rejected'
+
+  // 1. 尝试提取多选标签
   const tags = (job.statusTags && job.statusTags.length > 0)
     ? job.statusTags
     : extractStatusTags(job.rawStatus)
 
   if (tags && tags.length > 0) {
-    return tags.map((t) => ({
-      text: t,
-      color: getStatusTagStyle(t),
-    }))
+    const hasRejectedTag = tags.some((t) => /挂|淘汰|终止|不合适|感谢信|未通过|不通过|被拒/i.test(t))
+    // 检查标签与当前 status 是否自洽；若自洽则展示
+    if ((isRejected && hasRejectedTag) || (!isRejected && !hasRejectedTag)) {
+      return tags.map((t) => ({
+        text: t,
+        color: getStatusTagStyle(t),
+      }))
+    }
   }
 
-  // 2. 兜底策略：没有任何用户原始标签时，按业务状态映射为中文标签
-  const status = normalizeJobStatus(job.status)
-  if (status === 'rejected') {
-    const badge = getJobStageBadge(job as JobApplication)
-    return [{ text: badge.text, color: badge.color }]
-  }
-
+  // 2. 兜底策略：使用当前真实业务状态规范生成中文高亮徽章
   const badge = getJobStageBadge(job as JobApplication)
   return [{ text: badge.text, color: badge.color }]
 }
@@ -826,5 +827,130 @@ function parseMatrixData(matrix: any[][]): FeishuImportResult {
     failedCount,
     jobs,
     unmatchedHeaders,
+  }
+}
+
+/**
+ * 智能自洽转换岗位状态与其全部关联属性 (核心状态转换引擎)
+ * 确保：status、applyStatus、lastStage、statusTags、rawStatus、interviews 全部实时联动并自洽
+ */
+export function smartTransformJob(
+  currentJob: JobApplication,
+  changes: Partial<JobApplication>
+): JobApplication {
+  const next = { ...currentJob, ...changes }
+  let status = next.status ? normalizeJobStatus(next.status) : 'applied'
+  let applyStatus = next.applyStatus || currentJob.applyStatus || '已投递'
+  let lastStage = next.lastStage !== undefined ? next.lastStage : currentJob.lastStage
+  let interviews = [...(next.interviews || currentJob.interviews || [])]
+
+  // 1. 意向备战 (未投递)
+  if (status === 'wishlist' || applyStatus === '未投递') {
+    return {
+      ...next,
+      status: 'wishlist',
+      applyStatus: '未投递',
+      lastStage: undefined,
+      statusTags: ['意向备战'],
+      rawStatus: '意向备战',
+      interviews,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  // 2. 已投递常规推进流程（排除已挂）
+  if (status !== 'rejected') {
+    applyStatus = '已投递'
+    lastStage = undefined // 正在推进中，清除终止前阶段
+
+    // 智能补齐相应面试/笔试轮次（若当前轮次尚未建档）
+    const stageToRound: Record<string, string> = {
+      assessment: '笔试测评',
+      interview1: '技术一面',
+      interview2: '技术二面',
+      interview3: '技术三面',
+      hr: 'HR面/终面',
+    }
+    if (stageToRound[status]) {
+      const roundName = stageToRound[status]
+      const hasRound = interviews.some((iv) => iv.round.includes(roundName) || roundName.includes(iv.round))
+      if (!hasRound) {
+        interviews.push({
+          id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          round: roundName,
+          date: next.applyDate || new Date().toISOString().split('T')[0],
+          questions: [],
+          feedback: '推进中',
+          rating: 5,
+        })
+      }
+    }
+
+    const badge = getJobStageBadge({ ...next, status, lastStage: undefined })
+    return {
+      ...next,
+      status,
+      applyStatus: '已投递',
+      lastStage: undefined,
+      statusTags: [badge.text],
+      rawStatus: badge.text,
+      interviews,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  // 3. 流程终止 / 已挂 (status === 'rejected')
+  applyStatus = '已投递'
+  // 若未指定 lastStage，根据当前原阶段或现有最高面试轮次推导
+  if (!lastStage || lastStage === 'wishlist') {
+    if (currentJob.status && currentJob.status !== 'rejected' && currentJob.status !== 'wishlist') {
+      lastStage = currentJob.status
+    } else if (interviews.some((i) => /hr|终面|人事/i.test(i.round))) {
+      lastStage = 'hr'
+    } else if (interviews.some((i) => /三面|三轮|主管/i.test(i.round))) {
+      lastStage = 'interview3'
+    } else if (interviews.some((i) => /二面|二轮|交叉/i.test(i.round))) {
+      lastStage = 'interview2'
+    } else if (interviews.some((i) => !/笔试|测评/i.test(i.round))) {
+      lastStage = 'interview1'
+    } else if (interviews.some((i) => /笔试|测评/i.test(i.round))) {
+      lastStage = 'assessment'
+    } else {
+      lastStage = 'applied'
+    }
+  }
+
+  // 确保已挂阶段有面试/笔试记录对应，避免漏掉转化率与复盘
+  const stageToRoundMap: Record<string, string> = {
+    assessment: '笔试测评',
+    interview1: '技术一面',
+    interview2: '技术二面',
+    interview3: '技术三面',
+    hr: 'HR面/终面',
+  }
+  if (lastStage && stageToRoundMap[lastStage]) {
+    const roundName = stageToRoundMap[lastStage]
+    const hasRecord = interviews.some((i) => i.round.includes(roundName) || roundName.includes(i.round))
+    if (!hasRecord) {
+      interviews.push({
+        id: `iv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        round: roundName,
+        date: next.applyDate || new Date().toISOString().split('T')[0],
+        questions: [],
+        feedback: '流程终止已挂',
+      })
+    }
+  }
+
+  const badge = getJobStageBadge({ ...next, status: 'rejected', lastStage })
+  return {
+    ...next,
+    status: 'rejected',
+    applyStatus: '已投递',
+    lastStage,
+    statusTags: [badge.text],
+    rawStatus: badge.text,
+    interviews,
+    updatedAt: new Date().toISOString(),
   }
 }

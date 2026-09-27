@@ -230,23 +230,13 @@ export const StorageService = {
     }
   },
 
-  // 求职数据 (自动纠偏已挂与规范化状态)
+  // 求职数据 (严格规范化状态并尊重用户显式编辑)
   getJobs: (): JobApplication[] => {
     const list = getItem<JobApplication[]>(STORAGE_KEYS.JOBS, INITIAL_JOBS)
     return list.map((job) => {
-      let status = job.status
-      if (
-        status !== 'rejected' &&
-        (/挂|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(job.notes || '') ||
-         /挂|淘汰|流程终止|感谢信|不合适|未通过|不通过/i.test(job.applyStatus || ''))
-      ) {
-        status = 'rejected'
-      } else {
-        status = normalizeJobStatus(status)
-      }
       return {
         ...job,
-        status,
+        status: normalizeJobStatus(job.status),
       }
     })
   },

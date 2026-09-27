@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { JobApplication, JobStatus, InterviewRecord } from '@/types'
 import { getLocalDateKey } from '@/lib/utils'
+import { smartTransformJob } from '@/lib/feishu-parser'
 
 interface Props {
   job: JobApplication | null
@@ -52,12 +53,24 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
   if (!isOpen || !job || !formData) return null
 
   const handleStatusChange = (status: JobStatus) => {
-    const nextApplyStatus = status === 'wishlist' ? '未投递' : '已投递'
-    let lastStage = formData.lastStage
-    if (status === 'rejected' && formData.status !== 'rejected') {
-      lastStage = formData.status
-    }
-    setFormData({ ...formData, status, applyStatus: nextApplyStatus, lastStage, updatedAt: new Date().toISOString() })
+    const updated = smartTransformJob(formData, { status })
+    setFormData(updated)
+  }
+
+  const handleApplyStatusToggle = (isApplied: boolean) => {
+    const nextStatus = isApplied
+      ? (formData.status === 'wishlist' ? 'applied' : formData.status)
+      : 'wishlist'
+    const updated = smartTransformJob(formData, {
+      applyStatus: isApplied ? '已投递' : '未投递',
+      status: nextStatus,
+    })
+    setFormData(updated)
+  }
+
+  const handleLastStageChange = (lastStage: JobStatus) => {
+    const updated = smartTransformJob(formData, { status: 'rejected', lastStage })
+    setFormData(updated)
   }
 
   const handleAddInterview = () => {
@@ -93,7 +106,8 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(formData)
+    const transformed = smartTransformJob(formData, {})
+    onSave(transformed)
     onClose()
   }
 
@@ -140,14 +154,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
             <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/[0.08]">
               <button
                 type="button"
-                onClick={() => {
-                  setFormData({
-                    ...formData,
-                    applyStatus: '已投递',
-                    status: formData.status === 'wishlist' ? 'applied' : formData.status,
-                    updatedAt: new Date().toISOString(),
-                  })
-                }}
+                onClick={() => handleApplyStatusToggle(true)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   (formData.applyStatus !== '未投递' && formData.status !== 'wishlist')
                     ? 'bg-blue-500 text-white font-semibold shadow-sm'
@@ -158,14 +165,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setFormData({
-                    ...formData,
-                    applyStatus: '未投递',
-                    status: 'wishlist',
-                    updatedAt: new Date().toISOString(),
-                  })
-                }}
+                onClick={() => handleApplyStatusToggle(false)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   (formData.applyStatus === '未投递' || formData.status === 'wishlist')
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold shadow-sm'
@@ -180,7 +180,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
           {/* 飞书多维表格原始标签展示 */}
           {formData.statusTags && formData.statusTags.length > 0 && (
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-              <span className="text-[11px] text-zinc-500 shrink-0">飞书原标签:</span>
+              <span className="text-[11px] text-zinc-500 shrink-0">当前展示标签:</span>
               <div className="flex flex-wrap items-center gap-1.5">
                 {formData.statusTags.map((tag, tIdx) => (
                   <span
@@ -245,7 +245,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                     <button
                       key={stg.value}
                       type="button"
-                      onClick={() => setFormData({ ...formData, lastStage: stg.value as JobStatus })}
+                      onClick={() => handleLastStageChange(stg.value as JobStatus)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
                         isCurrentLast
                           ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold'
