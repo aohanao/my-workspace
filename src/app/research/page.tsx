@@ -349,41 +349,34 @@ export default function ResearchPage() {
           <div className="p-5 sm:p-6 rounded-2xl linear-card">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
-                    西南交通大学
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenThesisDatesModal()}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs text-zinc-400 hover:text-cyan-300 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
-                    title="点击修改论文题目及关键时间节点"
-                  >
-                    <Edit3 className="w-3 h-3 text-cyan-400" />
-                    <span>修改节点</span>
-                  </button>
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{thesis.title}</h2>
+                <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1] inline-block">
+                  西南交通大学
+                </span>
+                <h2
+                  onClick={() => handleOpenThesisDatesModal()}
+                  className="text-base sm:text-lg font-bold text-white leading-snug cursor-pointer hover:text-cyan-300 transition-colors"
+                  title="点击直接修改论文题目与毕业节点"
+                >
+                  {thesis.title}
+                </h2>
                 <div className="flex items-center gap-2.5 sm:gap-4 text-xs text-zinc-400 flex-wrap pt-0.5">
                   <button
                     type="button"
                     onClick={() => handleOpenThesisDatesModal('blindReview')}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer group text-xs shadow-sm"
-                    title="点击修改初稿完成送审日期"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
+                    title="点击直接修改初稿完成送审日期"
                   >
-                    <span className="text-zinc-400 group-hover:text-zinc-300">初稿完成送审:</span>
+                    <span className="text-zinc-400">初稿完成送审:</span>
                     <strong className="text-white font-mono">{thesis.blindReviewDate}</strong>
-                    <Edit3 className="w-3 h-3 text-zinc-500 group-hover:text-cyan-400 transition-colors opacity-70 group-hover:opacity-100 ml-0.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleOpenThesisDatesModal('defense')}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer group text-xs shadow-sm"
-                    title="点击修改正式答辩节点日期"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
+                    title="点击直接修改正式答辩节点日期"
                   >
-                    <span className="text-zinc-400 group-hover:text-zinc-300">正式答辩节点:</span>
+                    <span className="text-zinc-400">正式答辩节点:</span>
                     <strong className="text-white font-mono">{thesis.defenseDate}</strong>
-                    <Edit3 className="w-3 h-3 text-zinc-500 group-hover:text-cyan-400 transition-colors opacity-70 group-hover:opacity-100 ml-0.5" />
                   </button>
                 </div>
               </div>
@@ -418,21 +411,20 @@ export default function ResearchPage() {
               return (
                 <div key={ch.id} className="p-4 sm:p-5 rounded-2xl linear-card space-y-3 relative group">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
+                    <div
+                      onClick={() => setEditingChapter(ch)}
+                      className="min-w-0 flex-1 cursor-pointer group/title"
+                      title="点击直接编辑章节详情"
+                    >
                       <span className="text-xs font-mono text-cyan-400/80">
                         SECTION 0{idx + 1}
                       </span>
-                      <h4 className="font-semibold text-sm sm:text-base text-white mt-0.5 leading-tight">{ch.title}</h4>
+                      <h4 className="font-semibold text-sm sm:text-base text-white mt-0.5 leading-tight group-hover/title:text-cyan-300 transition-colors">
+                        {ch.title}
+                      </h4>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={() => setEditingChapter(ch)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.06] transition-colors"
-                        title="编辑章节详情"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
                       <select
                         value={ch.status}
                         onChange={(e) => handleUpdateChapter(ch.id, { status: e.target.value as any })}
@@ -711,13 +703,6 @@ export default function ResearchPage() {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setEditingExp(exp)}
-                      className="flex items-center gap-1.5 px-3 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-full border border-white/[0.08] transition-colors"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>编辑算法</span>
-                    </button>
-                    <button
                       onClick={() => handleDeleteExp(exp.id)}
                       className="p-1 text-zinc-500 hover:text-rose-400 rounded-lg transition-colors"
                       title="删除记录"
@@ -728,7 +713,13 @@ export default function ResearchPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-base sm:text-lg text-white">{exp.modelName}</h4>
+                  <h4
+                    onClick={() => setEditingExp(exp)}
+                    className="font-bold text-base sm:text-lg text-white cursor-pointer hover:text-cyan-300 transition-colors"
+                    title="点击直接编辑算法"
+                  >
+                    {exp.modelName}
+                  </h4>
                   <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                     任务类型: {exp.taskType}
                   </p>
@@ -1081,29 +1072,30 @@ export default function ResearchPage() {
 
                     <div className="p-4 sm:p-5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 group hover:border-cyan-500/30 transition-colors">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2.5">
+                        <div
+                          onClick={() => setEditingMilestone(ms)}
+                          className="flex items-center gap-2.5 cursor-pointer group/title"
+                          title="点击直接修改里程碑节点"
+                        >
                           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
                             {ms.category}
                           </span>
-                          <h4 className={`font-bold text-sm sm:text-base ${ms.completed ? 'line-through text-zinc-500' : 'text-white'}`}>
+                          <h4 className={`font-bold text-sm sm:text-base group-hover/title:text-cyan-300 transition-colors ${ms.completed ? 'line-through text-zinc-500' : 'text-white'}`}>
                             {ms.title}
                           </h4>
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <span className="text-xs sm:text-sm font-mono text-cyan-400 font-bold">
+                          <span
+                            onClick={() => setEditingMilestone(ms)}
+                            className="text-xs sm:text-sm font-mono text-cyan-400 font-bold cursor-pointer hover:underline"
+                            title="点击直接修改目标日期"
+                          >
                             {ms.targetDate}
                           </span>
                           <button
-                            onClick={() => setEditingMilestone(ms)}
-                            className="p-1 text-zinc-400 hover:text-cyan-300 rounded"
-                            title="编辑节点"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
                             onClick={() => handleDeleteMilestone(ms.id)}
-                            className="p-1 text-zinc-500 hover:text-rose-400 rounded"
+                            className="p-1 text-zinc-500 hover:text-rose-400 rounded transition-colors"
                             title="删除节点"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

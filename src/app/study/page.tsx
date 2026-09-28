@@ -315,11 +315,15 @@ export default function StudyPage() {
                   <div className="space-y-2.5">
                     {/* 头部：题号、标题、难度、操作 */}
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="font-mono font-bold text-xs bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded-md border border-cyan-500/25 shrink-0">
+                      <div
+                        onClick={() => setEditingLc(item)}
+                        className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group/title"
+                        title="点击直接修改题目与代码"
+                      >
+                        <span className="font-mono font-bold text-xs bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded-md border border-cyan-500/25 shrink-0 group-hover/title:border-cyan-400">
                           #{item.number}
                         </span>
-                        <h4 className="font-bold text-sm sm:text-base text-white truncate" title={item.title}>
+                        <h4 className="font-bold text-sm sm:text-base text-white truncate group-hover/title:text-cyan-300 transition-colors" title={item.title}>
                           {item.title}
                         </h4>
                       </div>
@@ -335,13 +339,6 @@ export default function StudyPage() {
                           {item.difficulty}
                         </span>
 
-                        <button
-                          onClick={() => setEditingLc(item)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.06] transition-colors"
-                          title="修改题目与完整代码"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
                         <button
                           onClick={() => handleDeleteLc(item.id)}
                           className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-white/[0.06] transition-colors"
@@ -769,13 +766,6 @@ export default function StudyPage() {
 
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => setEditingCard(card)}
-                          className="p-1 rounded text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.06] transition-colors"
-                          title="编辑该八股卡片"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
                           onClick={() => handleDeleteCard(card.id)}
                           className="p-1 rounded text-zinc-500 hover:text-rose-400 hover:bg-white/[0.06] transition-colors"
                           title="删除卡片"
@@ -785,7 +775,11 @@ export default function StudyPage() {
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-sm sm:text-base text-white leading-relaxed">
+                    <h4
+                      onClick={() => setEditingCard(card)}
+                      className="font-bold text-sm sm:text-base text-white leading-relaxed cursor-pointer hover:text-cyan-300 transition-colors"
+                      title="点击直接编辑该八股卡片"
+                    >
                       Q: {card.question}
                     </h4>
                   </div>
