@@ -273,7 +273,7 @@ export const StorageService = {
     const custom = getItem<string | null>(STORAGE_KEYS.THESIS_DRAFT_DEADLINE, null)
     if (custom) return custom
     const thesis = StorageService.getThesis()
-    return thesis.blindReviewDate || '2026-12-20'
+    return thesis.blindReviewDate || '2027-02-04'
   },
   saveThesisDraftDeadline: (date: string) => {
     setItem(STORAGE_KEYS.THESIS_DRAFT_DEADLINE, date)
@@ -281,10 +281,24 @@ export const StorageService = {
     thesis.blindReviewDate = date
     StorageService.saveThesis(thesis)
   },
+  getThesisDefenseDeadline: (): string => {
+    const thesis = StorageService.getThesis()
+    return thesis.defenseDate || '2027-05-20'
+  },
+  saveThesisDefenseDeadline: (date: string) => {
+    const thesis = StorageService.getThesis()
+    thesis.defenseDate = date
+    StorageService.saveThesis(thesis)
+  },
 
   // 毕业与科研数据
   getThesis: (): ThesisInfo => getItem(STORAGE_KEYS.THESIS, INITIAL_THESIS),
-  saveThesis: (thesis: ThesisInfo) => setItem(STORAGE_KEYS.THESIS, thesis),
+  saveThesis: (thesis: ThesisInfo) => {
+    setItem(STORAGE_KEYS.THESIS, thesis)
+    if (thesis.blindReviewDate) {
+      setItem(STORAGE_KEYS.THESIS_DRAFT_DEADLINE, thesis.blindReviewDate)
+    }
+  },
 
   getModels: (): ModelExperiment[] => getItem(STORAGE_KEYS.MODELS, INITIAL_MODELS),
   saveModels: (models: ModelExperiment[]) => setItem(STORAGE_KEYS.MODELS, models),

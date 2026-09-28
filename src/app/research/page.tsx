@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   GraduationCap,
   BookOpen,
@@ -19,6 +19,7 @@ import {
   Compass,
   ShieldCheck,
   FileText,
+  X,
 } from 'lucide-react'
 import {
   ThesisInfo,
@@ -46,6 +47,16 @@ export default function ResearchPage() {
   const [newProjectTaskText, setNewProjectTaskText] = useState('')
   const [editingMilestone, setEditingMilestone] = useState<MilestoneItem | null>(null)
   const [isAddMilestoneOpen, setIsAddMilestoneOpen] = useState(false)
+
+  // 论文题目与关键时间节点编辑状态
+  const [isEditingThesisDates, setIsEditingThesisDates] = useState(false)
+  const [thesisDatesForm, setThesisDatesForm] = useState({
+    title: '',
+    blindReviewDate: '',
+    defenseDate: '',
+  })
+  const blindReviewInputRef = useRef<HTMLInputElement>(null)
+  const defenseInputRef = useRef<HTMLInputElement>(null)
 
   const [newExp, setNewExp] = useState<Partial<ModelExperiment>>({
     modelName: '',
@@ -81,6 +92,55 @@ export default function ResearchPage() {
   const totalCurrentWords = thesis.chapters.reduce((acc, ch) => acc + (ch.currentWords || 0), 0)
   const totalTargetWords = thesis.chapters.reduce((acc, ch) => acc + (ch.targetWords || 0), 0)
   const overallProgress = totalTargetWords > 0 ? Math.round((totalCurrentWords / totalTargetWords) * 100) : 0
+
+  // 论文题目与关键节点更新
+  const handleOpenThesisDatesModal = (focusField?: 'blindReview' | 'defense') => {
+    setThesisDatesForm({
+      title: thesis.title,
+      blindReviewDate: thesis.blindReviewDate || '2027-02-04',
+      defenseDate: thesis.defenseDate || '2027-05-20',
+    })
+    setIsEditingThesisDates(true)
+    setTimeout(() => {
+      if (focusField === 'blindReview') {
+        blindReviewInputRef.current?.focus()
+      } else if (focusField === 'defense') {
+        defenseInputRef.current?.focus()
+      }
+    }, 60)
+  }
+
+  const handleSaveThesisDates = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!thesisDatesForm.blindReviewDate || !thesisDatesForm.defenseDate) return
+
+    const updatedThesis: ThesisInfo = {
+      ...thesis,
+      title: thesisDatesForm.title.trim() || thesis.title,
+      blindReviewDate: thesisDatesForm.blindReviewDate,
+      defenseDate: thesisDatesForm.defenseDate,
+    }
+
+    setThesis(updatedThesis)
+    StorageService.saveThesis(updatedThesis)
+    StorageService.saveThesisDraftDeadline(thesisDatesForm.blindReviewDate)
+
+    // 同步更新里程碑列表中对应的初稿送审与答辩节点（如存在）
+    const updatedMilestones = milestones.map((ms) => {
+      if (ms.id === 'ms-4' || ms.category === '预答辩' || ms.title.includes('初稿')) {
+        return { ...ms, targetDate: thesisDatesForm.blindReviewDate }
+      }
+      if (ms.id === 'ms-6' || ms.category === '答辩' || ms.title.includes('答辩')) {
+        return { ...ms, targetDate: thesisDatesForm.defenseDate }
+      }
+      return ms
+    })
+    setMilestones(updatedMilestones)
+    StorageService.saveMilestones(updatedMilestones)
+
+    setIsEditingThesisDates(false)
+    window.dispatchEvent(new CustomEvent('workspace-data-updated'))
+  }
 
   // 论文与章节更新
   const handleUpdateChapter = (chId: string, delta: Partial<ThesisChapter>) => {
@@ -289,13 +349,42 @@ export default function ResearchPage() {
           <div className="p-5 sm:p-6 rounded-2xl linear-card">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
-                <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
-                  西南交通大学
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
+                    西南交通大学
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenThesisDatesModal()}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs text-zinc-400 hover:text-cyan-300 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+                    title="点击修改论文题目及关键时间节点"
+                  >
+                    <Edit3 className="w-3 h-3 text-cyan-400" />
+                    <span>修改节点</span>
+                  </button>
+                </div>
                 <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{thesis.title}</h2>
-                <div className="flex items-center gap-3 sm:gap-6 text-xs text-zinc-400 flex-wrap">
-                  <span>初稿完成送审: <strong className="text-white font-mono">{thesis.blindReviewDate}</strong></span>
-                  <span>正式答辩节点: <strong className="text-white font-mono">{thesis.defenseDate}</strong></span>
+                <div className="flex items-center gap-2.5 sm:gap-4 text-xs text-zinc-400 flex-wrap pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenThesisDatesModal('blindReview')}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer group text-xs shadow-sm"
+                    title="点击修改初稿完成送审日期"
+                  >
+                    <span className="text-zinc-400 group-hover:text-zinc-300">初稿完成送审:</span>
+                    <strong className="text-white font-mono">{thesis.blindReviewDate}</strong>
+                    <Edit3 className="w-3 h-3 text-zinc-500 group-hover:text-cyan-400 transition-colors opacity-70 group-hover:opacity-100 ml-0.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenThesisDatesModal('defense')}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer group text-xs shadow-sm"
+                    title="点击修改正式答辩节点日期"
+                  >
+                    <span className="text-zinc-400 group-hover:text-zinc-300">正式答辩节点:</span>
+                    <strong className="text-white font-mono">{thesis.defenseDate}</strong>
+                    <Edit3 className="w-3 h-3 text-zinc-500 group-hover:text-cyan-400 transition-colors opacity-70 group-hover:opacity-100 ml-0.5" />
+                  </button>
                 </div>
               </div>
 
@@ -470,6 +559,112 @@ export default function ResearchPage() {
                       className="px-4 py-2 rounded-xl linear-btn-primary font-medium"
                     >
                       保存章节
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 修改论文及毕业关键时间节点模态框 */}
+          {isEditingThesisDates && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <h3 className="font-bold text-base text-white flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-cyan-400" />
+                    <span>修改毕业与论文时间节点</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingThesisDates(false)}
+                    className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveThesisDates} className="space-y-4 text-xs sm:text-sm">
+                  <div>
+                    <label className="text-zinc-300 font-medium block mb-1.5">
+                      论文题目：
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={thesisDatesForm.title}
+                      onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, title: e.target.value })}
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500 text-xs sm:text-sm"
+                      placeholder="请输入硕士学位论文题目"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-zinc-300 font-medium">
+                        初稿完成送审目标日期：
+                      </label>
+                      {thesisDatesForm.blindReviewDate && (
+                        <span className="text-[11px] font-mono text-cyan-400">
+                          {getDaysLeft(thesisDatesForm.blindReviewDate).isOverdue
+                            ? '已截止'
+                            : `倒计 ${getDaysLeft(thesisDatesForm.blindReviewDate).days} 天`}
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      ref={blindReviewInputRef}
+                      type="date"
+                      required
+                      value={thesisDatesForm.blindReviewDate}
+                      onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, blindReviewDate: e.target.value })}
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-500"
+                    />
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      对应研究生院初稿定稿、查重及预审/双盲送审关键节点
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-zinc-300 font-medium">
+                        正式答辩目标节点日期：
+                      </label>
+                      {thesisDatesForm.defenseDate && (
+                        <span className="text-[11px] font-mono text-emerald-400">
+                          {getDaysLeft(thesisDatesForm.defenseDate).isOverdue
+                            ? '已截止'
+                            : `倒计 ${getDaysLeft(thesisDatesForm.defenseDate).days} 天`}
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      ref={defenseInputRef}
+                      type="date"
+                      required
+                      value={thesisDatesForm.defenseDate}
+                      onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, defenseDate: e.target.value })}
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-500"
+                    />
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      对应西南交通大学硕士研究生终审与公开答辩节点
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.08]">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingThesisDates(false)}
+                      className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl linear-btn-primary font-medium flex items-center gap-1.5 shadow-md"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>确认修改</span>
                     </button>
                   </div>
                 </form>
