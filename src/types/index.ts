@@ -166,6 +166,7 @@ export interface HabitItem {
   icon: string
   category?: string
   logs: Record<string, boolean> // YYYY-MM-DD -> true
+  workoutDetails?: Record<string, string> // YYYY-MM-DD -> 健身部位，如 '胸部' | '背部' 等
 }
 
 export interface EnergyMoodLog {

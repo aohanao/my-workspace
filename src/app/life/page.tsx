@@ -87,17 +87,53 @@ export default function LifePage() {
     })
   }
 
-  const handleToggleHabit = (habitId: string, dateStr: string) => {
+  const isFitnessHabit = (h: HabitItem) =>
+    h.category?.trim() === '健身' ||
+    h.name.includes('健身') ||
+    h.name.includes('锻炼') ||
+    h.name.toLowerCase().includes('fitness') ||
+    h.name.toLowerCase().includes('workout')
+
+  const handleToggleHabit = (habitId: string, dateStr: string, forceVal?: boolean) => {
     const updated = habits.map((h) => {
       if (h.id !== habitId) return h
-      const currentVal = !!h.logs[dateStr]
+      const nextVal = forceVal !== undefined ? forceVal : !h.logs[dateStr]
+      const nextLogs = { ...h.logs }
+      const nextWorkoutDetails = { ...(h.workoutDetails || {}) }
+
+      if (nextVal) {
+        nextLogs[dateStr] = true
+      } else {
+        delete nextLogs[dateStr]
+        delete nextWorkoutDetails[dateStr]
+      }
+
       return {
         ...h,
-        logs: { ...h.logs, [dateStr]: !currentVal },
+        logs: nextLogs,
+        workoutDetails: nextWorkoutDetails,
       }
     })
     setHabits(updated)
     StorageService.saveHabits(updated)
+    window.dispatchEvent(new CustomEvent('workspace-data-updated'))
+  }
+
+  const handleSetFitnessPart = (habitId: string, dateStr: string, part: string) => {
+    const updated = habits.map((h) => {
+      if (h.id !== habitId) return h
+      const nextLogs = { ...h.logs, [dateStr]: true }
+      const nextWorkoutDetails = { ...(h.workoutDetails || {}), [dateStr]: part }
+
+      return {
+        ...h,
+        logs: nextLogs,
+        workoutDetails: nextWorkoutDetails,
+      }
+    })
+    setHabits(updated)
+    StorageService.saveHabits(updated)
+    window.dispatchEvent(new CustomEvent('workspace-data-updated'))
   }
 
   // 习惯增删改
@@ -329,21 +365,77 @@ export default function LifePage() {
                   {past7Days.map((d) => {
                     const isChecked = !!habit.logs[d.dateStr]
                     const isToday = d.dateStr === today
+                    const isFitness = isFitnessHabit(habit)
+                    const currentPart = habit.workoutDetails?.[d.dateStr]
 
                     return (
                       <td key={d.dateStr} className="p-3 text-center">
-                        <button
-                          onClick={() => handleToggleHabit(habit.id, d.dateStr)}
-                          className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto ${
-                            isChecked
-                              ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30 scale-105'
-                              : isToday
-                              ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50'
-                              : 'bg-transparent border-white/[0.08] text-transparent hover:border-white/20'
-                          }`}
-                        >
-                          {isChecked ? <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" /> : <span className="text-xs text-zinc-500">•</span>}
-                        </button>
+                        {isFitness ? (
+                          <div className="relative inline-flex items-center justify-center">
+                            <select
+                              value={isChecked ? (currentPart || '已打卡') : ''}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                if (val === '__uncheck__') {
+                                  handleToggleHabit(habit.id, d.dateStr, false)
+                                } else if (val) {
+                                  handleSetFitnessPart(habit.id, d.dateStr, val)
+                                }
+                              }}
+                              className={`h-8 rounded-xl border text-xs font-semibold cursor-pointer transition-all text-center appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-400 ${
+                                isChecked
+                                  ? 'px-2 min-w-[52px] bg-emerald-500 border-emerald-500 text-white font-mono shadow-sm shadow-emerald-500/30 hover:bg-emerald-600 scale-105'
+                                  : isToday
+                                  ? 'w-8 bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
+                                  : 'w-8 bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
+                              }`}
+                              title={
+                                isChecked
+                                  ? `健身打卡: ${currentPart || '已打卡'} (点击下拉更换部位或取消)`
+                                  : '点击下拉选择具体健身部位'
+                              }
+                            >
+                              <option value="" disabled={isChecked} className="bg-[#0e121e] text-zinc-400">
+                                {isChecked ? '更换部位' : '•'}
+                              </option>
+                              {isChecked && (
+                                <option value="__uncheck__" className="bg-[#0e121e] text-rose-400 font-bold">
+                                  ❌ 取消打卡
+                                </option>
+                              )}
+                              {isChecked &&
+                                currentPart &&
+                                !['胸部', '背部', '腿部', '肩部', '手臂', '核心', '有氧', '全身'].includes(
+                                  currentPart
+                                ) && (
+                                  <option value={currentPart} className="bg-[#0e121e] text-white">
+                                    🏋️ {currentPart}
+                                  </option>
+                                )}
+                              <option value="胸部" className="bg-[#0e121e] text-white">💪 胸部</option>
+                              <option value="背部" className="bg-[#0e121e] text-white">🥋 背部</option>
+                              <option value="腿部" className="bg-[#0e121e] text-white">🦵 腿部</option>
+                              <option value="肩部" className="bg-[#0e121e] text-white">🛡️ 肩部</option>
+                              <option value="手臂" className="bg-[#0e121e] text-white">🦾 手臂</option>
+                              <option value="核心" className="bg-[#0e121e] text-white">🔥 核心/腹肌</option>
+                              <option value="有氧" className="bg-[#0e121e] text-white">🏃 有氧/减脂</option>
+                              <option value="全身" className="bg-[#0e121e] text-white">⚡ 全身综合</option>
+                            </select>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleToggleHabit(habit.id, d.dateStr)}
+                            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto ${
+                              isChecked
+                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30 scale-105'
+                                : isToday
+                                ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50'
+                                : 'bg-transparent border-white/[0.08] text-transparent hover:border-white/20'
+                            }`}
+                          >
+                            {isChecked ? <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" /> : <span className="text-xs text-zinc-500">•</span>}
+                          </button>
+                        )}
                       </td>
                     )
                   })}
