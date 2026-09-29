@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Smile,
   Flame,
@@ -104,6 +104,16 @@ export default function LifePage() {
     h.name.toLowerCase().includes('fitness') ||
     h.name.toLowerCase().includes('workout')
 
+  const sortedHabits = useMemo(() => {
+    return [...habits].sort((a, b) => {
+      const isFitA = isFitnessHabit(a)
+      const isFitB = isFitnessHabit(b)
+      if (isFitA && !isFitB) return 1
+      if (!isFitA && isFitB) return -1
+      return 0
+    })
+  }, [habits])
+
   const FITNESS_PART_OPTIONS = [
     { id: '肩', short: '肩', label: '肩部', icon: '🛡️' },
     { id: '胸', short: '胸', label: '胸部', icon: '💪' },
@@ -127,13 +137,13 @@ export default function LifePage() {
     return trimmed
   }
 
-  const formatFitnessDisplay = (rawPartsStr?: string): { text: string; full: string } => {
-    if (!rawPartsStr) return { text: '', full: '' }
+  const formatFitnessDisplay = (rawPartsStr?: string): { text: string; full: string; count: number } => {
+    if (!rawPartsStr) return { text: '', full: '', count: 0 }
     const rawParts = rawPartsStr
       .split(',')
       .map((p) => normalizeFitnessPart(p))
       .filter(Boolean)
-    if (rawParts.length === 0) return { text: '', full: '' }
+    if (rawParts.length === 0) return { text: '', full: '', count: 0 }
 
     const shorts = rawParts.map((p) => {
       const opt = FITNESS_PART_OPTIONS.find((o) => o.id === p)
@@ -148,11 +158,11 @@ export default function LifePage() {
       .join(' + ')
 
     if (shorts.length === 1) {
-      return { text: rawParts[0], full }
+      return { text: shorts[0], full, count: 1 }
     } else if (shorts.length === 2) {
-      return { text: `${shorts[0]}${shorts[1]}`, full }
+      return { text: `${shorts[0]}${shorts[1]}`, full, count: 2 }
     } else {
-      return { text: `${shorts[0]}+${shorts.length - 1}`, full }
+      return { text: shorts.slice(0, 3).join(''), full, count: shorts.length }
     }
   }
 
@@ -412,7 +422,7 @@ export default function LifePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {habits.map((habit) => (
+              {sortedHabits.map((habit) => (
                 <tr key={habit.id} className="hover:bg-white/[0.02] transition-colors group">
                   <td className="p-3.5 pl-4 whitespace-nowrap">
                     <span className="text-xs font-medium px-3 py-1 rounded-full bg-white/[0.05] text-zinc-300 border border-white/[0.08]">
@@ -435,12 +445,13 @@ export default function LifePage() {
                     const isChecked = !!habit.logs[d.dateStr]
                     const isToday = d.dateStr === today
                     const isFitness = isFitnessHabit(habit)
-                    const { text: displayPart, full: fullPartText } = isFitness
+                    const { text: displayPart, full: fullPartText, count: partCount } = isFitness
                       ? formatFitnessDisplay(habit.workoutDetails?.[d.dateStr])
-                      : { text: '', full: '' }
+                      : { text: '', full: '', count: 0 }
+                    const isMultiPart = isChecked && isFitness && partCount >= 2
 
                     return (
-                      <td key={d.dateStr} className="p-3 text-center">
+                      <td key={d.dateStr} className="p-3 text-center w-16 min-w-[64px]">
                         {isFitness ? (
                           <button
                             type="button"
@@ -459,7 +470,9 @@ export default function LifePage() {
                                 initiallyChecked: isChecked,
                               })
                             }}
-                            className={`w-[38px] h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
+                            className={`h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
+                              isMultiPart ? 'w-[44px]' : 'w-8'
+                            } ${
                               isChecked
                                 ? 'bg-emerald-500 border-emerald-500 text-white font-normal leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
                                 : isToday
@@ -474,7 +487,7 @@ export default function LifePage() {
                           >
                             {isChecked ? (
                               <span
-                                className={`leading-none select-none text-center font-normal text-white max-w-[34px] overflow-hidden whitespace-nowrap ${
+                                className={`leading-none select-none text-center font-normal text-white overflow-hidden whitespace-nowrap ${
                                   (displayPart || '练').length === 1
                                     ? 'text-xs'
                                     : (displayPart || '练').length === 2
@@ -546,35 +559,35 @@ export default function LifePage() {
               </div>
               <div className="relative h-6 flex items-center group cursor-pointer px-1">
                 {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
-                <div className="w-full h-2 rounded-full bg-[#161c2c] border border-white/[0.12] relative overflow-hidden shadow-inner">
+                <div className="w-full h-2 rounded-full bg-slate-900/90 border border-slate-700/60 relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-600/90 transition-all duration-150 relative overflow-hidden"
-                    style={{ width: `${(energy / 5) * 100}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 transition-all duration-150 relative overflow-hidden"
+                    style={{ width: `${(Math.max(0, Math.min(5, energy)) / 5) * 100}%` }}
                   >
                     {energy > 0 && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
                     )}
                   </div>
                 </div>
-                {/* 发光滑块点 */}
+                {/* 发光滑块点：提高至 z-20 绝对置顶，位置精确对准 */}
                 <div
-                  className="absolute w-3.5 h-3.5 -ml-1.5 rounded-full bg-white border-2 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] pointer-events-none transition-all duration-150 flex items-center justify-center"
-                  style={{ left: `calc(${energy / 5} * (100% - 14px) + 7px)` }}
+                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.9)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
+                  style={{ left: `calc(8px + ${(Math.max(0, Math.min(5, energy)) / 5)} * (100% - 16px))` }}
                 >
-                  <span className="w-1 h-1 rounded-full bg-blue-600" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 </div>
                 <input
                   type="range"
                   min="0"
                   max="5"
                   step="1"
-                  value={energy}
+                  value={Math.max(0, Math.min(5, energy))}
                   onChange={(e) => {
                     const val = Number(e.target.value)
                     setEnergy(val)
                     saveWellbeing({ energy: val })
                   }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
                 />
               </div>
             </div>
@@ -586,35 +599,35 @@ export default function LifePage() {
               </div>
               <div className="relative h-6 flex items-center group cursor-pointer px-1">
                 {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
-                <div className="w-full h-2 rounded-full bg-[#161c2c] border border-white/[0.12] relative overflow-hidden shadow-inner">
+                <div className="w-full h-2 rounded-full bg-slate-900/90 border border-slate-700/60 relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-purple-900 to-violet-600/90 transition-all duration-150 relative overflow-hidden"
-                    style={{ width: `${(mood / 5) * 100}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-purple-600 via-violet-500 to-fuchsia-400 transition-all duration-150 relative overflow-hidden"
+                    style={{ width: `${(Math.max(0, Math.min(5, mood)) / 5) * 100}%` }}
                   >
                     {mood > 0 && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
                     )}
                   </div>
                 </div>
-                {/* 发光滑块点 */}
+                {/* 发光滑块点：提高至 z-20 绝对置顶，位置精确对准 */}
                 <div
-                  className="absolute w-3.5 h-3.5 -ml-1.5 rounded-full bg-white border-2 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)] pointer-events-none transition-all duration-150 flex items-center justify-center"
-                  style={{ left: `calc(${mood / 5} * (100% - 14px) + 7px)` }}
+                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.9)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
+                  style={{ left: `calc(8px + ${(Math.max(0, Math.min(5, mood)) / 5)} * (100% - 16px))` }}
                 >
-                  <span className="w-1 h-1 rounded-full bg-purple-600" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
                 </div>
                 <input
                   type="range"
                   min="0"
                   max="5"
                   step="1"
-                  value={mood}
+                  value={Math.max(0, Math.min(5, mood))}
                   onChange={(e) => {
                     const val = Number(e.target.value)
                     setMood(val)
                     saveWellbeing({ mood: val })
                   }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
                 />
               </div>
             </div>
