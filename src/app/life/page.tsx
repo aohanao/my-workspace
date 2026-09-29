@@ -162,7 +162,7 @@ export default function LifePage() {
     } else if (shorts.length === 2) {
       return { text: `${shorts[0]}${shorts[1]}`, full, count: 2 }
     } else {
-      return { text: shorts.slice(0, 3).join(''), full, count: shorts.length }
+      return { text: `${shorts[0]}+${shorts.length - 1}`, full, count: shorts.length }
     }
   }
 
@@ -471,10 +471,10 @@ export default function LifePage() {
                               })
                             }}
                             className={`h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
-                              isMultiPart ? 'w-[44px]' : 'w-8'
+                              isMultiPart ? 'w-[46px]' : 'w-8'
                             } ${
                               isChecked
-                                ? 'bg-emerald-500 border-emerald-500 text-white font-normal leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
+                                ? 'bg-emerald-500 border-emerald-500 text-white font-medium leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
                                 : isToday
                                 ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
                                 : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
@@ -486,15 +486,7 @@ export default function LifePage() {
                             }
                           >
                             {isChecked ? (
-                              <span
-                                className={`leading-none select-none text-center font-normal text-white overflow-hidden whitespace-nowrap ${
-                                  (displayPart || '练').length === 1
-                                    ? 'text-xs'
-                                    : (displayPart || '练').length === 2
-                                    ? 'text-[11px] tracking-tight'
-                                    : 'text-[10px] tracking-tighter'
-                                }`}
-                              >
+                              <span className="leading-none select-none text-center font-medium text-white text-[12.5px] tracking-tight">
                                 {displayPart || '练'}
                               </span>
                             ) : (
@@ -514,7 +506,7 @@ export default function LifePage() {
                             }`}
                           >
                             {isChecked ? (
-                              <Check className="w-4.5 h-4.5 stroke-[2.2] text-white" />
+                              <Check className="w-3.5 h-3.5 stroke-[2.2] text-white" />
                             ) : (
                               <span className="text-xs text-zinc-500">•</span>
                             )}
