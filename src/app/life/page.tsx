@@ -114,6 +114,22 @@ export default function LifePage() {
     { id: '有氧', short: '氧', label: '有氧', icon: '🏃' },
   ]
 
+  const ENERGY_LEVELS: Record<number, { label: string; icon: string; badge: string; glow: string; bar: string }> = {
+    1: { label: '蓄力休整', icon: '🔋', badge: 'bg-blue-500/10 border-blue-500/30 text-blue-300', glow: 'rgba(59,130,246,0.5)', bar: 'from-blue-600 to-cyan-500' },
+    2: { label: '温和恢复', icon: '☕', badge: 'bg-sky-500/10 border-sky-500/30 text-sky-300', glow: 'rgba(56,189,248,0.5)', bar: 'from-blue-500 via-cyan-500 to-teal-400' },
+    3: { label: '常态平稳', icon: '🎯', badge: 'bg-teal-500/10 border-teal-500/30 text-teal-300', glow: 'rgba(20,184,166,0.5)', bar: 'from-cyan-500 via-teal-400 to-emerald-400' },
+    4: { label: '深度专注', icon: '⚡', badge: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200', glow: 'rgba(16,185,129,0.55)', bar: 'from-teal-400 via-emerald-400 to-cyan-300' },
+    5: { label: '极限心流', icon: '🔥', badge: 'bg-cyan-400/20 border-cyan-400/50 text-white', glow: 'rgba(6,182,212,0.65)', bar: 'from-emerald-400 via-cyan-400 to-sky-200' },
+  }
+
+  const MOOD_LEVELS: Record<number, { label: string; icon: string; badge: string; glow: string; bar: string }> = {
+    1: { label: '沉淀蓄势', icon: '🌑', badge: 'bg-slate-500/10 border-slate-500/30 text-slate-300', glow: 'rgba(148,163,184,0.4)', bar: 'from-slate-600 to-indigo-500' },
+    2: { label: '微有起伏', icon: '🌧️', badge: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300', glow: 'rgba(99,102,241,0.5)', bar: 'from-indigo-600 via-purple-500 to-violet-400' },
+    3: { label: '从容平和', icon: '🍃', badge: 'bg-purple-500/10 border-purple-500/30 text-purple-300', glow: 'rgba(168,85,247,0.5)', bar: 'from-indigo-500 via-purple-500 to-pink-500' },
+    4: { label: '晴朗愉悦', icon: '✨', badge: 'bg-fuchsia-500/15 border-fuchsia-500/40 text-fuchsia-200', glow: 'rgba(217,70,239,0.55)', bar: 'from-purple-500 via-fuchsia-400 to-rose-400' },
+    5: { label: '高燃澎湃', icon: '🌟', badge: 'bg-rose-500/20 border-rose-500/50 text-white', glow: 'rgba(244,63,94,0.65)', bar: 'from-fuchsia-500 via-rose-400 to-amber-300' },
+  }
+
   const normalizeFitnessPart = (part?: string): string => {
     if (!part) return ''
     const trimmed = part.trim()
@@ -342,12 +358,11 @@ export default function LifePage() {
 
       {/* 1. 周计划时间块结构 (Time-Blocking) —— 支持全方位自定义修改 */}
       <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
-        <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
+        <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
           <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2.5 tracking-tight">
             <Clock className="w-5 h-5 text-zinc-300" />
             结构化作息时间块 (Time-Blocking)
           </h3>
-          <span className="text-xs sm:text-sm text-zinc-400">点击各时段卡片可编辑活动安排</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -525,70 +540,212 @@ export default function LifePage() {
 
       {/* 3. 状态能量与速记备忘 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        {/* 今日精力与状态日志 */}
-        <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2.5 tracking-tight">
-              <BatteryCharging className="w-5 h-5 text-cyan-400" />
-              今日能量与状态自评
-            </h3>
-            <span className="text-xs sm:text-sm font-mono text-cyan-400">{today}</span>
-          </div>
+        {/* 今日精力与状态日志 - 高级科技感玻璃拟态与粒子渐变流光 */}
+        {(() => {
+          const currentEnergyConfig = ENERGY_LEVELS[energy] || ENERGY_LEVELS[4]
+          const currentMoodConfig = MOOD_LEVELS[mood] || MOOD_LEVELS[4]
 
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
-                <span>⚡ 专注精力等级:</span>
-                <span className="font-mono font-bold text-base text-cyan-400">{energy} / 5</span>
+          return (
+            <div className="relative overflow-hidden linear-card p-5 sm:p-6 rounded-3xl border border-cyan-500/25 shadow-[0_12px_40px_rgba(0,0,0,0.5)] group">
+              {/* 背景微光光晕 */}
+              <div className="absolute -top-20 -left-20 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -right-20 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              {/* 卡片内浮动微粒子 */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
+                <span className="absolute top-3 left-1/4 w-1 h-1 rounded-full bg-cyan-400/70 animate-ping duration-1000" />
+                <span className="absolute top-10 right-10 w-1.5 h-1.5 rounded-full bg-cyan-300/40 blur-[0.5px] animate-pulse" />
+                <span className="absolute bottom-12 left-10 w-1 h-1 rounded-full bg-purple-400/50 animate-pulse duration-700" />
+                <span className="absolute top-1/2 right-1/4 w-1 h-1 rounded-full bg-emerald-400/50 animate-pulse duration-1000" />
+                <span className="absolute bottom-6 right-16 w-1.5 h-1.5 rounded-full bg-pink-400/40 blur-[0.5px] animate-ping duration-1000" />
               </div>
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={energy}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  setEnergy(val)
-                  saveWellbeing({ energy: val })
-                }}
-                className="w-full accent-cyan-500 cursor-pointer h-2 bg-black/40 rounded-lg"
-              />
-            </div>
 
-            <div>
-              <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
-                <span>😊 心情状态指数:</span>
-                <span className="font-mono font-bold text-base text-blue-400">{mood} / 5</span>
+              <div className="relative z-10 space-y-4 sm:space-y-5">
+                {/* 顶栏标题与日期标签 */}
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
+                      <BatteryCharging className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-2">
+                        今日能量与状态自评
+                      </h3>
+                      <p className="text-[11px] text-zinc-400">实时量化状态心流 · 沉淀复盘日记</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-cyan-500/30 text-cyan-300 font-mono text-xs shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    <span>{today}</span>
+                  </div>
+                </div>
+
+                {/* 1. 专注精力等级滑块 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs sm:text-sm font-medium text-zinc-200 flex items-center gap-1.5">
+                      <span className="text-cyan-400">⚡</span>
+                      专注精力等级
+                    </span>
+                    {/* 状态徽章 */}
+                    <div className={`px-2.5 py-0.5 rounded-full border text-xs font-mono font-medium flex items-center gap-1.5 shadow-sm transition-all ${currentEnergyConfig.badge}`}>
+                      <span>{currentEnergyConfig.icon}</span>
+                      <span className="font-bold">{energy} / 5</span>
+                      <span className="text-zinc-400 opacity-60">·</span>
+                      <span className="font-sans">{currentEnergyConfig.label}</span>
+                    </div>
+                  </div>
+
+                  {/* 渐变发光进度轨道 */}
+                  <div className="relative h-6 flex items-center group cursor-pointer">
+                    {/* 轨道底槽 */}
+                    <div className="w-full h-2.5 rounded-full bg-black/70 border border-white/[0.08] relative overflow-hidden backdrop-blur-md">
+                      {/* 分段刻度暗点 */}
+                      <div className="absolute inset-0 flex justify-between px-1 pointer-events-none z-0">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <span key={i} className="w-1 h-1 rounded-full bg-white/10 my-auto" />
+                        ))}
+                      </div>
+                      {/* 渐变流光色彩填充 */}
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${currentEnergyConfig.bar} transition-all duration-200 relative`}
+                        style={{
+                          width: `${(Math.max(1, energy) / 5) * 100}%`,
+                          boxShadow: `0 0 16px ${currentEnergyConfig.glow}`,
+                        }}
+                      >
+                        {/* 动态光束流动 */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse opacity-60" />
+                      </div>
+                    </div>
+
+                    {/* 科技发光拖动触点球 */}
+                    <div
+                      className="absolute w-5 h-5 -ml-2.5 rounded-full bg-white border-2 border-cyan-400 pointer-events-none transition-all duration-200 flex items-center justify-center shadow-lg"
+                      style={{
+                        left: `${(Math.max(1, energy) / 5) * 100}%`,
+                        boxShadow: `0 0 14px ${currentEnergyConfig.glow}, 0 2px 6px rgba(0,0,0,0.6)`,
+                      }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-ping duration-1000 opacity-75" />
+                    </div>
+
+                    {/* 交互输入控件（全透明覆盖） */}
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      step="1"
+                      value={energy}
+                      onChange={(e) => {
+                        const val = Number(e.target.value)
+                        setEnergy(val)
+                        saveWellbeing({ energy: val })
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. 心情状态指数滑块 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs sm:text-sm font-medium text-zinc-200 flex items-center gap-1.5">
+                      <span className="text-fuchsia-400">✨</span>
+                      心情状态指数
+                    </span>
+                    {/* 状态徽章 */}
+                    <div className={`px-2.5 py-0.5 rounded-full border text-xs font-mono font-medium flex items-center gap-1.5 shadow-sm transition-all ${currentMoodConfig.badge}`}>
+                      <span>{currentMoodConfig.icon}</span>
+                      <span className="font-bold">{mood} / 5</span>
+                      <span className="text-zinc-400 opacity-60">·</span>
+                      <span className="font-sans">{currentMoodConfig.label}</span>
+                    </div>
+                  </div>
+
+                  {/* 渐变发光进度轨道 */}
+                  <div className="relative h-6 flex items-center group cursor-pointer">
+                    {/* 轨道底槽 */}
+                    <div className="w-full h-2.5 rounded-full bg-black/70 border border-white/[0.08] relative overflow-hidden backdrop-blur-md">
+                      {/* 分段刻度暗点 */}
+                      <div className="absolute inset-0 flex justify-between px-1 pointer-events-none z-0">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <span key={i} className="w-1 h-1 rounded-full bg-white/10 my-auto" />
+                        ))}
+                      </div>
+                      {/* 渐变流光色彩填充 */}
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${currentMoodConfig.bar} transition-all duration-200 relative`}
+                        style={{
+                          width: `${(Math.max(1, mood) / 5) * 100}%`,
+                          boxShadow: `0 0 16px ${currentMoodConfig.glow}`,
+                        }}
+                      >
+                        {/* 动态光束流动 */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse opacity-60" />
+                      </div>
+                    </div>
+
+                    {/* 科技发光拖动触点球 */}
+                    <div
+                      className="absolute w-5 h-5 -ml-2.5 rounded-full bg-white border-2 border-fuchsia-400 pointer-events-none transition-all duration-200 flex items-center justify-center shadow-lg"
+                      style={{
+                        left: `${(Math.max(1, mood) / 5) * 100}%`,
+                        boxShadow: `0 0 14px ${currentMoodConfig.glow}, 0 2px 6px rgba(0,0,0,0.6)`,
+                      }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500 animate-ping duration-1000 opacity-75" />
+                    </div>
+
+                    {/* 交互输入控件（全透明覆盖） */}
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      step="1"
+                      value={mood}
+                      onChange={(e) => {
+                        const val = Number(e.target.value)
+                        setMood(val)
+                        saveWellbeing({ mood: val })
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. 心得与复盘笔记 */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                    <span className="font-medium text-zinc-200 flex items-center gap-1.5">
+                      <span>📝</span>
+                      今日心得与复盘笔记
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11px] text-emerald-400/90 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      实时暂存
+                    </span>
+                  </div>
+                  <div className="relative group">
+                    <textarea
+                      rows={3}
+                      value={dailyJournal}
+                      onChange={(e) => {
+                        setDailyJournal(e.target.value)
+                        saveWellbeing({ journal: e.target.value })
+                      }}
+                      placeholder="记录今日学习心得、面试感受、算法感悟..."
+                      className="w-full p-3.5 rounded-2xl bg-black/50 border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400/60 focus:bg-black/70 focus:shadow-[0_0_24px_rgba(6,182,212,0.18)] resize-none text-xs sm:text-sm leading-relaxed transition-all"
+                    />
+                    <div className="absolute bottom-2.5 right-3 text-[10px] text-zinc-500 font-mono pointer-events-none">
+                      {dailyJournal.length} 字
+                    </div>
+                  </div>
+                </div>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={mood}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  setMood(val)
-                  saveWellbeing({ mood: val })
-                }}
-                className="w-full accent-blue-500 cursor-pointer h-2 bg-black/40 rounded-lg"
-              />
             </div>
-
-            <div>
-              <label className="text-sm font-medium text-zinc-200 block mb-1.5">📝 今日心得与复盘笔记：</label>
-              <textarea
-                rows={3}
-                value={dailyJournal}
-                onChange={(e) => {
-                  setDailyJournal(e.target.value)
-                  saveWellbeing({ journal: e.target.value })
-                }}
-                placeholder="记录今日学习心得、面试感受、算法感悟..."
-                className="w-full p-3.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500 resize-none text-sm leading-relaxed"
-              />
-            </div>
-          </div>
-        </div>
+          )
+        })()}
 
         {/* 灵感速记与待办转存 */}
         <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20 flex flex-col justify-between">

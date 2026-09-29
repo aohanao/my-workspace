@@ -35,12 +35,10 @@ export function TechCursorEffect() {
   const pathname = usePathname()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
-  // 用户指定：仅在秋招求职管家页面（/career）关闭拖尾，保证该大表格绝对极速
+  // 用户指定：在秋招求职管家页面（/career）关闭鼠标重度流体拖尾，保证超大表格极速；常驻背景星光在所有页面均柔和常驻
   const isCareerPage = pathname === '/career'
 
   useEffect(() => {
-    if (isCareerPage) return
-
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })
@@ -57,26 +55,46 @@ export function TechCursorEffect() {
     }
     window.addEventListener('resize', handleResize, { passive: true })
 
-    // 1. 初始化全屏常驻随机浮动星尘粒子（35颗，安静漫游，赋予深空生命力）
+    // 1. 初始化全屏常驻随机浮动星尘粒子（72 颗，三层景深，带有真实微呼吸光晕，明显但不夺目）
     const ambientParticles: AmbientParticle[] = []
     const AMBIENT_COLORS = [
       'rgba(56, 189, 248, ',   // 冰川天青
-      'rgba(129, 140, 248, ',  // 电磁冷紫
-      'rgba(255, 255, 255, ',  // 纯白微星
-      'rgba(147, 197, 253, ',  // 浅深海蓝
+      'rgba(168, 85, 247, ',  // 电磁浅紫
+      'rgba(255, 255, 255, ',  // 纯白星光
+      'rgba(52, 211, 153, ',   // 极光薄荷绿
+      'rgba(251, 191, 36, ',   // 琥珀晨星
+      'rgba(147, 197, 253, ',  // 深空幽蓝
     ]
 
-    for (let i = 0; i < 35; i++) {
+    const TOTAL_STARS = 72
+    for (let i = 0; i < TOTAL_STARS; i++) {
+      let size: number
+      let baseAlpha: number
+
+      if (i < 36) {
+        // 深景微尘 (0.9px ~ 1.5px)
+        size = Math.random() * 0.6 + 0.9
+        baseAlpha = Math.random() * 0.2 + 0.35
+      } else if (i < 58) {
+        // 中景呼吸星 (1.6px ~ 2.4px)
+        size = Math.random() * 0.8 + 1.6
+        baseAlpha = Math.random() * 0.25 + 0.45
+      } else {
+        // 前景闪烁明星 (2.5px ~ 3.4px，带微光晕)
+        size = Math.random() * 0.9 + 2.5
+        baseAlpha = Math.random() * 0.2 + 0.65
+      }
+
       ambientParticles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.28,
-        vy: (Math.random() - 0.5) * 0.28,
-        size: Math.random() * 1.4 + 0.8, // 0.8px ~ 2.2px 精巧微尘
-        baseAlpha: Math.random() * 0.25 + 0.15,
-        alpha: 0.2,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        size,
+        baseAlpha,
+        alpha: baseAlpha,
         color: AMBIENT_COLORS[Math.floor(Math.random() * AMBIENT_COLORS.length)],
-        twinkleSpeed: Math.random() * 0.02 + 0.01,
+        twinkleSpeed: Math.random() * 0.025 + 0.012,
         phase: Math.random() * Math.PI * 2,
       })
     }
@@ -101,6 +119,9 @@ export function TechCursorEffect() {
     ]
 
     const handleMouseMove = (e: MouseEvent) => {
+      // 保持 /career 页面不发射鼠标拖尾，以确保大型千行表格极速滚动
+      if (isCareerPage) return
+
       const isFirstMove = !mouse.active
       mouse.active = true
       mouse.prevX = mouse.x
@@ -168,10 +189,24 @@ export function TechCursorEffect() {
         if (ap.y < -10) ap.y = height + 10
         else if (ap.y > height + 10) ap.y = -10
 
-        // 柔和呼吸闪烁
+        // 柔和呼吸闪烁 (最低 0.2，最高可达 0.95，清晰可见但温和舒适)
         ap.phase += ap.twinkleSpeed
-        const currentAlpha = ap.baseAlpha * (0.6 + Math.sin(ap.phase) * 0.4)
+        const currentAlpha = Math.min(0.95, Math.max(0.2, ap.baseAlpha * (0.65 + Math.sin(ap.phase) * 0.5)))
 
+        // 对于中大尺寸的星星，在其变亮时渲染柔和的发光微光晕
+        if (ap.size >= 1.8 && currentAlpha > 0.45) {
+          const haloRadius = ap.size * 2.8
+          const halo = ctx.createRadialGradient(ap.x, ap.y, 0, ap.x, ap.y, haloRadius)
+          halo.addColorStop(0, `${ap.color}${currentAlpha * 0.5})`)
+          halo.addColorStop(0.5, `${ap.color}${currentAlpha * 0.15})`)
+          halo.addColorStop(1, 'transparent')
+          ctx.fillStyle = halo
+          ctx.beginPath()
+          ctx.arc(ap.x, ap.y, haloRadius, 0, Math.PI * 2)
+          ctx.fill()
+        }
+
+        // 核心星点
         ctx.fillStyle = `${ap.color}${currentAlpha})`
         ctx.beginPath()
         ctx.arc(ap.x, ap.y, ap.size, 0, Math.PI * 2)
@@ -219,7 +254,7 @@ export function TechCursorEffect() {
       }
 
       // ================= 3. 鼠标当前位置极简科技微准星焦点 =================
-      if (mouse.active && mouse.x > 0 && mouse.y > 0) {
+      if (!isCareerPage && mouse.active && mouse.x > 0 && mouse.y > 0) {
         // 轻盈 14px 微光晕
         const cursorGlow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 14)
         cursorGlow.addColorStop(0, 'rgba(56, 189, 248, 0.25)')
@@ -248,11 +283,6 @@ export function TechCursorEffect() {
       cancelAnimationFrame(animationFrameId)
     }
   }, [isCareerPage])
-
-  // 秋招求职管家页面完全不渲染画布
-  if (isCareerPage) {
-    return null
-  }
 
   return (
     <canvas
