@@ -3,21 +3,20 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 
-// 鼠标流体拖尾粒子
+// 鼠标流体拖尾粒子 (纯黑白星光)
 interface FluidParticle {
   x: number
   y: number
   vx: number
   vy: number
   size: number
-  color: string
   alpha: number
   life: number
   maxLife: number
   turbPhase: number
 }
 
-// 背景常驻随机浮动微尘粒子
+// 背景常驻随机浮动微尘粒子 (纯黑白单色闪烁)
 interface AmbientParticle {
   x: number
   y: number
@@ -26,9 +25,28 @@ interface AmbientParticle {
   size: number
   baseAlpha: number
   alpha: number
-  color: string
   twinkleSpeed: number
   phase: number
+}
+
+// 随机划过屏幕的超高速宇宙粒子束 (Collimated Particle Beam / Ray Stream)
+interface ParticleBeam {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  length: number
+  width: number
+  angle: number
+  alpha: number
+  life: number
+  maxLife: number
+  particles: {
+    offset: number
+    lateralOffset: number
+    size: number
+    alpha: number
+  }[]
 }
 
 export function TechCursorEffect() {
@@ -55,51 +73,72 @@ export function TechCursorEffect() {
     }
     window.addEventListener('resize', handleResize, { passive: true })
 
-    // 1. 初始化全屏常驻随机浮动星尘粒子（72 颗，三层景深，带有真实微呼吸光晕，明显但不夺目）
+    // 1. 初始化纯黑白常驻随机浮动星尘粒子（38 颗精简配置，纯粹黑白闪烁，安静深空）
     const ambientParticles: AmbientParticle[] = []
-    const AMBIENT_COLORS = [
-      'rgba(56, 189, 248, ',   // 冰川天青
-      'rgba(168, 85, 247, ',  // 电磁浅紫
-      'rgba(255, 255, 255, ',  // 纯白星光
-      'rgba(52, 211, 153, ',   // 极光薄荷绿
-      'rgba(251, 191, 36, ',   // 琥珀晨星
-      'rgba(147, 197, 253, ',  // 深空幽蓝
-    ]
+    const TOTAL_STARS = 38
 
-    const TOTAL_STARS = 72
     for (let i = 0; i < TOTAL_STARS; i++) {
-      let size: number
-      let baseAlpha: number
-
-      if (i < 36) {
-        // 深景微尘 (0.9px ~ 1.5px)
-        size = Math.random() * 0.6 + 0.9
-        baseAlpha = Math.random() * 0.2 + 0.35
-      } else if (i < 58) {
-        // 中景呼吸星 (1.6px ~ 2.4px)
-        size = Math.random() * 0.8 + 1.6
-        baseAlpha = Math.random() * 0.25 + 0.45
-      } else {
-        // 前景闪烁明星 (2.5px ~ 3.4px，带微光晕)
-        size = Math.random() * 0.9 + 2.5
-        baseAlpha = Math.random() * 0.2 + 0.65
-      }
+      const size = Math.random() * 1.1 + 0.9 // 0.9px ~ 2.0px 细腻纯白星点
+      const baseAlpha = Math.random() * 0.35 + 0.35
 
       ambientParticles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2,
         size,
         baseAlpha,
         alpha: baseAlpha,
-        color: AMBIENT_COLORS[Math.floor(Math.random() * AMBIENT_COLORS.length)],
-        twinkleSpeed: Math.random() * 0.025 + 0.012,
+        twinkleSpeed: Math.random() * 0.02 + 0.012,
         phase: Math.random() * Math.PI * 2,
       })
     }
 
-    // 2. 鼠标坐标追踪与流体粒子发射池
+    // 2. 随机高能粒子束发射池 (每隔 3~6 秒随机划过屏幕)
+    const particleBeams: ParticleBeam[] = []
+    let nextBeamTimer = Math.floor(Math.random() * 100 + 60) // 初始 1~2.5 秒触发首个粒子束
+
+    const spawnParticleBeam = () => {
+      // 粒子束以 30° ~ 55° 倾角斜向射穿屏幕，速度极快 (18 ~ 26px/帧)
+      const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.35
+      const speed = Math.random() * 8 + 18
+      const vx = Math.cos(angle) * speed
+      const vy = Math.sin(angle) * speed
+      const length = Math.random() * 140 + 160 // 160px ~ 300px 聚束长度
+      const widthVal = Math.random() * 0.7 + 1.2 // 1.2px ~ 1.9px 纤细高光束
+
+      // 从屏幕顶部或左上方边缘射出
+      const startX = Math.random() * (width + 300) - 150
+      const startY = Math.random() * -100 - 50
+
+      // 伴生微粒子：沿着粒子束管道伴飞的微型高能微粒
+      const beamParticles = []
+      const pCount = Math.floor(Math.random() * 4 + 6) // 6 ~ 9 颗微粒子
+      for (let j = 0; j < pCount; j++) {
+        beamParticles.push({
+          offset: Math.random() * length * 0.88,
+          lateralOffset: (Math.random() - 0.5) * 3.5,
+          size: Math.random() * 1.0 + 0.7,
+          alpha: Math.random() * 0.4 + 0.6,
+        })
+      }
+
+      particleBeams.push({
+        x: startX,
+        y: startY,
+        vx,
+        vy,
+        length,
+        width: widthVal,
+        angle,
+        alpha: 0,
+        life: 0,
+        maxLife: Math.floor(Math.max(width, height) / speed) + 20,
+        particles: beamParticles,
+      })
+    }
+
+    // 3. 鼠标坐标追踪与纯黑白流体粒子发射池
     const mouse = {
       x: -1000,
       y: -1000,
@@ -109,14 +148,6 @@ export function TechCursorEffect() {
     }
 
     const fluidParticles: FluidParticle[] = []
-
-    // 粒子流体调色板：冰川天青、冷晶蓝、电磁冷紫、纯白星光
-    const FLUID_COLORS = [
-      'rgba(56, 189, 248, ',   // 冰川天青
-      'rgba(96, 165, 250, ',   // 冷晶蓝
-      'rgba(129, 140, 248, ',  // 电磁冷紫
-      'rgba(255, 255, 255, ',  // 纯白星尘
-    ]
 
     const handleMouseMove = (e: MouseEvent) => {
       // 保持 /career 页面不发射鼠标拖尾，以确保大型千行表格极速滚动
@@ -135,35 +166,30 @@ export function TechCursorEffect() {
       const dy = mouse.y - mouse.prevY
       const dist = Math.hypot(dx, dy)
 
-      // 只要鼠标有移动，就顺滑释放星尘流体粒子（无激光连线、无粗苯光团）
+      // 只要鼠标有移动，顺滑释放纯白星尘微流体粒子
       if (dist > 2) {
-        // 根据移动速度发射 3 ~ 7 颗粒子，形成自然流淌的粒子沙流带
-        const count = Math.min(7, Math.max(3, Math.floor(dist / 6)))
+        const count = Math.min(6, Math.max(2, Math.floor(dist / 8)))
 
         for (let i = 0; i < count; i++) {
-          const color = FLUID_COLORS[Math.floor(Math.random() * FLUID_COLORS.length)]
-          // 沿着移动切线带有散开角度与流体动量
           const sprayAngle = Math.atan2(dy, dx) + Math.PI + (Math.random() - 0.5) * 1.2
-          const speed = Math.random() * 1.6 + 0.5
+          const speed = Math.random() * 1.4 + 0.4
 
           fluidParticles.push({
-            x: mouse.x + (Math.random() - 0.5) * 6,
-            y: mouse.y + (Math.random() - 0.5) * 6,
-            vx: Math.cos(sprayAngle) * speed * 0.45 + (Math.random() - 0.5) * 0.6,
-            vy: Math.sin(sprayAngle) * speed * 0.45 + (Math.random() - 0.5) * 0.6,
-            size: Math.random() * 1.5 + 1.1, // 1.1px ~ 2.6px 精致微细粒子
-            color,
-            alpha: Math.random() * 0.35 + 0.65,
+            x: mouse.x + (Math.random() - 0.5) * 5,
+            y: mouse.y + (Math.random() - 0.5) * 5,
+            vx: Math.cos(sprayAngle) * speed * 0.4 + (Math.random() - 0.5) * 0.5,
+            vy: Math.sin(sprayAngle) * speed * 0.4 + (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 1.2 + 0.9, // 精致微细纯白粒子
+            alpha: Math.random() * 0.3 + 0.6,
             life: 0,
-            maxLife: Math.floor(Math.random() * 25 + 30), // 30 ~ 55 帧优雅渐隐
+            maxLife: Math.floor(Math.random() * 20 + 25),
             turbPhase: Math.random() * Math.PI * 2,
           })
         }
       }
 
-      // 控制最大粒子数量，保障 60fps 满帧
-      if (fluidParticles.length > 90) {
-        fluidParticles.splice(0, fluidParticles.length - 90)
+      if (fluidParticles.length > 70) {
+        fluidParticles.splice(0, fluidParticles.length - 70)
       }
     }
 
@@ -177,7 +203,7 @@ export function TechCursorEffect() {
     const render = () => {
       ctx.clearRect(0, 0, width, height)
 
-      // ================= 1. 渲染背景常驻随机浮动微尘粒子 =================
+      // ================= 1. 渲染纯黑白常驻随机浮动星尘粒子 =================
       for (let i = 0; i < ambientParticles.length; i++) {
         const ap = ambientParticles[i]
         ap.x += ap.vx
@@ -189,39 +215,102 @@ export function TechCursorEffect() {
         if (ap.y < -10) ap.y = height + 10
         else if (ap.y > height + 10) ap.y = -10
 
-        // 柔和呼吸闪烁 (最低 0.2，最高可达 0.95，清晰可见但温和舒适)
+        // 纯黑白微闪呼吸
         ap.phase += ap.twinkleSpeed
-        const currentAlpha = Math.min(0.95, Math.max(0.2, ap.baseAlpha * (0.65 + Math.sin(ap.phase) * 0.5)))
-
-        // 对于中大尺寸的星星，在其变亮时渲染柔和的发光微光晕
-        if (ap.size >= 1.8 && currentAlpha > 0.45) {
-          const haloRadius = ap.size * 2.8
-          const halo = ctx.createRadialGradient(ap.x, ap.y, 0, ap.x, ap.y, haloRadius)
-          halo.addColorStop(0, `${ap.color}${currentAlpha * 0.5})`)
-          halo.addColorStop(0.5, `${ap.color}${currentAlpha * 0.15})`)
-          halo.addColorStop(1, 'transparent')
-          ctx.fillStyle = halo
-          ctx.beginPath()
-          ctx.arc(ap.x, ap.y, haloRadius, 0, Math.PI * 2)
-          ctx.fill()
-        }
+        const currentAlpha = Math.min(0.85, Math.max(0.18, ap.baseAlpha * (0.65 + Math.sin(ap.phase) * 0.45)))
 
         // 核心星点
-        ctx.fillStyle = `${ap.color}${currentAlpha})`
+        ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`
         ctx.beginPath()
         ctx.arc(ap.x, ap.y, ap.size, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // ================= 2. 渲染鼠标粒子流体拖尾 (Fluid Particle Stream) =================
+      // ================= 2. 渲染高能粒子束 (Particle Beam Stream) =================
+      nextBeamTimer--
+      if (nextBeamTimer <= 0 && particleBeams.length < 2) {
+        spawnParticleBeam()
+        nextBeamTimer = Math.floor(Math.random() * 220 + 160) // 160 ~ 380 帧 (~2.5 ~ 6 秒)
+      }
+
+      for (let i = particleBeams.length - 1; i >= 0; i--) {
+        const beam = particleBeams[i]
+        beam.life++
+        beam.x += beam.vx
+        beam.y += beam.vy
+
+        // 平滑渐入与渐出
+        if (beam.life < 8) {
+          beam.alpha = (beam.life / 8) * 0.9
+        } else if (beam.life > beam.maxLife - 15) {
+          beam.alpha = Math.max(0, ((beam.maxLife - beam.life) / 15) * 0.9)
+        } else {
+          beam.alpha = 0.9
+        }
+
+        // 越过视口或生命终结
+        if (beam.life >= beam.maxLife || beam.x > width + 400 || beam.y > height + 400 || beam.alpha <= 0) {
+          particleBeams.splice(i, 1)
+          continue
+        }
+
+        const tailX = beam.x - Math.cos(beam.angle) * beam.length
+        const tailY = beam.y - Math.sin(beam.angle) * beam.length
+
+        // A. 粒子束核心高光流线 (Collimated Beam Core)
+        const beamGrad = ctx.createLinearGradient(beam.x, beam.y, tailX, tailY)
+        beamGrad.addColorStop(0, `rgba(255, 255, 255, ${beam.alpha})`)
+        beamGrad.addColorStop(0.12, `rgba(255, 255, 255, ${beam.alpha * 0.85})`)
+        beamGrad.addColorStop(0.55, `rgba(255, 255, 255, ${beam.alpha * 0.25})`)
+        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+        ctx.strokeStyle = beamGrad
+        ctx.lineWidth = beam.width
+        ctx.lineCap = 'round'
+        ctx.beginPath()
+        ctx.moveTo(tailX, tailY)
+        ctx.lineTo(beam.x, beam.y)
+        ctx.stroke()
+
+        // B. 粒子束头部高亮发光节点 (Luminous Beam Head)
+        const headGlow = ctx.createRadialGradient(beam.x, beam.y, 0, beam.x, beam.y, 6)
+        headGlow.addColorStop(0, `rgba(255, 255, 255, ${beam.alpha * 0.95})`)
+        headGlow.addColorStop(0.4, `rgba(255, 255, 255, ${beam.alpha * 0.35})`)
+        headGlow.addColorStop(1, 'transparent')
+        ctx.fillStyle = headGlow
+        ctx.beginPath()
+        ctx.arc(beam.x, beam.y, 6, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${beam.alpha})`
+        ctx.beginPath()
+        ctx.arc(beam.x, beam.y, 1.8, 0, Math.PI * 2)
+        ctx.fill()
+
+        // C. 沿粒子束管道伴随喷射的微粒子群 (Micro Particle Cluster)
+        for (let j = 0; j < beam.particles.length; j++) {
+          const bp = beam.particles[j]
+          const px = beam.x - Math.cos(beam.angle) * bp.offset + Math.sin(beam.angle) * bp.lateralOffset
+          const py = beam.y - Math.sin(beam.angle) * bp.offset - Math.cos(beam.angle) * bp.lateralOffset
+
+          const pAlpha = beam.alpha * bp.alpha * (1 - bp.offset / beam.length)
+          if (pAlpha > 0.05) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${pAlpha})`
+            ctx.beginPath()
+            ctx.arc(px, py, bp.size, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+      }
+
+      // ================= 3. 渲染鼠标纯黑白流体拖尾 (Fluid Particle Stream) =================
       for (let i = fluidParticles.length - 1; i >= 0; i--) {
         const p = fluidParticles[i]
         p.life++
 
-        // 流体物理阻尼与微涡流扰动
         p.turbPhase += 0.12
-        p.x += p.vx + Math.sin(p.turbPhase) * 0.35
-        p.y += p.vy + Math.cos(p.turbPhase) * 0.35
+        p.x += p.vx + Math.sin(p.turbPhase) * 0.3
+        p.y += p.vy + Math.cos(p.turbPhase) * 0.3
         p.vx *= 0.94
         p.vy *= 0.94
 
@@ -233,39 +322,18 @@ export function TechCursorEffect() {
           continue
         }
 
-        const currentSize = p.size * (1 - progress * 0.35)
+        const currentSize = p.size * (1 - progress * 0.3)
 
-        // 细腻发光粒子绘制（微光晕 + 高光星核）
-        const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentSize * 2.8)
-        halo.addColorStop(0, `${p.color}${currentAlpha * 0.8})`)
-        halo.addColorStop(0.45, `${p.color}${currentAlpha * 0.25})`)
-        halo.addColorStop(1, 'transparent')
-
-        ctx.fillStyle = halo
+        // 纯白高光微核
+        ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.85})`
         ctx.beginPath()
-        ctx.arc(p.x, p.y, currentSize * 2.8, 0, Math.PI * 2)
-        ctx.fill()
-
-        // 核心亮点
-        ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.9})`
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, currentSize * 0.65, 0, Math.PI * 2)
+        ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // ================= 3. 鼠标当前位置极简科技微准星焦点 =================
+      // ================= 4. 鼠标焦点纯白微准星 =================
       if (!isCareerPage && mouse.active && mouse.x > 0 && mouse.y > 0) {
-        // 轻盈 14px 微光晕
-        const cursorGlow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 14)
-        cursorGlow.addColorStop(0, 'rgba(56, 189, 248, 0.25)')
-        cursorGlow.addColorStop(1, 'transparent')
-        ctx.fillStyle = cursorGlow
-        ctx.beginPath()
-        ctx.arc(mouse.x, mouse.y, 14, 0, Math.PI * 2)
-        ctx.fill()
-
-        // 核心 1.5px 纯白微星
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'
         ctx.beginPath()
         ctx.arc(mouse.x, mouse.y, 1.5, 0, Math.PI * 2)
         ctx.fill()

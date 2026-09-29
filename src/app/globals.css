@@ -39,7 +39,7 @@ body {
     radial-gradient(ellipse 110% 70% at 50% -10%, rgba(45, 80, 150, 0.22), transparent 70%),
     radial-gradient(ellipse 85% 50% at 90% 15%, rgba(28, 52, 110, 0.18), transparent 60%),
     radial-gradient(ellipse 70% 40% at 10% 35%, rgba(32, 58, 120, 0.16), transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07), transparent 1.2px);
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.055) 1px, transparent 0);
   background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px;
   background-attachment: fixed;
   font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
