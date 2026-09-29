@@ -17,6 +17,7 @@ import {
   Cpu,
   GraduationCap,
   Check,
+  X,
 } from 'lucide-react'
 import { EnergyMoodLog, HabitItem, QuickCaptureNote, TimeBlockItem } from '@/types'
 import { StorageService } from '@/lib/storage'
@@ -29,6 +30,15 @@ export default function LifePage() {
   const [newHabitName, setNewHabitName] = useState('')
   const [newHabitCategory, setNewHabitCategory] = useState('技能学习')
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false)
+
+  // 健身部位多选记录弹窗
+  const [fitnessModalTarget, setFitnessModalTarget] = useState<{
+    habitId: string
+    dateStr: string
+    dateLabel: string
+    selectedParts: string[]
+    initiallyChecked: boolean
+  } | null>(null)
 
   // 编辑习惯模态框
   const [editingHabit, setEditingHabit] = useState<HabitItem | null>(null)
@@ -94,16 +104,56 @@ export default function LifePage() {
     h.name.toLowerCase().includes('fitness') ||
     h.name.toLowerCase().includes('workout')
 
+  const FITNESS_PART_OPTIONS = [
+    { id: '肩', short: '肩', label: '肩部', icon: '🛡️' },
+    { id: '胸', short: '胸', label: '胸部', icon: '💪' },
+    { id: '背', short: '背', label: '背部', icon: '🥋' },
+    { id: '手臂', short: '臂', label: '手臂', icon: '🦾' },
+    { id: '核心', short: '核', label: '核心', icon: '🔥' },
+    { id: '臀腿', short: '腿', label: '臀腿', icon: '🦵' },
+    { id: '有氧', short: '氧', label: '有氧', icon: '🏃' },
+  ]
+
   const normalizeFitnessPart = (part?: string): string => {
     if (!part) return ''
-    if (part === '肩' || part.includes('肩')) return '肩'
-    if (part === '胸' || part.includes('胸')) return '胸'
-    if (part === '背' || part.includes('背')) return '背'
-    if (part.includes('臂')) return '手臂'
-    if (part.includes('核') || part.includes('腹')) return '核心'
-    if (part.includes('腿') || part.includes('臀')) return '臀腿'
-    if (part.includes('氧') || part.includes('跑')) return '有氧'
-    return part
+    const trimmed = part.trim()
+    if (trimmed === '肩' || trimmed.includes('肩')) return '肩'
+    if (trimmed === '胸' || trimmed.includes('胸')) return '胸'
+    if (trimmed === '背' || trimmed.includes('背')) return '背'
+    if (trimmed.includes('臂')) return '手臂'
+    if (trimmed.includes('核') || trimmed.includes('腹')) return '核心'
+    if (trimmed.includes('腿') || trimmed.includes('臀')) return '臀腿'
+    if (trimmed.includes('氧') || trimmed.includes('跑')) return '有氧'
+    return trimmed
+  }
+
+  const formatFitnessDisplay = (rawPartsStr?: string): { text: string; full: string } => {
+    if (!rawPartsStr) return { text: '', full: '' }
+    const rawParts = rawPartsStr
+      .split(',')
+      .map((p) => normalizeFitnessPart(p))
+      .filter(Boolean)
+    if (rawParts.length === 0) return { text: '', full: '' }
+
+    const shorts = rawParts.map((p) => {
+      const opt = FITNESS_PART_OPTIONS.find((o) => o.id === p)
+      return opt ? opt.short : p.slice(0, 1)
+    })
+
+    const full = rawParts
+      .map((p) => {
+        const opt = FITNESS_PART_OPTIONS.find((o) => o.id === p)
+        return opt ? opt.label : p
+      })
+      .join(' + ')
+
+    if (shorts.length === 1) {
+      return { text: rawParts[0], full }
+    } else if (shorts.length === 2) {
+      return { text: `${shorts[0]}${shorts[1]}`, full }
+    } else {
+      return { text: `${shorts[0]}+${shorts.length - 1}`, full }
+    }
   }
 
   const handleToggleHabit = (habitId: string, dateStr: string, forceVal?: boolean) => {
@@ -131,11 +181,19 @@ export default function LifePage() {
     window.dispatchEvent(new CustomEvent('workspace-data-updated'))
   }
 
-  const handleSetFitnessPart = (habitId: string, dateStr: string, part: string) => {
+  const handleSetFitnessParts = (habitId: string, dateStr: string, parts: string[]) => {
     const updated = habits.map((h) => {
       if (h.id !== habitId) return h
-      const nextLogs = { ...h.logs, [dateStr]: true }
-      const nextWorkoutDetails = { ...(h.workoutDetails || {}), [dateStr]: part }
+      const nextLogs = { ...h.logs }
+      const nextWorkoutDetails = { ...(h.workoutDetails || {}) }
+
+      if (parts.length > 0) {
+        nextLogs[dateStr] = true
+        nextWorkoutDetails[dateStr] = parts.join(',')
+      } else {
+        delete nextLogs[dateStr]
+        delete nextWorkoutDetails[dateStr]
+      }
 
       return {
         ...h,
@@ -378,73 +436,56 @@ export default function LifePage() {
                     const isChecked = !!habit.logs[d.dateStr]
                     const isToday = d.dateStr === today
                     const isFitness = isFitnessHabit(habit)
-                    const rawPart = habit.workoutDetails?.[d.dateStr]
-                    const displayPart = normalizeFitnessPart(rawPart) || '练'
+                    const { text: displayPart, full: fullPartText } = isFitness
+                      ? formatFitnessDisplay(habit.workoutDetails?.[d.dateStr])
+                      : { text: '', full: '' }
 
                     return (
                       <td key={d.dateStr} className="p-3 text-center">
                         {isFitness ? (
-                          <div className="relative w-8 h-8 mx-auto flex items-center justify-center">
-                            {/* 视觉方框：与其它打卡项严格保持 100% 相同 w-8 h-8 固定尺寸，不撑宽排版 */}
-                            <div
-                              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all select-none mx-auto ${
-                                isChecked
-                                  ? 'bg-emerald-500 border-emerald-500 text-white font-bold text-[11px] leading-none shadow-sm shadow-emerald-500/30 scale-105'
-                                  : isToday
-                                  ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50'
-                                  : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20'
-                              }`}
-                            >
-                              {isChecked ? (
-                                <span className="tracking-tight leading-none truncate max-w-[28px]">
-                                  {displayPart}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-zinc-500">•</span>
-                              )}
-                            </div>
-
-                            {/* 隐形系统级下拉框：覆盖在方框上，点击直接弹窗选择，零布局位移 */}
-                            <select
-                              value={isChecked ? displayPart : ''}
-                              onChange={(e) => {
-                                const val = e.target.value
-                                if (val === '__uncheck__') {
-                                  handleToggleHabit(habit.id, d.dateStr, false)
-                                } else if (val) {
-                                  handleSetFitnessPart(habit.id, d.dateStr, val)
-                                }
-                              }}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                              title={
-                                isChecked
-                                  ? `健身打卡: ${displayPart} (点击下拉更换部位或取消)`
-                                  : '点击下拉选择健身部位'
-                              }
-                            >
-                              {!isChecked && (
-                                <option value="" disabled className="bg-[#0e121e] text-zinc-400">
-                                  选择部位...
-                                </option>
-                              )}
-                              {isChecked && (
-                                <option value="__uncheck__" className="bg-[#0e121e] text-rose-400 font-bold">
-                                  ❌ 取消打卡
-                                </option>
-                              )}
-                              <option value="肩" className="bg-[#0e121e] text-white">🛡️ 肩</option>
-                              <option value="胸" className="bg-[#0e121e] text-white">💪 胸</option>
-                              <option value="背" className="bg-[#0e121e] text-white">🥋 背</option>
-                              <option value="手臂" className="bg-[#0e121e] text-white">🦾 手臂</option>
-                              <option value="核心" className="bg-[#0e121e] text-white">🔥 核心</option>
-                              <option value="臀腿" className="bg-[#0e121e] text-white">🦵 臀腿</option>
-                              <option value="有氧" className="bg-[#0e121e] text-white">🏃 有氧</option>
-                            </select>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const raw = habit.workoutDetails?.[d.dateStr] || ''
+                              const currentParts = raw
+                                ? raw.split(',').map((p) => normalizeFitnessPart(p)).filter(Boolean)
+                                : isChecked
+                                ? ['胸']
+                                : []
+                              setFitnessModalTarget({
+                                habitId: habit.id,
+                                dateStr: d.dateStr,
+                                dateLabel: `${d.weekday} (${d.shortDate})`,
+                                selectedParts: currentParts,
+                                initiallyChecked: isChecked,
+                              })
+                            }}
+                            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
+                              isChecked
+                                ? 'bg-emerald-500 border-emerald-500 text-white font-bold leading-none shadow-sm shadow-emerald-500/30 scale-105 hover:bg-emerald-600'
+                                : isToday
+                                ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
+                                : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
+                            }`}
+                            title={
+                              isChecked
+                                ? `健身打卡: ${fullPartText} (点击修改部位或取消)`
+                                : '点击选择健身部位打卡 (支持多选)'
+                            }
+                          >
+                            {isChecked ? (
+                              <span className="tracking-tighter font-bold text-[10px] leading-none select-none max-w-[28px] overflow-hidden whitespace-nowrap text-center">
+                                {displayPart || '练'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-zinc-500">•</span>
+                            )}
+                          </button>
                         ) : (
                           <button
+                            type="button"
                             onClick={() => handleToggleHabit(habit.id, d.dateStr)}
-                            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto ${
+                            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
                               isChecked
                                 ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30 scale-105'
                                 : isToday
@@ -609,6 +650,127 @@ export default function LifePage() {
           </div>
         </div>
       </div>
+
+      {/* ================= 健身部位多选记录弹窗 ================= */}
+      {fitnessModalTarget && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div>
+                <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-amber-400" />
+                  <span>记录健身部位</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  {fitnessModalTarget.dateLabel} · 支持多选部位
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFitnessModalTarget(null)}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 部位快捷多选网格 */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-zinc-400 block mb-1">点击勾选今日训练部位：</label>
+              <div className="grid grid-cols-2 gap-2">
+                {FITNESS_PART_OPTIONS.map((item) => {
+                  const isSelected = fitnessModalTarget.selectedParts.includes(item.id)
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        const next = isSelected
+                          ? fitnessModalTarget.selectedParts.filter((p) => p !== item.id)
+                          : [...fitnessModalTarget.selectedParts, item.id]
+                        setFitnessModalTarget({ ...fitnessModalTarget, selectedParts: next })
+                      }}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-sm shadow-emerald-500/20 scale-[1.02]'
+                          : 'bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:bg-white/[0.07] hover:border-white/20'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </span>
+                      {isSelected ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <span className="w-3.5 h-3.5 rounded-full border border-white/20" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 选中组合摘要 */}
+            <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] text-xs">
+              <span className="text-zinc-400">已选部位：</span>
+              <span className="font-semibold text-white ml-1">
+                {fitnessModalTarget.selectedParts.length > 0
+                  ? fitnessModalTarget.selectedParts
+                      .map((p) => FITNESS_PART_OPTIONS.find((o) => o.id === p)?.label || p)
+                      .join(' + ')
+                  : '未选部位 (请至少点击选择 1 项)'}
+              </span>
+            </div>
+
+            {/* 底部确认与清除按钮 */}
+            <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between gap-2">
+              {fitnessModalTarget.initiallyChecked ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleToggleHabit(fitnessModalTarget.habitId, fitnessModalTarget.dateStr, false)
+                    setFitnessModalTarget(null)
+                  }}
+                  className="text-xs text-rose-400 hover:text-rose-300 px-3 py-2 rounded-xl hover:bg-rose-500/10 transition-colors cursor-pointer"
+                >
+                  清除打卡
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setFitnessModalTarget(null)}
+                  className="text-xs text-zinc-400 hover:text-zinc-300 px-3 py-2 rounded-xl hover:bg-white/[0.06] transition-colors cursor-pointer"
+                >
+                  取消
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={fitnessModalTarget.selectedParts.length === 0}
+                onClick={() => {
+                  handleSetFitnessParts(
+                    fitnessModalTarget.habitId,
+                    fitnessModalTarget.dateStr,
+                    fitnessModalTarget.selectedParts
+                  )
+                  setFitnessModalTarget(null)
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all ${
+                  fitnessModalTarget.selectedParts.length === 0
+                    ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500'
+                    : 'linear-btn-primary cursor-pointer'
+                }`}
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>
+                  确认打卡 {fitnessModalTarget.selectedParts.length > 0 ? `(${fitnessModalTarget.selectedParts.length})` : ''}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= 编辑习惯弹窗 ================= */}
       {editingHabit && (
