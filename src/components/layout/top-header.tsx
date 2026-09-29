@@ -11,7 +11,7 @@ interface TopHeaderProps {
 }
 
 export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
-  const [greeting, setGreeting] = useState('')
+  const [greetingData, setGreetingData] = useState({ shortText: '', fullText: '', icon: '' })
   const [currentDate, setCurrentDate] = useState('')
   const [currentTime, setCurrentTime] = useState('')
   const [careerDays, setCareerDays] = useState({ days: 0, isOverdue: false })
@@ -37,10 +37,10 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
     const updateTime = () => {
       const now = new Date()
       const hours = now.getHours()
-      if (hours < 6) setGreeting('夜深了，早点休息 🌙')
-      else if (hours < 12) setGreeting('早上好，保持专注 ☀️')
-      else if (hours < 18) setGreeting('下午好，高效推进 ☕')
-      else setGreeting('晚上好，复盘今日 🌌')
+      if (hours < 6) setGreetingData({ shortText: '夜深了', fullText: '夜深了，早点休息', icon: '🌙' })
+      else if (hours < 12) setGreetingData({ shortText: '早上好', fullText: '早上好，保持专注', icon: '☀️' })
+      else if (hours < 18) setGreetingData({ shortText: '下午好', fullText: '下午好，高效推进', icon: '☕' })
+      else setGreetingData({ shortText: '晚上好', fullText: '晚上好，复盘今日', icon: '🌌' })
 
       const dateOptions: Intl.DateTimeFormatOptions = {
         month: 'short',
@@ -105,23 +105,24 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
 
   return (
     <>
-      <header className="h-16 border-b border-white/[0.08] bg-black/35 backdrop-blur-2xl px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 gap-3">
-        {/* 左侧：移动端菜单 + 醒目问候与实时日期时间胶囊（同一行无换行堆叠） */}
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+      <header className="h-16 border-b border-white/[0.08] bg-black/35 backdrop-blur-2xl px-2.5 sm:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 gap-2 sm:gap-4 overflow-hidden">
+        {/* 左侧：移动端菜单 + 醒目问候与实时日期时间胶囊 */}
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
           <button
             onClick={onOpenMobileMenu}
-            className="lg:hidden p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.08] transition-colors shrink-0"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.08] transition-colors shrink-0"
             title="打开菜单"
             aria-label="打开菜单"
           >
             <Menu className="w-4 h-4" />
           </button>
 
-          {/* 醒目问候语 */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] inline-block" />
-            <h2 className="text-sm sm:text-base font-bold text-white tracking-tight whitespace-nowrap">
-              {greeting}
+          {/* 醒目问候语（移动端展示短版，避免与右侧时间重叠；平板及电脑端展示完整版） */}
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] inline-block shrink-0" />
+            <h2 className="text-xs sm:text-base font-bold text-white tracking-tight whitespace-nowrap">
+              <span className="md:hidden">{greetingData.shortText} {greetingData.icon}</span>
+              <span className="hidden md:inline">{greetingData.fullText} {greetingData.icon}</span>
             </h2>
           </div>
 
@@ -146,15 +147,15 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           </button>
         </div>
 
-        {/* 右侧：移动端实时时间 + 双核心倒计时胶囊（同一行） */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* 右侧：移动端实时时间 + 双核心倒计时胶囊（同一行弹性间距） */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {currentTime && (
             <button
               onClick={() => setIsCalendarOpen(true)}
-              className="sm:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-cyan-400"
+              className="sm:hidden flex items-center gap-1 px-2 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-mono text-cyan-400 shrink-0"
               title="点击打开日历"
             >
-              <Clock className="w-3 h-3 text-zinc-400" />
+              <Clock className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
               <span>{currentTime}</span>
             </button>
           )}
@@ -163,12 +164,12 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           <button
             onClick={handleOpenEditCareer}
             title="点击修改秋招冲刺目标日期"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer shrink-0"
           >
-            <Clock className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors shrink-0" />
+            <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-zinc-400 group-hover:text-white transition-colors shrink-0" />
             <span className="text-zinc-400 group-hover:text-zinc-200 font-normal hidden md:inline">秋招冲刺:</span>
-            <span className="font-mono font-bold text-white">
-              {careerDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
+            <span className="font-mono font-bold text-white text-[11px] sm:text-xs">
+              {careerDays.days} <span className="text-[10px] sm:text-[11px] font-normal text-zinc-500">天</span>
             </span>
           </button>
 
@@ -176,12 +177,12 @@ export function TopHeader({ onOpenMobileMenu }: TopHeaderProps) {
           <button
             onClick={handleOpenEditThesis}
             title="点击修改论文初稿目标日期"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-xs text-zinc-300 hover:text-white transition-all group cursor-pointer shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors shrink-0" />
+            <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-zinc-400 group-hover:text-white transition-colors shrink-0" />
             <span className="text-zinc-400 group-hover:text-zinc-200 font-normal hidden md:inline">论文初稿:</span>
-            <span className="font-mono font-bold text-white">
-              {thesisDays.days} <span className="text-[11px] font-normal text-zinc-500">天</span>
+            <span className="font-mono font-bold text-white text-[11px] sm:text-xs">
+              {thesisDays.days} <span className="text-[10px] sm:text-[11px] font-normal text-zinc-500">天</span>
             </span>
           </button>
         </div>
