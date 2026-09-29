@@ -94,6 +94,18 @@ export default function LifePage() {
     h.name.toLowerCase().includes('fitness') ||
     h.name.toLowerCase().includes('workout')
 
+  const normalizeFitnessPart = (part?: string): string => {
+    if (!part) return ''
+    if (part === '肩' || part.includes('肩')) return '肩'
+    if (part === '胸' || part.includes('胸')) return '胸'
+    if (part === '背' || part.includes('背')) return '背'
+    if (part.includes('臂')) return '手臂'
+    if (part.includes('核') || part.includes('腹')) return '核心'
+    if (part.includes('腿') || part.includes('臀')) return '臀腿'
+    if (part.includes('氧') || part.includes('跑')) return '有氧'
+    return part
+  }
+
   const handleToggleHabit = (habitId: string, dateStr: string, forceVal?: boolean) => {
     const updated = habits.map((h) => {
       if (h.id !== habitId) return h
@@ -366,14 +378,35 @@ export default function LifePage() {
                     const isChecked = !!habit.logs[d.dateStr]
                     const isToday = d.dateStr === today
                     const isFitness = isFitnessHabit(habit)
-                    const currentPart = habit.workoutDetails?.[d.dateStr]
+                    const rawPart = habit.workoutDetails?.[d.dateStr]
+                    const displayPart = normalizeFitnessPart(rawPart) || '练'
 
                     return (
                       <td key={d.dateStr} className="p-3 text-center">
                         {isFitness ? (
-                          <div className="relative inline-flex items-center justify-center">
+                          <div className="relative w-8 h-8 mx-auto flex items-center justify-center">
+                            {/* 视觉方框：与其它打卡项严格保持 100% 相同 w-8 h-8 固定尺寸，不撑宽排版 */}
+                            <div
+                              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all select-none mx-auto ${
+                                isChecked
+                                  ? 'bg-emerald-500 border-emerald-500 text-white font-bold text-[11px] leading-none shadow-sm shadow-emerald-500/30 scale-105'
+                                  : isToday
+                                  ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50'
+                                  : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20'
+                              }`}
+                            >
+                              {isChecked ? (
+                                <span className="tracking-tight leading-none truncate max-w-[28px]">
+                                  {displayPart}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-zinc-500">•</span>
+                              )}
+                            </div>
+
+                            {/* 隐形系统级下拉框：覆盖在方框上，点击直接弹窗选择，零布局位移 */}
                             <select
-                              value={isChecked ? (currentPart || '已打卡') : ''}
+                              value={isChecked ? displayPart : ''}
                               onChange={(e) => {
                                 const val = e.target.value
                                 if (val === '__uncheck__') {
@@ -382,44 +415,30 @@ export default function LifePage() {
                                   handleSetFitnessPart(habit.id, d.dateStr, val)
                                 }
                               }}
-                              className={`h-8 rounded-xl border text-xs font-semibold cursor-pointer transition-all text-center appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-400 ${
-                                isChecked
-                                  ? 'px-2 min-w-[52px] bg-emerald-500 border-emerald-500 text-white font-mono shadow-sm shadow-emerald-500/30 hover:bg-emerald-600 scale-105'
-                                  : isToday
-                                  ? 'w-8 bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
-                                  : 'w-8 bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
-                              }`}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                               title={
                                 isChecked
-                                  ? `健身打卡: ${currentPart || '已打卡'} (点击下拉更换部位或取消)`
-                                  : '点击下拉选择具体健身部位'
+                                  ? `健身打卡: ${displayPart} (点击下拉更换部位或取消)`
+                                  : '点击下拉选择健身部位'
                               }
                             >
-                              <option value="" disabled={isChecked} className="bg-[#0e121e] text-zinc-400">
-                                {isChecked ? '更换部位' : '•'}
-                              </option>
+                              {!isChecked && (
+                                <option value="" disabled className="bg-[#0e121e] text-zinc-400">
+                                  选择部位...
+                                </option>
+                              )}
                               {isChecked && (
                                 <option value="__uncheck__" className="bg-[#0e121e] text-rose-400 font-bold">
                                   ❌ 取消打卡
                                 </option>
                               )}
-                              {isChecked &&
-                                currentPart &&
-                                !['胸部', '背部', '腿部', '肩部', '手臂', '核心', '有氧', '全身'].includes(
-                                  currentPart
-                                ) && (
-                                  <option value={currentPart} className="bg-[#0e121e] text-white">
-                                    🏋️ {currentPart}
-                                  </option>
-                                )}
-                              <option value="胸部" className="bg-[#0e121e] text-white">💪 胸部</option>
-                              <option value="背部" className="bg-[#0e121e] text-white">🥋 背部</option>
-                              <option value="腿部" className="bg-[#0e121e] text-white">🦵 腿部</option>
-                              <option value="肩部" className="bg-[#0e121e] text-white">🛡️ 肩部</option>
+                              <option value="肩" className="bg-[#0e121e] text-white">🛡️ 肩</option>
+                              <option value="胸" className="bg-[#0e121e] text-white">💪 胸</option>
+                              <option value="背" className="bg-[#0e121e] text-white">🥋 背</option>
                               <option value="手臂" className="bg-[#0e121e] text-white">🦾 手臂</option>
-                              <option value="核心" className="bg-[#0e121e] text-white">🔥 核心/腹肌</option>
-                              <option value="有氧" className="bg-[#0e121e] text-white">🏃 有氧/减脂</option>
-                              <option value="全身" className="bg-[#0e121e] text-white">⚡ 全身综合</option>
+                              <option value="核心" className="bg-[#0e121e] text-white">🔥 核心</option>
+                              <option value="臀腿" className="bg-[#0e121e] text-white">🦵 臀腿</option>
+                              <option value="有氧" className="bg-[#0e121e] text-white">🏃 有氧</option>
                             </select>
                           </div>
                         ) : (

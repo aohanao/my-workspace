@@ -690,14 +690,14 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="space-y-2.5">
-            {activeInterviews.slice(0, 4).map((job) => {
+          <div className="space-y-2.5 max-h-[290px] overflow-y-auto pr-1.5">
+            {activeInterviews.map((job) => {
               const latestIv = job.interviews?.[job.interviews.length - 1]
 
               return (
                 <div
                   key={job.id}
-                  className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] flex items-center justify-between text-xs sm:text-sm gap-2"
+                  className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] flex items-center justify-between text-xs sm:text-sm gap-2 hover:border-white/10 transition-colors"
                 >
                   <div className="min-w-0">
                     <h5 className="font-bold text-white truncate">{job.company}</h5>
