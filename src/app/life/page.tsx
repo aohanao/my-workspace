@@ -462,7 +462,7 @@ export default function LifePage() {
                             }}
                             className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
                               isChecked
-                                ? 'bg-emerald-500 border-emerald-500 text-white font-bold leading-none shadow-sm shadow-emerald-500/30 scale-105 hover:bg-emerald-600'
+                                ? 'bg-emerald-500 border-emerald-500 text-white font-light leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
                                 : isToday
                                 ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
                                 : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
@@ -474,7 +474,15 @@ export default function LifePage() {
                             }
                           >
                             {isChecked ? (
-                              <span className="tracking-tighter font-bold text-[10px] leading-none select-none max-w-[28px] overflow-hidden whitespace-nowrap text-center">
+                              <span
+                                className={`leading-none select-none text-center font-light max-w-[28px] overflow-hidden whitespace-nowrap ${
+                                  (displayPart || '练').length === 1
+                                    ? 'text-xs'
+                                    : (displayPart || '练').length === 2
+                                    ? 'text-[11px] tracking-tight'
+                                    : 'text-[10px] tracking-tighter'
+                                }`}
+                              >
                                 {displayPart || '练'}
                               </span>
                             ) : (
@@ -690,7 +698,7 @@ export default function LifePage() {
                           : [...fitnessModalTarget.selectedParts, item.id]
                         setFitnessModalTarget({ ...fitnessModalTarget, selectedParts: next })
                       }}
-                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-sm shadow-emerald-500/20 scale-[1.02]'
                           : 'bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:bg-white/[0.07] hover:border-white/20'
