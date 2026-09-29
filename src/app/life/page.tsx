@@ -459,9 +459,9 @@ export default function LifePage() {
                                 initiallyChecked: isChecked,
                               })
                             }}
-                            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
+                            className={`w-[38px] h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
                               isChecked
-                                ? 'bg-emerald-500 border-emerald-500 text-white/85 font-light leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
+                                ? 'bg-emerald-500 border-emerald-500 text-white font-normal leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
                                 : isToday
                                 ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
                                 : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
@@ -474,7 +474,7 @@ export default function LifePage() {
                           >
                             {isChecked ? (
                               <span
-                                className={`leading-none select-none text-center font-light text-white/85 max-w-[28px] overflow-hidden whitespace-nowrap ${
+                                className={`leading-none select-none text-center font-normal text-white max-w-[34px] overflow-hidden whitespace-nowrap ${
                                   (displayPart || '练').length === 1
                                     ? 'text-xs'
                                     : (displayPart || '练').length === 2
@@ -501,7 +501,7 @@ export default function LifePage() {
                             }`}
                           >
                             {isChecked ? (
-                              <CheckCircle2 className="w-4.5 h-4.5 stroke-[1.5] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                              <Check className="w-4.5 h-4.5 stroke-[2.2] text-white" />
                             ) : (
                               <span className="text-xs text-zinc-500">•</span>
                             )}
@@ -544,10 +544,11 @@ export default function LifePage() {
                 <span>⚡ 专注精力等级:</span>
                 <span className="font-mono font-bold text-sm text-blue-300/90">{energy} / 5</span>
               </div>
-              <div className="relative h-5 flex items-center group cursor-pointer">
-                <div className="w-full h-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] relative overflow-hidden">
+              <div className="relative h-6 flex items-center group cursor-pointer px-1">
+                {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
+                <div className="w-full h-2 rounded-full bg-[#161c2c] border border-white/[0.12] relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-700/80 transition-all duration-150 relative overflow-hidden"
+                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-600/90 transition-all duration-150 relative overflow-hidden"
                     style={{ width: `${(energy / 5) * 100}%` }}
                   >
                     {energy > 0 && (
@@ -555,9 +556,10 @@ export default function LifePage() {
                     )}
                   </div>
                 </div>
+                {/* 发光滑块点 */}
                 <div
-                  className="absolute w-3 h-3 -ml-1.5 rounded-full bg-white border border-blue-400/80 shadow-[0_0_8px_rgba(59,130,246,0.5)] pointer-events-none transition-all duration-150 flex items-center justify-center"
-                  style={{ left: `${(energy / 5) * 100}%` }}
+                  className="absolute w-3.5 h-3.5 -ml-1.5 rounded-full bg-white border-2 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] pointer-events-none transition-all duration-150 flex items-center justify-center"
+                  style={{ left: `calc(${energy / 5} * (100% - 14px) + 7px)` }}
                 >
                   <span className="w-1 h-1 rounded-full bg-blue-600" />
                 </div>
@@ -582,10 +584,11 @@ export default function LifePage() {
                 <span>😊 心情状态指数:</span>
                 <span className="font-mono font-bold text-sm text-purple-300/90">{mood} / 5</span>
               </div>
-              <div className="relative h-5 flex items-center group cursor-pointer">
-                <div className="w-full h-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] relative overflow-hidden">
+              <div className="relative h-6 flex items-center group cursor-pointer px-1">
+                {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
+                <div className="w-full h-2 rounded-full bg-[#161c2c] border border-white/[0.12] relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-purple-950 to-violet-700/80 transition-all duration-150 relative overflow-hidden"
+                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-purple-900 to-violet-600/90 transition-all duration-150 relative overflow-hidden"
                     style={{ width: `${(mood / 5) * 100}%` }}
                   >
                     {mood > 0 && (
@@ -593,9 +596,10 @@ export default function LifePage() {
                     )}
                   </div>
                 </div>
+                {/* 发光滑块点 */}
                 <div
-                  className="absolute w-3 h-3 -ml-1.5 rounded-full bg-white border border-purple-400/80 shadow-[0_0_8px_rgba(168,85,247,0.5)] pointer-events-none transition-all duration-150 flex items-center justify-center"
-                  style={{ left: `${(mood / 5) * 100}%` }}
+                  className="absolute w-3.5 h-3.5 -ml-1.5 rounded-full bg-white border-2 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)] pointer-events-none transition-all duration-150 flex items-center justify-center"
+                  style={{ left: `calc(${mood / 5} * (100% - 14px) + 7px)` }}
                 >
                   <span className="w-1 h-1 rounded-full bg-purple-600" />
                 </div>
