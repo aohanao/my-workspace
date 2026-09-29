@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 
-// 背景常驻随机浮动纯黑白微尘粒子
+// 背景微尘星光 (纯黑白极简)
 interface AmbientParticle {
   x: number
   y: number
@@ -16,29 +16,39 @@ interface AmbientParticle {
   phase: number
 }
 
-// 高级感方块拖尾粒子束 (Block-Trail Cyber Particle Beam)
-interface BlockTrailBeam {
+// 悬浮数码晶格方块 (Cyber Cube / Digital Square Voxel - 大一点且带呼吸闪烁)
+interface CyberCube {
   x: number
   y: number
-  angle: number
-  targetAngle: number
-  speed: number
-  curveSpeed: number
-  blockSize: number
+  vx: number
+  vy: number
+  size: number // 8px ~ 18px 几何线框方块
+  rotation: number
+  rotationSpeed: number
+  baseAlpha: number
+  alpha: number
+  twinkleSpeed: number
+  phase: number
+  hasCenterDot: boolean
+}
+
+// 随机穿越屏幕的巡航数码方块 (Cruising Cyber Block - 离散高科技残影，绝非连串毛毛虫)
+interface CruisingBlock {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  rotation: number
+  rotationSpeed: number
+  size: number // 14px ~ 22px
   alpha: number
   life: number
   maxLife: number
-  history: {
+  // 离散的原地消散全息残影 (Echo Keyframes)
+  echoes: {
     x: number
     y: number
-    angle: number
-  }[]
-  // 伴随拖尾飘落的微型方块碎屑
-  debris: {
-    x: number
-    y: number
-    vx: number
-    vy: number
+    rotation: number
     size: number
     alpha: number
     life: number
@@ -46,7 +56,7 @@ interface BlockTrailBeam {
   }[]
 }
 
-// 鼠标流体拖尾粒子 (纯白极简)
+// 鼠标微流体粒子
 interface FluidParticle {
   x: number
   y: number
@@ -82,82 +92,94 @@ export function TechCursorEffect() {
     }
     window.addEventListener('resize', handleResize, { passive: true })
 
-    // 1. 初始化纯黑白常驻随机浮动微尘粒子（约 30 颗克制纯白星光，安静深空）
+    // 1. 初始化纯黑白微星尘 (25 颗极简白点，衬托深空)
     const ambientParticles: AmbientParticle[] = []
-    const TOTAL_STARS = 30
-
+    const TOTAL_STARS = 25
     for (let i = 0; i < TOTAL_STARS; i++) {
-      const size = Math.random() * 1.0 + 0.8 // 0.8px ~ 1.8px 细腻白点
-      const baseAlpha = Math.random() * 0.3 + 0.3
-
       ambientParticles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.18,
-        vy: (Math.random() - 0.5) * 0.18,
-        size,
-        baseAlpha,
-        alpha: baseAlpha,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: (Math.random() - 0.5) * 0.16,
+        size: Math.random() * 0.9 + 0.8,
+        baseAlpha: Math.random() * 0.3 + 0.25,
+        alpha: 0.3,
         twinkleSpeed: Math.random() * 0.02 + 0.01,
         phase: Math.random() * Math.PI * 2,
       })
     }
 
-    // 2. 高级感方块拖尾粒子束发射池 (随性随机穿越，非僵硬超高速直线，优美优雅巡航)
-    const blockBeams: BlockTrailBeam[] = []
-    let nextBeamTimer = Math.floor(Math.random() * 80 + 40) // 1~2秒内触发首个
-
-    const spawnBlockBeam = () => {
-      // 随机选择生成边缘：0:左侧向右, 1:顶部向下, 2:右侧向左, 3:左上斜穿
-      const side = Math.floor(Math.random() * 4)
-      let startX = 0
-      let startY = 0
-      let initialAngle = 0
-
-      if (side === 0) {
-        // 左边边缘向右侧穿越
-        startX = -30
-        startY = Math.random() * height
-        initialAngle = (Math.random() - 0.5) * 0.6 // -17° ~ +17°
-      } else if (side === 1) {
-        // 顶部边缘向下穿越
-        startX = Math.random() * width
-        startY = -30
-        initialAngle = Math.PI / 2 + (Math.random() - 0.5) * 0.7
-      } else if (side === 2) {
-        // 右边边缘向左穿越
-        startX = width + 30
-        startY = Math.random() * height
-        initialAngle = Math.PI + (Math.random() - 0.5) * 0.6
-      } else {
-        // 斜对角优雅俯冲
-        startX = Math.random() * (width * 0.5) - 30
-        startY = -30
-        initialAngle = Math.PI / 4 + (Math.random() - 0.5) * 0.4
-      }
-
-      // 优雅巡航速度 (4.5px ~ 6.5px / 帧，非瞬间闪现，清晰可见方块拖尾)
-      const speed = Math.random() * 2.0 + 4.2
-      const blockSize = Math.random() * 1.5 + 4.5 // 4.5px ~ 6.0px 主方块
-      const maxLife = Math.floor(Math.max(width, height) / speed) + 60
-
-      blockBeams.push({
-        x: startX,
-        y: startY,
-        angle: initialAngle,
-        targetAngle: initialAngle + (Math.random() - 0.5) * 0.8,
-        speed,
-        curveSpeed: (Math.random() - 0.5) * 0.015, // 优雅轻微摆动弯曲
-        blockSize,
-        alpha: 0,
-        life: 0,
-        maxLife,
-        history: [],
-        debris: [],
+    // 2. 初始化常驻悬浮数码方块 (6 ~ 8 个稍大一些的纯几何线框方块，缓慢自转与呼吸闪烁)
+    const cyberCubes: CyberCube[] = []
+    const CUBE_COUNT = 7
+    for (let i = 0; i < CUBE_COUNT; i++) {
+      cyberCubes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2,
+        size: Math.random() * 8 + 9, // 9px ~ 17px 大方块
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.008,
+        baseAlpha: Math.random() * 0.25 + 0.25,
+        alpha: 0.3,
+        twinkleSpeed: Math.random() * 0.02 + 0.012,
+        phase: Math.random() * Math.PI * 2,
+        hasCenterDot: Math.random() > 0.3,
       })
     }
 
-    // 3. 鼠标纯白微流体粒子
+    // 3. 随机穿越屏幕的巡航数码方块 (每隔 3~6 秒，一个高级几何方块巡航穿越屏幕，带离散残影)
+    const cruisingBlocks: CruisingBlock[] = []
+    let nextCruisingTimer = Math.floor(Math.random() * 80 + 40)
+
+    const spawnCruisingBlock = () => {
+      const side = Math.floor(Math.random() * 4)
+      let startX = 0
+      let startY = 0
+      let angle = 0
+
+      if (side === 0) {
+        // 从左往右
+        startX = -40
+        startY = Math.random() * height
+        angle = (Math.random() - 0.5) * 0.5
+      } else if (side === 1) {
+        // 从顶往下
+        startX = Math.random() * width
+        startY = -40
+        angle = Math.PI / 2 + (Math.random() - 0.5) * 0.5
+      } else if (side === 2) {
+        // 从右往左
+        startX = width + 40
+        startY = Math.random() * height
+        angle = Math.PI + (Math.random() - 0.5) * 0.5
+      } else {
+        // 对角穿越
+        startX = Math.random() * (width * 0.4) - 30
+        startY = -30
+        angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3
+      }
+
+      const speed = Math.random() * 1.5 + 3.8 // 3.8 ~ 5.3 px/frame 稳定优雅巡航
+      const size = Math.random() * 6 + 14 // 14px ~ 20px 醒目高级大方块
+
+      cruisingBlocks.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.02,
+        size,
+        alpha: 0,
+        life: 0,
+        maxLife: Math.floor(Math.max(width, height) / speed) + 50,
+        echoes: [],
+      })
+    }
+
+    // 4. 鼠标纯白微粒子
     const mouse = {
       x: -1000,
       y: -1000,
@@ -185,8 +207,7 @@ export function TechCursorEffect() {
       const dist = Math.hypot(dx, dy)
 
       if (dist > 3) {
-        const count = Math.min(5, Math.max(2, Math.floor(dist / 9)))
-
+        const count = Math.min(4, Math.max(2, Math.floor(dist / 10)))
         for (let i = 0; i < count; i++) {
           const sprayAngle = Math.atan2(dy, dx) + Math.PI + (Math.random() - 0.5) * 1.2
           const speed = Math.random() * 1.2 + 0.4
@@ -194,18 +215,18 @@ export function TechCursorEffect() {
           fluidParticles.push({
             x: mouse.x + (Math.random() - 0.5) * 4,
             y: mouse.y + (Math.random() - 0.5) * 4,
-            vx: Math.cos(sprayAngle) * speed * 0.4,
-            vy: Math.sin(sprayAngle) * speed * 0.4,
-            size: Math.random() * 1.0 + 0.8,
-            alpha: Math.random() * 0.25 + 0.55,
+            vx: Math.cos(sprayAngle) * speed * 0.35,
+            vy: Math.sin(sprayAngle) * speed * 0.35,
+            size: Math.random() * 0.9 + 0.8,
+            alpha: Math.random() * 0.25 + 0.5,
             life: 0,
-            maxLife: Math.floor(Math.random() * 20 + 20),
+            maxLife: Math.floor(Math.random() * 18 + 18),
           })
         }
       }
 
-      if (fluidParticles.length > 50) {
-        fluidParticles.splice(0, fluidParticles.length - 50)
+      if (fluidParticles.length > 40) {
+        fluidParticles.splice(0, fluidParticles.length - 40)
       }
     }
 
@@ -219,7 +240,7 @@ export function TechCursorEffect() {
     const render = () => {
       ctx.clearRect(0, 0, width, height)
 
-      // ================= 1. 渲染纯黑白常驻随机浮动微尘粒子 =================
+      // ================= 1. 渲染微星尘 =================
       for (let i = 0; i < ambientParticles.length; i++) {
         const ap = ambientParticles[i]
         ap.x += ap.vx
@@ -231,7 +252,7 @@ export function TechCursorEffect() {
         else if (ap.y > height + 10) ap.y = -10
 
         ap.phase += ap.twinkleSpeed
-        const currentAlpha = Math.min(0.8, Math.max(0.15, ap.baseAlpha * (0.65 + Math.sin(ap.phase) * 0.45)))
+        const currentAlpha = Math.min(0.75, Math.max(0.12, ap.baseAlpha * (0.65 + Math.sin(ap.phase) * 0.45)))
 
         ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`
         ctx.beginPath()
@@ -239,116 +260,137 @@ export function TechCursorEffect() {
         ctx.fill()
       }
 
-      // ================= 2. 渲染高级感方块拖尾粒子束 =================
-      nextBeamTimer--
-      if (nextBeamTimer <= 0 && blockBeams.length < 2) {
-        spawnBlockBeam()
-        nextBeamTimer = Math.floor(Math.random() * 200 + 150) // 每隔 2.5 ~ 6 秒触发一条
+      // ================= 2. 渲染常驻大号数码晶格方块 (呼吸闪烁 + 缓慢自转) =================
+      for (let i = 0; i < cyberCubes.length; i++) {
+        const cube = cyberCubes[i]
+        cube.x += cube.vx
+        cube.y += cube.vy
+        cube.rotation += cube.rotationSpeed
+
+        if (cube.x < -30) cube.x = width + 30
+        else if (cube.x > width + 30) cube.x = -30
+        if (cube.y < -30) cube.y = height + 30
+        else if (cube.y > height + 30) cube.y = -30
+
+        cube.phase += cube.twinkleSpeed
+        const cubeAlpha = Math.min(0.7, Math.max(0.1, cube.baseAlpha * (0.6 + Math.sin(cube.phase) * 0.45)))
+
+        ctx.save()
+        ctx.translate(cube.x, cube.y)
+        ctx.rotate(cube.rotation)
+
+        // 半透明方块底色
+        ctx.fillStyle = `rgba(255, 255, 255, ${cubeAlpha * 0.05})`
+        ctx.fillRect(-cube.size / 2, -cube.size / 2, cube.size, cube.size)
+
+        // 纯白纤细方块线框 (0.8px 极细科技感)
+        ctx.strokeStyle = `rgba(255, 255, 255, ${cubeAlpha * 0.55})`
+        ctx.lineWidth = 0.8
+        ctx.strokeRect(-cube.size / 2, -cube.size / 2, cube.size, cube.size)
+
+        // 方块中心发光微核点
+        if (cube.hasCenterDot) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${cubeAlpha * 0.9})`
+          ctx.fillRect(-1, -1, 2, 2)
+        }
+
+        ctx.restore()
       }
 
-      for (let i = blockBeams.length - 1; i >= 0; i--) {
-        const beam = blockBeams[i]
-        beam.life++
+      // ================= 3. 渲染随机巡航大数码方块 (带离散全息残影，绝非连串毛毛虫) =================
+      nextCruisingTimer--
+      if (nextCruisingTimer <= 0 && cruisingBlocks.length < 2) {
+        spawnCruisingBlock()
+        nextCruisingTimer = Math.floor(Math.random() * 220 + 160) // 每隔 2.5 ~ 6 秒巡航一个
+      }
 
-        // 柔和微弧线巡航运动
-        beam.angle += Math.sin(beam.life * 0.035) * beam.curveSpeed
-        beam.x += Math.cos(beam.angle) * beam.speed
-        beam.y += Math.sin(beam.angle) * beam.speed
+      for (let i = cruisingBlocks.length - 1; i >= 0; i--) {
+        const block = cruisingBlocks[i]
+        block.life++
+        block.x += block.vx
+        block.y += block.vy
+        block.rotation += block.rotationSpeed
 
         // 平滑渐显与渐隐
-        if (beam.life < 14) {
-          beam.alpha = (beam.life / 14) * 0.95
-        } else if (beam.life > beam.maxLife - 20) {
-          beam.alpha = Math.max(0, ((beam.maxLife - beam.life) / 20) * 0.95)
+        if (block.life < 14) {
+          block.alpha = (block.life / 14) * 0.9
+        } else if (block.life > block.maxLife - 18) {
+          block.alpha = Math.max(0, ((block.maxLife - block.life) / 18) * 0.9)
         } else {
-          beam.alpha = 0.95
+          block.alpha = 0.9
         }
 
-        // 记录历史轨迹点以生成方块拖尾 (最多保留 26 个阶梯方块)
-        beam.history.unshift({ x: beam.x, y: beam.y, angle: beam.angle })
-        if (beam.history.length > 26) {
-          beam.history.pop()
-        }
-
-        // 偶发散落微型方块碎屑 (形成高科技数字粒子束尾流)
-        if (beam.life % 4 === 0 && beam.debris.length < 12) {
-          const spreadAngle = beam.angle + Math.PI + (Math.random() - 0.5) * 1.5
-          beam.debris.push({
-            x: beam.x,
-            y: beam.y,
-            vx: Math.cos(spreadAngle) * (Math.random() * 1.2 + 0.3),
-            vy: Math.sin(spreadAngle) * (Math.random() * 1.2 + 0.3),
-            size: Math.random() * 1.2 + 1.2, // 1.2px ~ 2.4px 小方块
-            alpha: beam.alpha * 0.8,
+        // 每隔 14 帧在原地释放一个离散全息光波残影 (原地停留渐隐，非粘连拖尾)
+        if (block.life % 14 === 0 && block.echoes.length < 5) {
+          block.echoes.push({
+            x: block.x,
+            y: block.y,
+            rotation: block.rotation,
+            size: block.size,
+            alpha: block.alpha * 0.55,
             life: 0,
-            maxLife: Math.floor(Math.random() * 18 + 14),
+            maxLife: 28,
           })
         }
 
-        // 越界销毁判断
-        const isOutOfScreen =
-          beam.x < -80 || beam.x > width + 80 || beam.y < -80 || beam.y > height + 80
-        if ((beam.life >= beam.maxLife || (beam.life > 50 && isOutOfScreen)) && beam.debris.length === 0) {
-          blockBeams.splice(i, 1)
-          continue
-        }
+        // 渲染残影 (全息渐隐方块)
+        for (let e = block.echoes.length - 1; e >= 0; e--) {
+          const echo = block.echoes[e]
+          echo.life++
+          const echoProgress = echo.life / echo.maxLife
+          const currentEchoAlpha = echo.alpha * (1 - echoProgress)
 
-        // A. 绘制方块拖尾连线 (Hairline Beam Guide)
-        if (beam.history.length > 1) {
-          ctx.strokeStyle = `rgba(255, 255, 255, ${beam.alpha * 0.18})`
-          ctx.lineWidth = 1
-          ctx.beginPath()
-          for (let k = 0; k < beam.history.length; k++) {
-            if (k === 0) ctx.moveTo(beam.history[k].x, beam.history[k].y)
-            else ctx.lineTo(beam.history[k].x, beam.history[k].y)
-          }
-          ctx.stroke()
-        }
-
-        // B. 绘制阶梯式方块拖尾 (Block Trail)
-        for (let k = beam.history.length - 1; k >= 0; k--) {
-          const pt = beam.history[k]
-          const progress = k / beam.history.length // 0 为头部, 1 为尾部
-          const curSize = Math.max(1.2, beam.blockSize * Math.pow(1 - progress, 0.72))
-          const blockAlpha = beam.alpha * (1 - progress * 0.85)
-
-          ctx.save()
-          ctx.translate(pt.x, pt.y)
-          ctx.rotate(pt.angle)
-
-          // 纯白数码方块填充
-          ctx.fillStyle = `rgba(255, 255, 255, ${blockAlpha})`
-          ctx.fillRect(-curSize / 2, -curSize / 2, curSize, curSize)
-
-          // 核心方块高光微边框
-          if (curSize >= 3.0) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${blockAlpha * 0.5})`
-            ctx.lineWidth = 0.6
-            ctx.strokeRect(-curSize / 2, -curSize / 2, curSize, curSize)
-          }
-          ctx.restore()
-        }
-
-        // C. 绘制伴随散落的微方块碎屑
-        for (let d = beam.debris.length - 1; d >= 0; d--) {
-          const deb = beam.debris[d]
-          deb.life++
-          deb.x += deb.vx
-          deb.y += deb.vy
-          const debProgress = deb.life / deb.maxLife
-          const debAlpha = deb.alpha * (1 - debProgress)
-
-          if (deb.life >= deb.maxLife || debAlpha <= 0) {
-            beam.debris.splice(d, 1)
+          if (echo.life >= echo.maxLife || currentEchoAlpha <= 0) {
+            block.echoes.splice(e, 1)
             continue
           }
 
-          ctx.fillStyle = `rgba(255, 255, 255, ${debAlpha})`
-          ctx.fillRect(deb.x - deb.size / 2, deb.y - deb.size / 2, deb.size, deb.size)
+          ctx.save()
+          ctx.translate(echo.x, echo.y)
+          ctx.rotate(echo.rotation)
+          ctx.strokeStyle = `rgba(255, 255, 255, ${currentEchoAlpha * 0.4})`
+          ctx.lineWidth = 0.8
+          ctx.strokeRect(-echo.size / 2, -echo.size / 2, echo.size, echo.size)
+          ctx.restore()
         }
+
+        // 越界销毁
+        const isOut =
+          block.x < -80 || block.x > width + 80 || block.y < -80 || block.y > height + 80
+        if (block.life >= block.maxLife || (block.life > 40 && isOut)) {
+          cruisingBlocks.splice(i, 1)
+          continue
+        }
+
+        // 渲染巡航主方块 (科技数码立方体外观)
+        ctx.save()
+        ctx.translate(block.x, block.y)
+        ctx.rotate(block.rotation)
+
+        // 半透明填充
+        ctx.fillStyle = `rgba(255, 255, 255, ${block.alpha * 0.08})`
+        ctx.fillRect(-block.size / 2, -block.size / 2, block.size, block.size)
+
+        // 纯白高光线框
+        ctx.strokeStyle = `rgba(255, 255, 255, ${block.alpha * 0.85})`
+        ctx.lineWidth = 1.0
+        ctx.strokeRect(-block.size / 2, -block.size / 2, block.size, block.size)
+
+        // 中心高光微核
+        ctx.fillStyle = `rgba(255, 255, 255, ${block.alpha * 0.95})`
+        ctx.fillRect(-1.5, -1.5, 3, 3)
+
+        // 四角数码微标尺
+        const tickLen = 2.5
+        ctx.strokeStyle = `rgba(255, 255, 255, ${block.alpha * 0.6})`
+        ctx.lineWidth = 0.7
+        ctx.strokeRect(-block.size / 2 - tickLen, -block.size / 2 - tickLen, tickLen, tickLen)
+        ctx.strokeRect(block.size / 2, block.size / 2, tickLen, tickLen)
+
+        ctx.restore()
       }
 
-      // ================= 3. 渲染鼠标纯白流体微颗粒 =================
+      // ================= 4. 渲染鼠标微颗粒 =================
       for (let i = fluidParticles.length - 1; i >= 0; i--) {
         const p = fluidParticles[i]
         p.life++

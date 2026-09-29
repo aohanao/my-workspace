@@ -461,7 +461,7 @@ export default function LifePage() {
                             }}
                             className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
                               isChecked
-                                ? 'bg-emerald-500 border-emerald-500 text-white font-light leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
+                                ? 'bg-emerald-500 border-emerald-500 text-white/85 font-light leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
                                 : isToday
                                 ? 'bg-white/[0.04] border-cyan-500/40 text-zinc-500 hover:border-emerald-500/50 hover:text-zinc-300'
                                 : 'bg-transparent border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'
@@ -474,7 +474,7 @@ export default function LifePage() {
                           >
                             {isChecked ? (
                               <span
-                                className={`leading-none select-none text-center font-light max-w-[28px] overflow-hidden whitespace-nowrap ${
+                                className={`leading-none select-none text-center font-light text-white/85 max-w-[28px] overflow-hidden whitespace-nowrap ${
                                   (displayPart || '练').length === 1
                                     ? 'text-xs'
                                     : (displayPart || '练').length === 2
@@ -500,7 +500,11 @@ export default function LifePage() {
                                 : 'bg-transparent border-white/[0.08] text-transparent hover:border-white/20'
                             }`}
                           >
-                            {isChecked ? <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" /> : <span className="text-xs text-zinc-500">•</span>}
+                            {isChecked ? (
+                              <CheckCircle2 className="w-4.5 h-4.5 stroke-[1.5] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                            ) : (
+                              <span className="text-xs text-zinc-500">•</span>
+                            )}
                           </button>
                         )}
                       </td>
