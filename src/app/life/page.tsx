@@ -506,7 +506,7 @@ export default function LifePage() {
                             }`}
                           >
                             {isChecked ? (
-                              <Check className="w-3.5 h-3.5 stroke-[2.2] text-white" />
+                              <CheckCircle2 className="w-4.5 h-4.5 stroke-[2] text-white" />
                             ) : (
                               <span className="text-xs text-zinc-500">•</span>
                             )}

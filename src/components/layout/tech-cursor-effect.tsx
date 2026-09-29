@@ -16,14 +16,19 @@ interface AmbientParticle {
   phase: number
 }
 
-// 高级感方块拖尾粒子束 (Block-Trail Cyber Particle Beam)
+type BeamMode = 'corner' | 'loop' | 'wave'
+
+// 高级感方块拖尾粒子束 (Block-Trail Cyber Particle Beam) - 支持高速巡航、变轨急拐弯与绕圈回旋
 interface BlockTrailBeam {
   x: number
   y: number
   angle: number
-  targetAngle: number
   speed: number
-  curveSpeed: number
+  mode: BeamMode
+  angularVelocity: number
+  turnLife: number
+  turnTargetAngle: number
+  hasTurned: boolean
   blockSize: number
   alpha: number
   life: number
@@ -103,51 +108,74 @@ export function TechCursorEffect() {
       })
     }
 
-    // 2. 高级感方块拖尾粒子束发射池 (随性随机穿越，非僵硬超高速直线，优美优雅巡航)
+    // 2. 高级感高速方块拖尾粒子束发射池 (支持高速穿梭、急剧拐弯、大圆弧绕圈机动)
     const blockBeams: BlockTrailBeam[] = []
-    let nextBeamTimer = Math.floor(Math.random() * 80 + 40) // 1~2秒内触发首个
+    let nextBeamTimer = Math.floor(Math.random() * 40 + 20) // 启动后迅速触发首个
 
     const spawnBlockBeam = () => {
-      // 随机选择生成边缘：0:左侧向右, 1:顶部向下, 2:右侧向左, 3:左上斜穿
+      // 随机选择生成边缘：0:左, 1:顶, 2:右, 3:底
       const side = Math.floor(Math.random() * 4)
       let startX = 0
       let startY = 0
       let initialAngle = 0
 
       if (side === 0) {
-        // 左边边缘向右侧穿越
-        startX = -30
-        startY = Math.random() * height
-        initialAngle = (Math.random() - 0.5) * 0.6 // -17° ~ +17°
+        startX = -40
+        startY = Math.random() * (height * 0.8) + height * 0.1
+        initialAngle = (Math.random() - 0.5) * 0.5
       } else if (side === 1) {
-        // 顶部边缘向下穿越
-        startX = Math.random() * width
-        startY = -30
-        initialAngle = Math.PI / 2 + (Math.random() - 0.5) * 0.7
+        startX = Math.random() * (width * 0.8) + width * 0.1
+        startY = -40
+        initialAngle = Math.PI / 2 + (Math.random() - 0.5) * 0.5
       } else if (side === 2) {
-        // 右边边缘向左穿越
-        startX = width + 30
-        startY = Math.random() * height
-        initialAngle = Math.PI + (Math.random() - 0.5) * 0.6
+        startX = width + 40
+        startY = Math.random() * (height * 0.8) + height * 0.1
+        initialAngle = Math.PI + (Math.random() - 0.5) * 0.5
       } else {
-        // 斜对角优雅俯冲
-        startX = Math.random() * (width * 0.5) - 30
-        startY = -30
-        initialAngle = Math.PI / 4 + (Math.random() - 0.5) * 0.4
+        startX = Math.random() * (width * 0.8) + width * 0.1
+        startY = height + 40
+        initialAngle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5
       }
 
-      // 优雅巡航速度 (4.5px ~ 6.5px / 帧，非瞬间闪现，清晰可见方块拖尾)
-      const speed = Math.random() * 2.0 + 4.2
-      const blockSize = Math.random() * 1.5 + 4.5 // 4.5px ~ 6.0px 主方块
-      const maxLife = Math.floor(Math.max(width, height) / speed) + 60
+      // 高速粒子束 (11.5px ~ 16.5px / 帧)
+      const speed = Math.random() * 5.0 + 11.5
+      const blockSize = Math.random() * 1.5 + 4.5
+
+      // 随机机动模式：拐弯 (corner)、绕圈回旋 (loop)、波浪穿梭 (wave)
+      const randMode = Math.random()
+      let mode: BeamMode = 'corner'
+      let angularVelocity = 0
+      let turnLife = 0
+      let turnTargetAngle = initialAngle
+
+      if (randMode < 0.42) {
+        // 模式 1: 高速急拐弯 - 飞行中途突然 75° ~ 105° 变轨拐弯
+        mode = 'corner'
+        turnLife = Math.floor(Math.random() * 16 + 14)
+        const turnDir = Math.random() > 0.5 ? 1 : -1
+        turnTargetAngle = initialAngle + turnDir * (Math.PI * 0.45 + Math.random() * 0.2)
+      } else if (randMode < 0.8) {
+        // 模式 2: 高速绕圈 - 以大角速度绕出优美的大圆弧/回旋圈后极速飞出
+        mode = 'loop'
+        const loopDir = Math.random() > 0.5 ? 1 : -1
+        angularVelocity = loopDir * (Math.random() * 0.025 + 0.055)
+      } else {
+        // 模式 3: 高速波浪穿梭
+        mode = 'wave'
+      }
+
+      const maxLife = Math.floor(Math.max(width, height) / speed) + 90
 
       blockBeams.push({
         x: startX,
         y: startY,
         angle: initialAngle,
-        targetAngle: initialAngle + (Math.random() - 0.5) * 0.8,
         speed,
-        curveSpeed: (Math.random() - 0.5) * 0.015, // 优雅轻微摆动弯曲
+        mode,
+        angularVelocity,
+        turnLife,
+        turnTargetAngle,
+        hasTurned: false,
         blockSize,
         alpha: 0,
         life: 0,
@@ -239,56 +267,76 @@ export function TechCursorEffect() {
         ctx.fill()
       }
 
-      // ================= 2. 渲染高级感方块拖尾粒子束 =================
+      // ================= 2. 渲染高级感高速方块拖尾粒子束 =================
       nextBeamTimer--
       if (nextBeamTimer <= 0 && blockBeams.length < 2) {
         spawnBlockBeam()
-        nextBeamTimer = Math.floor(Math.random() * 200 + 150) // 每隔 2.5 ~ 6 秒触发一条
+        nextBeamTimer = Math.floor(Math.random() * 160 + 100) // 每隔 1.6 ~ 4.3 秒触发一条高速巡航
       }
 
       for (let i = blockBeams.length - 1; i >= 0; i--) {
         const beam = blockBeams[i]
         beam.life++
 
-        // 柔和微弧线巡航运动
-        beam.angle += Math.sin(beam.life * 0.035) * beam.curveSpeed
+        // 核心动力学：高速、拐弯、绕圈
+        if (beam.mode === 'loop') {
+          // 高速绕圈：每帧以角速度偏转角度，回旋一圈多（约 75 帧）后切向冲出
+          beam.angle += beam.angularVelocity
+          if (beam.life > 75) {
+            beam.angularVelocity *= 0.93
+          }
+        } else if (beam.mode === 'corner') {
+          // 高速拐弯：在 turnLife 节点迅速变轨拐弯
+          if (beam.life >= beam.turnLife && !beam.hasTurned) {
+            const diff = beam.turnTargetAngle - beam.angle
+            beam.angle += diff * 0.26
+            if (Math.abs(diff) < 0.04 || beam.life > beam.turnLife + 10) {
+              beam.angle = beam.turnTargetAngle
+              beam.hasTurned = true
+            }
+          }
+        } else {
+          // 高速波浪穿梭
+          beam.angle += Math.sin(beam.life * 0.08) * 0.05
+        }
+
         beam.x += Math.cos(beam.angle) * beam.speed
         beam.y += Math.sin(beam.angle) * beam.speed
 
         // 平滑渐显与渐隐
-        if (beam.life < 14) {
-          beam.alpha = (beam.life / 14) * 0.95
-        } else if (beam.life > beam.maxLife - 20) {
-          beam.alpha = Math.max(0, ((beam.maxLife - beam.life) / 20) * 0.95)
+        if (beam.life < 10) {
+          beam.alpha = (beam.life / 10) * 0.95
+        } else if (beam.life > beam.maxLife - 15) {
+          beam.alpha = Math.max(0, ((beam.maxLife - beam.life) / 15) * 0.95)
         } else {
           beam.alpha = 0.95
         }
 
-        // 记录历史轨迹点以生成方块拖尾 (最多保留 26 个阶梯方块)
+        // 记录历史轨迹点以生成方块拖尾 (高速下保留 24 个阶梯方块)
         beam.history.unshift({ x: beam.x, y: beam.y, angle: beam.angle })
-        if (beam.history.length > 26) {
+        if (beam.history.length > 24) {
           beam.history.pop()
         }
 
-        // 偶发散落微型方块碎屑 (形成高科技数字粒子束尾流)
-        if (beam.life % 4 === 0 && beam.debris.length < 12) {
-          const spreadAngle = beam.angle + Math.PI + (Math.random() - 0.5) * 1.5
+        // 散落微型方块碎屑 (拐弯或绕圈时伴随微小甩落碎屑)
+        if (beam.life % 3 === 0 && beam.debris.length < 14) {
+          const spreadAngle = beam.angle + Math.PI + (Math.random() - 0.5) * 1.6
           beam.debris.push({
             x: beam.x,
             y: beam.y,
-            vx: Math.cos(spreadAngle) * (Math.random() * 1.2 + 0.3),
-            vy: Math.sin(spreadAngle) * (Math.random() * 1.2 + 0.3),
-            size: Math.random() * 1.2 + 1.2, // 1.2px ~ 2.4px 小方块
+            vx: Math.cos(spreadAngle) * (Math.random() * 1.5 + 0.5),
+            vy: Math.sin(spreadAngle) * (Math.random() * 1.5 + 0.5),
+            size: Math.random() * 1.2 + 1.2,
             alpha: beam.alpha * 0.8,
             life: 0,
-            maxLife: Math.floor(Math.random() * 18 + 14),
+            maxLife: Math.floor(Math.random() * 16 + 12),
           })
         }
 
         // 越界销毁判断
         const isOutOfScreen =
-          beam.x < -80 || beam.x > width + 80 || beam.y < -80 || beam.y > height + 80
-        if ((beam.life >= beam.maxLife || (beam.life > 50 && isOutOfScreen)) && beam.debris.length === 0) {
+          beam.x < -100 || beam.x > width + 100 || beam.y < -100 || beam.y > height + 100
+        if ((beam.life >= beam.maxLife || (beam.life > 40 && isOutOfScreen)) && beam.debris.length === 0) {
           blockBeams.splice(i, 1)
           continue
         }
