@@ -538,39 +538,77 @@ export default function LifePage() {
             <div>
               <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>⚡ 专注精力等级:</span>
-                <span className="font-mono font-bold text-base text-cyan-400">{energy} / 5</span>
+                <span className="font-mono font-bold text-sm text-blue-300/90">{energy} / 5</span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={energy}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  setEnergy(val)
-                  saveWellbeing({ energy: val })
-                }}
-                className="w-full accent-cyan-500 cursor-pointer h-2 bg-black/40 rounded-lg"
-              />
+              <div className="relative h-5 flex items-center group cursor-pointer">
+                <div className="w-full h-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] relative overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-700/80 transition-all duration-150 relative overflow-hidden"
+                    style={{ width: `${(energy / 5) * 100}%` }}
+                  >
+                    {energy > 0 && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
+                    )}
+                  </div>
+                </div>
+                <div
+                  className="absolute w-3 h-3 -ml-1.5 rounded-full bg-white border border-blue-400/80 shadow-[0_0_8px_rgba(59,130,246,0.5)] pointer-events-none transition-all duration-150 flex items-center justify-center"
+                  style={{ left: `${(energy / 5) * 100}%` }}
+                >
+                  <span className="w-1 h-1 rounded-full bg-blue-600" />
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="5"
+                  step="1"
+                  value={energy}
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
+                    setEnergy(val)
+                    saveWellbeing({ energy: val })
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+              </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>😊 心情状态指数:</span>
-                <span className="font-mono font-bold text-base text-blue-400">{mood} / 5</span>
+                <span className="font-mono font-bold text-sm text-purple-300/90">{mood} / 5</span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={mood}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  setMood(val)
-                  saveWellbeing({ mood: val })
-                }}
-                className="w-full accent-blue-500 cursor-pointer h-2 bg-black/40 rounded-lg"
-              />
+              <div className="relative h-5 flex items-center group cursor-pointer">
+                <div className="w-full h-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] relative overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-slate-900 via-purple-950 to-violet-700/80 transition-all duration-150 relative overflow-hidden"
+                    style={{ width: `${(mood / 5) * 100}%` }}
+                  >
+                    {mood > 0 && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
+                    )}
+                  </div>
+                </div>
+                <div
+                  className="absolute w-3 h-3 -ml-1.5 rounded-full bg-white border border-purple-400/80 shadow-[0_0_8px_rgba(168,85,247,0.5)] pointer-events-none transition-all duration-150 flex items-center justify-center"
+                  style={{ left: `${(mood / 5) * 100}%` }}
+                >
+                  <span className="w-1 h-1 rounded-full bg-purple-600" />
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="5"
+                  step="1"
+                  value={mood}
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
+                    setMood(val)
+                    saveWellbeing({ mood: val })
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+              </div>
             </div>
 
             <div>
