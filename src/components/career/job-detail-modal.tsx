@@ -87,6 +87,19 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
     setActiveInterviewIndex(list.length - 1)
   }
 
+  const handleRemoveInterview = (indexToRemove: number) => {
+    if (!formData.interviews || !formData.interviews[indexToRemove]) return
+    const targetRound = formData.interviews[indexToRemove].round || `第 ${indexToRemove + 1} 轮`
+    if (!confirm(`确定要删除「${targetRound}」及该轮次下的所有考点记录吗？`)) {
+      return
+    }
+    const updated = formData.interviews.filter((_, idx) => idx !== indexToRemove)
+    setFormData({ ...formData, interviews: updated })
+    if (activeInterviewIndex >= updated.length) {
+      setActiveInterviewIndex(Math.max(0, updated.length - 1))
+    }
+  }
+
   const handleAddQuestion = () => {
     if (!newQuestion.trim() || !formData.interviews || formData.interviews.length === 0) return
     const updated = [...formData.interviews]
@@ -398,24 +411,62 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
             {formData.interviews && formData.interviews.length > 0 ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                  {formData.interviews.map((iv, idx) => (
-                    <button
-                      type="button"
-                      key={iv.id}
-                      onClick={() => setActiveInterviewIndex(idx)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all border ${
-                        activeInterviewIndex === idx
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          : 'bg-white/[0.02] text-zinc-400 border-white/[0.06] hover:text-white'
-                      }`}
-                    >
-                      {iv.round} ({iv.date})
-                    </button>
-                  ))}
+                  {formData.interviews.map((iv, idx) => {
+                    const isActive = activeInterviewIndex === idx
+                    return (
+                      <div
+                        key={iv.id}
+                        className={`group/tab relative inline-flex items-center rounded-xl transition-all border shrink-0 ${
+                          isActive
+                            ? 'bg-amber-500/15 text-amber-400 border-amber-500/40 font-semibold shadow-sm'
+                            : 'bg-white/[0.02] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setActiveInterviewIndex(idx)}
+                          className="px-3 py-1.5 text-xs whitespace-nowrap pr-1.5"
+                        >
+                          {iv.round} ({iv.date})
+                        </button>
+                        <button
+                          type="button"
+                          title={`删除「${iv.round}」`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRemoveInterview(idx)
+                          }}
+                          className="p-1 mr-1 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/20 rounded-md transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 {currentInterview && (
                   <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3">
+                    {/* 轮次操作标题栏 */}
+                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-amber-300">
+                          {currentInterview.round || `第 ${activeInterviewIndex + 1} 轮`}
+                        </span>
+                        <span className="text-[10px] text-zinc-500">
+                          (第 {activeInterviewIndex + 1} / {formData.interviews.length} 轮)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveInterview(activeInterviewIndex)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-medium transition-colors"
+                        title="删除当前选中的面试轮次"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>删除此轮面试</span>
+                      </button>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <input
                         type="text"

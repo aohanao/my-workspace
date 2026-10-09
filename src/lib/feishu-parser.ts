@@ -863,7 +863,8 @@ export function smartTransformJob(
     applyStatus = '已投递'
     lastStage = undefined // 正在推进中，清除终止前阶段
 
-    // 智能补齐相应面试/笔试轮次（若当前轮次尚未建档）
+    // 仅在状态明确推进跃迁且未显式指定 interviews 时，智能补齐相应面试/笔试轮次（若当前轮次尚未建档）
+    const isStatusChanged = changes.status !== undefined && changes.status !== currentJob.status
     const stageToRound: Record<string, string> = {
       assessment: '笔试测评',
       interview1: '技术一面',
@@ -871,7 +872,7 @@ export function smartTransformJob(
       interview3: '技术三面',
       hr: 'HR面/终面',
     }
-    if (stageToRound[status]) {
+    if (isStatusChanged && !changes.interviews && stageToRound[status]) {
       const roundName = stageToRound[status]
       const hasRound = interviews.some((iv) => iv.round.includes(roundName) || roundName.includes(iv.round))
       if (!hasRound) {
@@ -920,7 +921,9 @@ export function smartTransformJob(
     }
   }
 
-  // 确保已挂阶段有面试/笔试记录对应，避免漏掉转化率与复盘
+  // 仅在明确状态变更或终止阶段变更且未显式指定 interviews 时，智能补齐对应轮次
+  const isRejectedTransition = changes.status === 'rejected' && currentJob.status !== 'rejected'
+  const isLastStageChanged = changes.lastStage !== undefined && changes.lastStage !== currentJob.lastStage
   const stageToRoundMap: Record<string, string> = {
     assessment: '笔试测评',
     interview1: '技术一面',
@@ -928,7 +931,7 @@ export function smartTransformJob(
     interview3: '技术三面',
     hr: 'HR面/终面',
   }
-  if (lastStage && stageToRoundMap[lastStage]) {
+  if ((isRejectedTransition || isLastStageChanged) && !changes.interviews && lastStage && stageToRoundMap[lastStage]) {
     const roundName = stageToRoundMap[lastStage]
     const hasRecord = interviews.some((i) => i.round.includes(roundName) || roundName.includes(i.round))
     if (!hasRecord) {

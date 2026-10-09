@@ -83,6 +83,11 @@ export default function CareerPage() {
     loadData()
   }
 
+  const handleBatchDeleteJobs = (ids: string[]) => {
+    StorageService.batchDeleteJobs(ids)
+    loadData()
+  }
+
   const handleUpdateStatus = (jobId: string, nextStatus: JobStatus) => {
     const job = jobs.find((j) => j.id === jobId)
     if (job) {
@@ -347,6 +352,7 @@ export default function CareerPage() {
             setIsDetailOpen(true)
           }}
           onDeleteJob={handleDeleteJob}
+          onBatchDeleteJobs={handleBatchDeleteJobs}
           onUpdateJob={handleSaveJob}
           onBatchUpdateJobs={(updatedList) => {
             StorageService.saveJobs(updatedList)

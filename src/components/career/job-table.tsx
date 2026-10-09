@@ -26,6 +26,7 @@ interface Props {
   onDeleteJob?: (id: string) => void
   onUpdateJob?: (job: JobApplication) => void
   onBatchUpdateJobs?: (jobs: JobApplication[]) => void
+  onBatchDeleteJobs?: (ids: string[]) => void
 }
 
 const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
@@ -40,7 +41,7 @@ const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
   rejected: { label: '流程终止', badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
 }
 
-export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchUpdateJobs }: Props) {
+export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchUpdateJobs, onBatchDeleteJobs }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
@@ -129,6 +130,24 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
       onBatchUpdateJobs(updatedJobs)
     } else if (onUpdateJob) {
       updatedJobs.filter((j) => selectedIds.has(j.id)).forEach((j) => onUpdateJob(j))
+    }
+    setSelectedIds(new Set())
+  }
+
+  // 批量删除选中的投递记录
+  const handleBatchDelete = () => {
+    if (selectedIds.size === 0) return
+    if (!confirm(`确定要批量删除已选中的 ${selectedIds.size} 条投递记录吗？删除后不可撤销。`)) {
+      return
+    }
+    const idsToDelete = Array.from(selectedIds)
+    if (onBatchDeleteJobs) {
+      onBatchDeleteJobs(idsToDelete)
+    } else if (onBatchUpdateJobs) {
+      const remainingJobs = jobs.filter((j) => !selectedIds.has(j.id))
+      onBatchUpdateJobs(remainingJobs)
+    } else if (onDeleteJob) {
+      idsToDelete.forEach((id) => onDeleteJob(id))
     }
     setSelectedIds(new Set())
   }
@@ -238,6 +257,14 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
               className="px-2.5 py-1 rounded-lg bg-white/[0.08] text-amber-300 hover:bg-white/[0.15] border border-amber-500/30 transition-colors"
             >
               设为「未投递」
+            </button>
+            <button
+              onClick={handleBatchDelete}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 font-medium transition-colors"
+              title="批量删除选中的投递记录"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>批量删除 ({selectedIds.size})</span>
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}

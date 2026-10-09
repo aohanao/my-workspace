@@ -255,6 +255,11 @@ export const StorageService = {
     const list = StorageService.getJobs()
     StorageService.saveJobs(list.filter((j) => j.id !== id))
   },
+  batchDeleteJobs: (ids: string[]) => {
+    const idSet = new Set(ids)
+    const list = StorageService.getJobs()
+    StorageService.saveJobs(list.filter((j) => !idSet.has(j.id)))
+  },
   batchAddJobs: (newJobs: JobApplication[]) => {
     const existing = StorageService.getJobs()
     const existingIds = new Set(existing.map((j) => `${j.company.toLowerCase()}_${j.role.toLowerCase()}`))
