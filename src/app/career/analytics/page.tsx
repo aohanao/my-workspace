@@ -407,7 +407,24 @@ export default function CareerAnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0]
+                      return (
+                        <div className="bg-[#101422] border border-white/20 px-3 py-2 rounded-xl shadow-2xl backdrop-blur-md">
+                          <p className="text-white text-xs font-medium flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm"
+                              style={{ backgroundColor: data.payload?.fill || data.color }}
+                            />
+                            <span className="text-white font-semibold">{data.name} :</span>
+                            <span className="font-mono font-bold text-white text-sm">{data.value}</span>
+                          </p>
+                        </div>
+                      )
+                    }
+                    return null
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -445,7 +462,22 @@ export default function CareerAnalyticsPage() {
                   <XAxis dataKey="city" fontSize={12} stroke="#a1a1aa" />
                   <YAxis allowDecimals={false} fontSize={12} stroke="#a1a1aa" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#12151f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0]
+                        return (
+                          <div className="bg-[#101422] border border-white/20 px-3 py-2 rounded-xl shadow-2xl backdrop-blur-md">
+                            <p className="text-zinc-300 text-[11px] mb-1 font-medium">{label || data.name}</p>
+                            <p className="text-white text-xs font-medium flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full inline-block bg-blue-500 shrink-0 shadow-sm" />
+                              <span className="text-white font-semibold">投递数 :</span>
+                              <span className="font-mono font-bold text-white text-sm">{data.value}</span>
+                            </p>
+                          </div>
+                        )
+                      }
+                      return null
+                    }}
                   />
                   <Bar dataKey="count" name="投递数" fill="#3b82f6" radius={[6, 6, 0, 0]} />
                 </BarChart>

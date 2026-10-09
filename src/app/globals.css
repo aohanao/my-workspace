@@ -169,3 +169,13 @@ pre, code {
   animation: shimmer-sweep 3s ease-in-out infinite;
 }
 
+/* Recharts 暗黑主题 Tooltip 字体纯白高亮适配 */
+.recharts-default-tooltip,
+.recharts-tooltip-item,
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value,
+.recharts-tooltip-item-separator,
+.recharts-tooltip-label {
+  color: #ffffff !important;
+}
+
