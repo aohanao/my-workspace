@@ -28,7 +28,7 @@ BEGIN
     NEW.updated_at = timezone('utc'::text, now());
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql SET search_path = pg_catalog;
 
 DROP TRIGGER IF EXISTS set_workspace_storage_updated_at ON public.workspace_storage;
 CREATE TRIGGER set_workspace_storage_updated_at
