@@ -25,12 +25,12 @@ import { CloudConfigModal } from './cloud-config-modal'
 import { getSupabase } from '@/lib/supabase'
 
 const NAV_ITEMS = [
-  { href: '/', label: '控制中枢', sub: 'Overview', icon: LayoutDashboard },
-  { href: '/career', label: '秋招求职管家', sub: 'Pipeline', icon: Briefcase },
-  { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3 },
-  { href: '/research', label: '硕士毕业管理', sub: 'Thesis & System', icon: GraduationCap },
-  { href: '/study', label: '知识与算法复盘', sub: 'Study & LeetCode', icon: Brain },
-  { href: '/life', label: '生活管理', sub: 'Life & Daily', icon: Smile },
+  { href: '/', label: '总览', icon: LayoutDashboard },
+  { href: '/career', label: '求职', icon: Briefcase },
+  { href: '/career/analytics', label: '求职分析', icon: BarChart3 },
+  { href: '/research', label: '论文与研究', icon: GraduationCap },
+  { href: '/study', label: '学习复习', icon: Brain },
+  { href: '/life', label: '生活', icon: Smile },
 ]
 
 interface SidebarProps {
@@ -101,9 +101,9 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
               </div>
               <div>
                 <h1 className="font-bold text-sm sm:text-base tracking-tight text-white flex items-center gap-1.5 font-sans">
-                  Workspace <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/[0.08] text-zinc-300 font-mono border border-white/[0.12]">AI OS</span>
+                  我的工作台
                 </h1>
-                <p className="text-xs text-zinc-400 font-normal">Academic & Career Studio</p>
+                <p className="text-xs text-zinc-400 font-normal">把重要的事放在眼前</p>
               </div>
             </Link>
 

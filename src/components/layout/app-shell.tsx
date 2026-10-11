@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Sidebar } from './sidebar'
 import { TopHeader } from './top-header'
-import { TechCursorEffect } from './tech-cursor-effect'
 import { AuthGate } from './auth-gate'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,7 +19,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <AuthGate>
       <div className="min-h-screen flex w-full bg-transparent text-foreground overflow-hidden relative">
       {/* 科技感鼠标光影跟随与网格粒子 */}
-      <TechCursorEffect />
 
       {/* PC 端固定侧边栏 (lg 及以上显示) */}
       <div className="hidden lg:block shrink-0">
