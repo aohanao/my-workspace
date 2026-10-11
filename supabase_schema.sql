@@ -13,35 +13,13 @@ CREATE TABLE IF NOT EXISTS public.workspace_storage (
 -- 2. 开启行级安全策略 (Row Level Security - RLS)
 ALTER TABLE public.workspace_storage ENABLE ROW LEVEL SECURITY;
 
--- 3. 创建匿名/公开读写策略 (适用于个人工作台的 anon key 访问)
+-- 3. 移除旧版公开策略。创建唯一账户后，运行 supabase_owner_migration.sql
+--    建立仅限该账户的读写策略；在迁移前，此表不会向客户端开放。
 DROP POLICY IF EXISTS "Allow public read access" ON public.workspace_storage;
-CREATE POLICY "Allow public read access"
-ON public.workspace_storage
-FOR SELECT
-TO anon, authenticated
-USING (true);
-
 DROP POLICY IF EXISTS "Allow public insert access" ON public.workspace_storage;
-CREATE POLICY "Allow public insert access"
-ON public.workspace_storage
-FOR INSERT
-TO anon, authenticated
-WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Allow public update access" ON public.workspace_storage;
-CREATE POLICY "Allow public update access"
-ON public.workspace_storage
-FOR UPDATE
-TO anon, authenticated
-USING (true)
-WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Allow public delete access" ON public.workspace_storage;
-CREATE POLICY "Allow public delete access"
-ON public.workspace_storage
-FOR DELETE
-TO anon, authenticated
-USING (true);
+REVOKE ALL ON public.workspace_storage FROM anon;
 
 -- 4. 创建触发器函数：在更新时自动刷新 updated_at
 CREATE OR REPLACE FUNCTION public.handle_updated_at()

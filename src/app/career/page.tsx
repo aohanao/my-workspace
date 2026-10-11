@@ -38,8 +38,6 @@ export default function CareerPage() {
 
   useEffect(() => {
     loadData()
-    // 首次进入自动拉取云端数据（如果已配置）
-    StorageService.initCloudSync()
 
     const handleUpdate = () => loadData()
     window.addEventListener('workspace-data-updated', handleUpdate)

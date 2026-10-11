@@ -16,11 +16,13 @@ import {
   X,
   Settings,
   Sparkles,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import { StorageService, CloudSyncStatus } from '@/lib/storage'
 import { CloudConfigModal } from './cloud-config-modal'
+import { getSupabase } from '@/lib/supabase'
 
 const NAV_ITEMS = [
   { href: '/', label: '控制中枢', sub: 'Overview', icon: LayoutDashboard },
@@ -73,6 +75,18 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
     }
     setSyncInfo(StorageService.getSyncStatus())
     setIsSyncing(false)
+  }
+
+  const handleSignOut = async () => {
+    const client = getSupabase()
+    if (!client) return
+    const { error } = await client.auth.signOut({ scope: 'local' })
+    if (error) {
+      alert('退出失败，请稍后重试。')
+      return
+    }
+    StorageService.clearLocalCache()
+    onClose?.()
   }
 
   return (
@@ -200,6 +214,13 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                 : '点击可填入 Supabase Key 开启多端同步'}
             </p>
           </div>
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-zinc-400 hover:bg-white/[0.04] hover:text-white"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            退出当前设备
+          </button>
         </div>
       </aside>
 

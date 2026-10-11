@@ -129,6 +129,12 @@ async function syncKeyToCloud(key: string, value: any) {
 }
 
 export const StorageService = {
+  // 退出当前设备时清除个人数据缓存；云端数据保留供下次登录恢复
+  clearLocalCache: () => {
+    if (typeof window === 'undefined') return
+    Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key))
+  },
+
   // 云端同步状态
   getSyncStatus: (): { status: CloudSyncStatus; isConfigured: boolean; lastSyncTime: string | null } => {
     return {

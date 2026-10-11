@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Sidebar } from './sidebar'
 import { TopHeader } from './top-header'
 import { TechCursorEffect } from './tech-cursor-effect'
-import { StorageService } from '@/lib/storage'
+import { AuthGate } from './auth-gate'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -16,13 +16,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false)
   }, [pathname])
 
-  // 应用初始化时启动云端数据同步
-  useEffect(() => {
-    StorageService.initCloudSync()
-  }, [])
-
   return (
-    <div className="min-h-screen flex w-full bg-transparent text-foreground overflow-hidden relative">
+    <AuthGate>
+      <div className="min-h-screen flex w-full bg-transparent text-foreground overflow-hidden relative">
       {/* 科技感鼠标光影跟随与网格粒子 */}
       <TechCursorEffect />
 
@@ -54,6 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </AuthGate>
   )
 }
