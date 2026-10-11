@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
-  Table as TableIcon,
   ArrowUpDown,
   Sparkles,
 } from 'lucide-react'
@@ -43,8 +42,6 @@ const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
 
 export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchUpdateJobs, onBatchDeleteJobs }: Props) {
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [applyTab, setApplyTab] = useState<'all' | 'applied' | 'not_applied'>('all')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -54,23 +51,13 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
   const appliedCount = jobs.filter((j) => isJobApplied(j)).length
   const notAppliedCount = jobs.length - appliedCount
 
+  const companyQuery = search.trim().toLocaleLowerCase()
   const filtered = jobs.filter((j) => {
     // 投递状态 Tab 过滤
     if (applyTab === 'applied' && !isJobApplied(j)) return false
     if (applyTab === 'not_applied' && isJobApplied(j)) return false
 
-    const matchesSearch =
-      j.company.toLowerCase().includes(search.toLowerCase()) ||
-      j.role.toLowerCase().includes(search.toLowerCase()) ||
-      (j.category && j.category.toLowerCase().includes(search.toLowerCase())) ||
-      (j.location && j.location.toLowerCase().includes(search.toLowerCase())) ||
-      (j.industry && j.industry.toLowerCase().includes(search.toLowerCase())) ||
-      (j.notes && j.notes.toLowerCase().includes(search.toLowerCase()))
-
-    const matchesStatus = statusFilter === 'all' || j.status === statusFilter
-    const matchesPriority = priorityFilter === 'all' || j.priority === priorityFilter
-
-    return matchesSearch && matchesStatus && matchesPriority
+    return j.company.toLocaleLowerCase().includes(companyQuery)
   })
 
   // 行内单项切换投递状态 (已投递 ⇄ 未投递)
@@ -283,7 +270,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
       {/* ===================== 二级终端视窗 (Sub-Window Terminal) ===================== */}
       <div className={`sub-window-terminal rounded-2xl overflow-hidden flex flex-col relative transition-all border border-white/[0.1] ${isFullscreen ? 'flex-1 min-h-0' : 'h-[580px]'}`}>
         {/* 视窗标题栏与控制台 (Sub-window Header) */}
-        <div className="px-4 py-2.5 bg-[#090d16]/95 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 select-none">
+        <div className="px-4 py-2.5 bg-[#090d16]/95 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 flex-wrap select-none">
           <div className="flex items-center gap-3">
             {/* 拟物终端小红绿点 */}
             <div className="flex items-center gap-1.5">
@@ -292,14 +279,25 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
             </div>
 
-            <div className="flex items-center gap-2">
-              <TableIcon className="w-3.5 h-3.5 text-zinc-300" />
-              <span className="text-xs sm:text-sm font-semibold text-white tracking-tight font-mono">
-                [ 投递清单二级视窗 // JOB_PIPELINE_CONSOLE ]
-              </span>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1]">
                 已展示 {filtered.length} / 共 {jobs.length} 岗位
               </span>
+              <label className="relative block">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value)
+                    setSelectedIds(new Set())
+                    if (event.target.value.trim()) setApplyTab('all')
+                  }}
+                  placeholder="搜索投递公司"
+                  aria-label="搜索投递公司名称"
+                  className="w-36 sm:w-48 rounded-full bg-white/[0.06] border border-white/[0.12] py-1 pl-8 pr-3 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400/60"
+                />
+              </label>
             </div>
           </div>
 
@@ -550,7 +548,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                   <td colSpan={13} className="p-16 text-center text-zinc-400">
                     <p className="text-base font-medium text-zinc-300">暂无匹配的求职记录</p>
                     <p className="text-xs sm:text-sm mt-1.5 text-zinc-500">
-                      可切换上方「全部岗位」/「实际已投递」/「未投递/意向储备」标签
+                      可调整公司名称搜索或切换上方分类标签
                     </p>
                   </td>
                 </tr>

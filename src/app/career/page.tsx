@@ -5,9 +5,7 @@ import {
   Briefcase,
   Kanban,
   Table as TableIcon,
-  Plus,
   FileSpreadsheet,
-  BarChart3,
   Layers,
   Award,
   CheckCircle2,
@@ -18,7 +16,6 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
-import Link from 'next/link'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
 import { isJobApplied, hasReachedStage, smartTransformJob } from '@/lib/feishu-parser'
@@ -27,7 +24,6 @@ import { JobTable } from '@/components/career/job-table'
 import { FeishuImporter } from '@/components/career/feishu-importer'
 import { JobDetailModal } from '@/components/career/job-detail-modal'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
-import { getLocalDateKey } from '@/lib/utils'
 
 export default function CareerPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
@@ -52,20 +48,6 @@ export default function CareerPage() {
       window.removeEventListener('workspace-data-updated', handleUpdate)
     }
   }, [])
-
-  const handleCreateNew = () => {
-    const newJob: JobApplication = {
-      id: `job-${Date.now()}`,
-      company: '',
-      role: '',
-      applyDate: getLocalDateKey(),
-      status: 'applied',
-      updatedAt: new Date().toISOString(),
-      interviews: [],
-    }
-    setSelectedJob(newJob)
-    setIsDetailOpen(true)
-  }
 
   const handleSaveJob = (job: JobApplication) => {
     const transformed = smartTransformJob(job, {})
@@ -147,15 +129,6 @@ export default function CareerPage() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-          {/* 大屏跳转 */}
-          <Link
-            href="/career/analytics"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white text-xs font-medium border border-white/[0.08] transition-all"
-          >
-            <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>量化大屏</span>
-          </Link>
-
           {/* 飞书导入 */}
           <button
             onClick={() => setIsImporterOpen(true)}
@@ -181,15 +154,6 @@ export default function CareerPage() {
               <span>清空记录</span>
             </button>
           )}
-
-          {/* 新增投递 */}
-          <button
-            onClick={handleCreateNew}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full linear-btn-primary text-xs font-semibold shadow-md shadow-blue-500/20"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>添加投递</span>
-          </button>
         </div>
       </div>
 
@@ -279,29 +243,6 @@ export default function CareerPage() {
         </div>
       </div>
 
-      {/* 投递全景流转与总数严格核验条 */}
-      <div className="px-3.5 py-2.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-zinc-300 font-medium flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-400" />
-            全库求职总览 (共 <span className="font-mono font-bold text-white">{totalCount}</span> 家) =
-          </span>
-          <span className="text-zinc-200 font-medium">
-            实际已投递 <span className="font-mono font-bold text-blue-400">{appliedCount}</span> 家
-            <span className="text-zinc-400 ml-1">
-              [待初筛 <span className="font-mono text-zinc-200 font-semibold">{screeningCount}</span> · 笔试 <span className="font-mono text-purple-300 font-semibold">{assessmentCount}</span> · 面试中 <span className="font-mono text-amber-300 font-semibold">{interviewCount}</span> · Offer <span className="font-mono text-emerald-300 font-semibold">{offerCount}</span> · <span className="text-rose-400 font-semibold">已挂 <span className="font-mono">{rejectedCount}</span></span>]
-            </span>
-          </span>
-          <span className="text-zinc-600 font-bold">＋</span>
-          <span className="text-zinc-400">
-            储备待投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家
-          </span>
-        </div>
-        <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/20 font-semibold">
-          总数核验 100% 对齐 ✓
-        </div>
-      </div>
-
       {/* 视图切换控制 */}
       <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5">
         <div className="flex items-center gap-1.5 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06]">
@@ -328,10 +269,6 @@ export default function CareerPage() {
             <span>表格模式</span>
           </button>
         </div>
-
-        <p className="text-xs sm:text-sm text-zinc-400 hidden sm:block">
-          💡 点击卡片可查看被问考点、记录复盘并打分
-        </p>
       </div>
 
       {/* 视图主体 */}
