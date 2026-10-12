@@ -29,6 +29,16 @@ import {
 import { getSupabase, isSupabaseConfigured } from './supabase'
 import { normalizeJobStatus } from './feishu-parser'
 import { getLocalDateKey } from './utils'
+import { THESIS_TITLE, THESIS_CHAPTER_TITLES, THESIS_CHAPTER_NOTES, THESIS_OUTLINE } from './thesis-outline'
+
+const LEGACY_CHAPTER_NOTES = [
+  '明确“少人化、机械化、智能化”需求，综述隧道开挖支护机理与智能决策系统。',
+  '研究主洞/平导不同围岩与工法下的机械装备空间适配性与高效谱系化配置。',
+  '揭示围岩应力状态、压力拱演化规律以及岩-支-机相互作用机理。',
+  '构建“围岩性态-支护参数-结构安全”数据集，开发物理约束神经网络模型。',
+  '集成工法选择、支护设计与装备配置算法，选取典型工程算例测试验证。',
+  '总结全工序机械化智能配置核心成果与创新点。',
+]
 
 export const STORAGE_KEYS = {
   JOBS: 'workspace_jobs_v4',
@@ -303,7 +313,25 @@ export const StorageService = {
   },
 
   // 毕业与科研数据
-  getThesis: (): ThesisInfo => getItem(STORAGE_KEYS.THESIS, INITIAL_THESIS),
+  getThesis: (): ThesisInfo => {
+    const thesis = getItem(STORAGE_KEYS.THESIS, INITIAL_THESIS)
+    if ((thesis.outlineVersion ?? 0) >= 1) return thesis
+
+    // 旧数据升级目录与章节标题，保留已有字数、状态和自定义备注。
+    return {
+      ...thesis,
+      title: THESIS_TITLE,
+      outline: THESIS_OUTLINE,
+      outlineVersion: 1,
+      chapters: thesis.chapters.map((chapter, index) => ({
+        ...chapter,
+        title: THESIS_CHAPTER_TITLES[index] ?? chapter.title,
+        notes: chapter.notes === LEGACY_CHAPTER_NOTES[index]
+          ? THESIS_CHAPTER_NOTES[index]
+          : chapter.notes,
+      })),
+    }
+  },
   saveThesis: (thesis: ThesisInfo) => {
     setItem(STORAGE_KEYS.THESIS, thesis)
     if (thesis.blindReviewDate) {

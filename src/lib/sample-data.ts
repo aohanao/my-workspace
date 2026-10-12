@@ -11,63 +11,66 @@ import {
   QuickCaptureNote,
   TimeBlockItem,
 } from '@/types'
+import { THESIS_TITLE, THESIS_CHAPTER_TITLES, THESIS_CHAPTER_NOTES, THESIS_OUTLINE } from './thesis-outline'
 
 // 初始秋招投递数据：清空，等待用户导入真实飞书表格或手动添加
 export const INITIAL_JOBS: JobApplication[] = []
 
 // 硕士学位论文真实信息（来自西南交通大学开题报告：梅傲寒）
 export const INITIAL_THESIS: ThesisInfo = {
-  title: '钻爆法隧道全工序机械化施工智能配置方法及系统研究',
+  title: THESIS_TITLE,
   blindReviewDate: '2027-02-04',
   defenseDate: '2027-05-20',
+  outline: THESIS_OUTLINE,
+  outlineVersion: 1,
   chapters: [
     {
       id: 'ch-1',
-      title: '第一章 绪论 (工程背景、国内外研究现状及论文主要内容与技术路线)',
+      title: THESIS_CHAPTER_TITLES[0],
       targetWords: 6000,
       currentWords: 0,
       status: 'not_started',
-      notes: '明确“少人化、机械化、智能化”需求，综述隧道开挖支护机理与智能决策系统。',
+      notes: THESIS_CHAPTER_NOTES[0],
     },
     {
       id: 'ch-2',
-      title: '第二章 隧道全工序机械化施工标准工法与装备谱系化配置体系',
+      title: THESIS_CHAPTER_TITLES[1],
       targetWords: 8000,
       currentWords: 0,
       status: 'not_started',
-      notes: '研究主洞/平导不同围岩与工法下的机械装备空间适配性与高效谱系化配置。',
+      notes: THESIS_CHAPTER_NOTES[1],
     },
     {
       id: 'ch-3',
-      title: '第三章 适应全工序机械化施工的隧道支护结构体系与接触力学机理',
+      title: THESIS_CHAPTER_TITLES[2],
       targetWords: 9000,
       currentWords: 0,
       status: 'not_started',
-      notes: '揭示围岩应力状态、压力拱演化规律以及岩-支-机相互作用机理。',
+      notes: THESIS_CHAPTER_NOTES[2],
     },
     {
       id: 'ch-4',
-      title: '第四章 融合力学机理与数据驱动的隧道支护参数智能选择模型',
+      title: THESIS_CHAPTER_TITLES[3],
       targetWords: 8000,
       currentWords: 0,
       status: 'not_started',
-      notes: '构建“围岩性态-支护参数-结构安全”数据集，开发物理约束神经网络模型。',
+      notes: THESIS_CHAPTER_NOTES[3],
     },
     {
       id: 'ch-5',
-      title: '第五章 公路隧道多工序关键参数智能设计与配置系统研发及工程验证',
+      title: THESIS_CHAPTER_TITLES[4],
       targetWords: 7000,
       currentWords: 0,
       status: 'not_started',
-      notes: '集成工法选择、支护设计与装备配置算法，选取典型工程算例测试验证。',
+      notes: THESIS_CHAPTER_NOTES[4],
     },
     {
       id: 'ch-6',
-      title: '第六章 结论与展望',
+      title: THESIS_CHAPTER_TITLES[5],
       targetWords: 2000,
       currentWords: 0,
       status: 'not_started',
-      notes: '总结全工序机械化智能配置核心成果与创新点。',
+      notes: THESIS_CHAPTER_NOTES[5],
     },
   ],
 }

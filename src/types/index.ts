@@ -69,6 +69,8 @@ export interface ThesisInfo {
   defenseDate: string
   blindReviewDate: string
   chapters: ThesisChapter[]
+  outline?: string
+  outlineVersion?: number
 }
 
 export interface ModelExperiment {
