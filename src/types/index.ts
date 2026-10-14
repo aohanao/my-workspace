@@ -167,6 +167,8 @@ export interface HabitItem {
   color: string
   icon: string
   category?: string
+  createdAt?: string // YYYY-MM-DD，创建前不计入缺漏
+  archivedAt?: string // YYYY-MM-DD，归档后从当前矩阵隐藏
   logs: Record<string, boolean> // YYYY-MM-DD -> true
   workoutDetails?: Record<string, string> // YYYY-MM-DD -> 健身部位，如 '胸部' | '背部' 等
 }
