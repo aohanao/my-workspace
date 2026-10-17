@@ -1,0 +1,7 @@
+.home { box-sizing: border-box; min-height: 100vh; padding: 140rpx 48rpx 80rpx; background: radial-gradient(circle at 85% 8%, #172747 0, #090b10 45%); }
+.badge { color: #93c5fd; font-size: 22rpx; letter-spacing: 6rpx; }
+.title { margin-top: 28rpx; font-size: 64rpx; font-weight: 700; }
+.description { margin-top: 28rpx; color: #a1a1aa; font-size: 30rpx; line-height: 1.7; }
+.open-button { margin-top: 96rpx; padding: 12rpx 24rpx; border-radius: 24rpx; background: #3b82f6; color: white; font-size: 32rpx; font-weight: 600; }
+.open-button::after { border: 0; }
+.hint { margin-top: 28rpx; color: #fbbf24; font-size: 24rpx; text-align: center; }

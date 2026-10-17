@@ -1,0 +1,7 @@
+<view class="home">
+  <view class="badge">WORKSPACE</view>
+  <view class="title">个人工作台</view>
+  <view class="description">求职、科研、学习与生活，随时进入你的工作台。</view>
+  <button class="open-button" bindtap="openWorkspace">进入工作台</button>
+  <view wx:if="{{!configured}}" class="hint">请先在 config.js 中填写工作台网址</view>
+</view>

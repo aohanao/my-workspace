@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/workspace/workspace"
+  ],
+  "window": {
+    "navigationBarTitleText": "个人工作台",
+    "navigationBarBackgroundColor": "#090b10",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#090b10"
+  },
+  "style": "v2"
+}
