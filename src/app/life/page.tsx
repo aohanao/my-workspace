@@ -22,6 +22,7 @@ import {
 import { EnergyMoodLog, HabitItem, QuickCaptureNote, TimeBlockItem } from '@/types'
 import { StorageService } from '@/lib/storage'
 import { getLocalDateKey } from '@/lib/utils'
+import HabitHistoryModal from '@/components/life/habit-history-modal'
 
 export default function LifePage() {
   const [habits, setHabits] = useState<HabitItem[]>([])
@@ -30,6 +31,7 @@ export default function LifePage() {
   const [newHabitName, setNewHabitName] = useState('')
   const [newHabitCategory, setNewHabitCategory] = useState('技能学习')
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false)
+  const [isHabitHistoryOpen, setIsHabitHistoryOpen] = useState(false)
 
   // 健身部位多选记录弹窗
   const [fitnessModalTarget, setFitnessModalTarget] = useState<{
@@ -105,7 +107,7 @@ export default function LifePage() {
     h.name.toLowerCase().includes('workout')
 
   const sortedHabits = useMemo(() => {
-    return [...habits].sort((a, b) => {
+    return habits.filter((habit) => !habit.archivedAt).sort((a, b) => {
       const isFitA = isFitnessHabit(a)
       const isFitB = isFitnessHabit(b)
       if (isFitA && !isFitB) return 1
@@ -227,6 +229,7 @@ export default function LifePage() {
       category: newHabitCategory.trim() || '常规',
       color: colors[habits.length % colors.length],
       icon: 'Flame',
+      createdAt: today,
       logs: { [today]: true },
     }
     const updated = StorageService.groupHabitsByCategory([...habits, item])
@@ -248,8 +251,8 @@ export default function LifePage() {
   }
 
   const handleDeleteHabit = (id: string) => {
-    if (confirm('确定删除该日常打卡项吗？')) {
-      const updated = StorageService.groupHabitsByCategory(habits.filter((h) => h.id !== id))
+    if (confirm('确定归档该日常打卡项吗？历史打卡记录会保留。')) {
+      const updated = StorageService.groupHabitsByCategory(habits.map((h) => h.id === id ? { ...h, archivedAt: today } : h))
       setHabits(updated)
       StorageService.saveHabits(updated)
     }
@@ -396,13 +399,16 @@ export default function LifePage() {
       <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2.5 tracking-tight">
-              <Flame className="w-5 h-5 text-amber-400" />
-              日常任务打卡矩阵 (Habit Matrix)
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              <button type="button" onClick={() => setIsHabitHistoryOpen(true)} className="flex items-center gap-2.5 text-left hover:text-cyan-300 transition-colors group" title="查看历史打卡日历">
+                <Flame className="w-5 h-5 text-amber-400" />
+                <span className="group-hover:underline underline-offset-4">日常任务打卡矩阵 (Habit Matrix)</span>
+                <Calendar className="w-4 h-4 text-zinc-400 group-hover:text-cyan-300" />
+              </button>
             </h3>
           </div>
           <span className="text-xs sm:text-sm font-mono text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1]">
-            共 {habits.length} 项习惯
+            共 {sortedHabits.length} 项习惯
           </span>
         </div>
 
@@ -708,6 +714,10 @@ export default function LifePage() {
           </div>
         </div>
       </div>
+
+      {isHabitHistoryOpen && (
+        <HabitHistoryModal habits={habits} today={today} onClose={() => setIsHabitHistoryOpen(false)} />
+      )}
 
       {/* ================= 健身部位多选记录弹窗 ================= */}
       {fitnessModalTarget && (
