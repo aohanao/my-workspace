@@ -63,9 +63,9 @@ export default function ResearchPage() {
 
   const [newExp, setNewExp] = useState<Partial<ModelExperiment>>({
     modelName: '',
-    taskType: '非线性高维力学映射与安全性预测',
-    dataset: '地质参数、围岩等级与支护工况数据集',
-    hyperparameters: 'DNN (4隐含层) + AdamW, lr: 1e-4',
+    taskType: '力学响应预测 / 支护智能决策',
+    dataset: '地质—开挖—支护力学时序数据库',
+    hyperparameters: '候选架构与超参数待验证集选择',
     metrics: '待运行 / R² 待评测',
     status: 'not_started',
     notes: '',
@@ -175,10 +175,10 @@ export default function ResearchPage() {
     if (!newExp.modelName) return
     const expItem: ModelExperiment = {
       id: `exp-${Date.now()}`,
-      modelName: newExp.modelName || '地质-围岩-支护-安全性映射神经网络',
+      modelName: newExp.modelName || '支护智能决策模型',
       taskType: newExp.taskType || '参数映射与安全性评价',
       dataset: newExp.dataset || '工程地质与数值模拟矩阵',
-      hyperparameters: newExp.hyperparameters || 'DNN, lr: 1e-4',
+      hyperparameters: newExp.hyperparameters || '待验证集选择',
       metrics: newExp.metrics || '待运行',
       status: (newExp.status as any) || 'not_started',
       date: getLocalDateKey(),
@@ -245,6 +245,20 @@ export default function ResearchPage() {
     })
     setProjects(updated)
     StorageService.saveProjects(updated)
+  }
+
+  const handleSaveProject = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingProject || !editingProject.name.trim() || editingProject.tasks.some((task) => !task.text.trim())) return
+    const tasks = editingProject.tasks.map((task) => ({ ...task, text: task.text.trim() }))
+    const updated = projects.map((project) => project.id === editingProject.id ? {
+      ...editingProject, name: editingProject.name.trim(), description: editingProject.description.trim(),
+      techStack: editingProject.techStack.map((item) => item.trim()).filter(Boolean), tasks,
+      progress: tasks.length ? Math.round(tasks.filter((task) => task.done).length / tasks.length * 100) : 0,
+    } : project)
+    setProjects(updated)
+    StorageService.saveProjects(updated)
+    setEditingProject(null)
   }
 
   // 毕业里程碑操作
@@ -327,7 +341,7 @@ export default function ResearchPage() {
             }`}
           >
             <Network className="w-4 h-4" />
-            <span>2. 映射神经网络算法</span>
+            <span>2. 算法与模型训练</span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
@@ -542,7 +556,7 @@ export default function ResearchPage() {
           {/* 章节编辑模态弹窗 */}
           {editingChapter && (
             <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white flex items-center gap-2">
                   <Edit3 className="w-4 h-4 text-cyan-400" />
                   编辑章节信息
@@ -733,17 +747,17 @@ export default function ResearchPage() {
         </div>
       )}
 
-      {/* ===================== 板块 2: 映射神经网络算法 (核心唯一算法) ===================== */}
+      {/* ===================== 板块 2: 算法与模型训练计划 ===================== */}
       {activeTab === 'models' && (
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
                 <Network className="w-4 h-4 text-cyan-400" />
-                硕士课题核心算法模型台账
+                硕士课题算法与模型训练计划
               </h3>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-                训练深度神经网络模型：找到「地质参数、围岩等级、支护参数」与「结构安全性」之间的非线性映射关系
+                第2—4章：机理特征与时序数据库 → 世界模型与安全评价 → 时空 Transformer 决策 → 反馈优化与验证
               </p>
             </div>
             <button
@@ -763,12 +777,13 @@ export default function ResearchPage() {
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
                     <span className="text-xs font-medium px-3 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1] uppercase">
-                      {exp.status === 'not_started' ? '规划启动阶段' : exp.status}
+                      {{ not_started: '规划启动阶段', training: '训练中', completed: '已完成', failed: '失败', aborted: '已中止' }[exp.status]}
                     </span>
                     <span className="text-xs text-zinc-500 font-mono">登记日期: {exp.date}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button onClick={() => setEditingExp({ ...exp })} className="flex items-center gap-1 px-2 py-1 text-xs text-cyan-300 hover:text-white"><Edit3 className="w-3.5 h-3.5" />编辑</button>
                     <button
                       onClick={() => handleDeleteExp(exp.id)}
                       className="p-1 text-zinc-500 hover:text-rose-400 rounded-lg transition-colors"
@@ -821,12 +836,12 @@ export default function ResearchPage() {
           {/* 编辑算法模态弹窗 */}
           {editingExp && (
             <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white flex items-center gap-2">
                   <Edit3 className="w-4 h-4 text-cyan-400" />
                   修改算法模型参数
                 </h3>
-                <form onSubmit={handleUpdateExistingExp} className="space-y-3.5 text-xs sm:text-sm">
+                <form onSubmit={handleUpdateExistingExp} className="space-y-3.5 text-xs sm:text-sm"><label className="block text-zinc-400">训练状态<select value={editingExp.status} onChange={(e) => setEditingExp({ ...editingExp, status: e.target.value as ModelExperiment['status'] })} className="mt-1 w-full p-2.5 rounded-xl bg-black/50 border border-white/10 text-white"><option value="not_started">未开始</option><option value="training">训练中</option><option value="completed">已完成</option><option value="failed">失败</option><option value="aborted">已中止</option></select></label>
                   <div>
                     <label className="text-zinc-400 block mb-1">算法模型名称：</label>
                     <input
@@ -911,13 +926,13 @@ export default function ResearchPage() {
           {/* 新增算法弹窗 */}
           {isAddExpOpen && (
             <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white">新建实验与算法模型</h3>
                 <form onSubmit={handleSaveExp} className="space-y-3 text-xs sm:text-sm">
                   <input
                     type="text"
                     required
-                    placeholder="模型名称 (如: GeoSupportSafety-DNN-v2)"
+                    placeholder="模型名称（如：时空 Transformer 支护决策）"
                     value={newExp.modelName}
                     onChange={(e) => setNewExp({ ...newExp, modelName: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
@@ -938,7 +953,7 @@ export default function ResearchPage() {
                   />
                   <input
                     type="text"
-                    placeholder="超参数 (如: lr: 1e-4, 4-layers DNN)"
+                    placeholder="候选架构、学习率、窗口与损失函数"
                     value={newExp.hyperparameters}
                     onChange={(e) => setNewExp({ ...newExp, hyperparameters: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono"
@@ -989,7 +1004,7 @@ export default function ResearchPage() {
                 全工序机械化施工智能决策与协同配置大系统
               </h3>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-                包含装备配置、工法选配、支护参数配置子系统，深度介入 RAG 与工程智能体板块
+                第5章：集成力学预测、安全评价、支护反馈决策与工法—支护—装备配置，开展工程应用验证
               </p>
             </div>
           </div>
@@ -1008,7 +1023,8 @@ export default function ResearchPage() {
                     <h4 className="font-bold text-base sm:text-xl text-white">{proj.name}</h4>
                     <p className="text-xs sm:text-sm text-zinc-300 mt-1 leading-relaxed">{proj.description}</p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 space-y-2">
+                    <button onClick={() => setEditingProject({ ...proj, techStack: [...proj.techStack], tasks: proj.tasks.map((task) => ({ ...task })) })} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-cyan-500/30 text-xs text-cyan-300 hover:bg-cyan-500/10"><Edit3 className="w-4 h-4" />编辑系统与任务</button>
                     <span className="font-mono font-bold text-base sm:text-xl text-cyan-400">{proj.progress}%</span>
                     <p className="text-[11px] text-zinc-500">子系统协同进度</p>
                   </div>
@@ -1093,6 +1109,40 @@ export default function ResearchPage() {
               </div>
             ))}
           </div>
+
+          {editingProject && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-labelledby="project-editor-title" className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6">
+                <h3 id="project-editor-title" className="font-bold text-white mb-4">编辑大系统与模块任务</h3>
+                <form onSubmit={handleSaveProject} className="space-y-4 text-sm">
+                  <label className="block text-zinc-400">系统名称
+                    <input autoFocus required value={editingProject.name} onChange={(e) => setEditingProject({ ...editingProject, name: e.target.value })} className="mt-1 w-full p-2.5 rounded-xl bg-black/50 border border-white/10 text-white" />
+                  </label>
+                  <label className="block text-zinc-400">系统说明与研究路线
+                    <textarea rows={4} value={editingProject.description} onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })} className="mt-1 w-full p-2.5 rounded-xl bg-black/50 border border-white/10 text-white" />
+                  </label>
+                  <label className="block text-zinc-400">技术栈（每行一个）
+                    <textarea rows={3} value={editingProject.techStack.join('\n')} onChange={(e) => setEditingProject({ ...editingProject, techStack: e.target.value.split('\n') })} className="mt-1 w-full p-2.5 rounded-xl bg-black/50 border border-white/10 text-white" />
+                  </label>
+                  <div className="space-y-3">
+                    <p className="text-zinc-400">模块任务（可修改内容、勾选完成或删除；进度自动计算）</p>
+                    {editingProject.tasks.map((task, index) => (
+                      <div key={task.id} className="flex items-start gap-2">
+                        <input type="checkbox" aria-label={'任务 ' + (index + 1) + ' 已完成'} checked={task.done} onChange={(e) => setEditingProject({ ...editingProject, tasks: editingProject.tasks.map((item) => item.id === task.id ? { ...item, done: e.target.checked } : item) })} className="mt-3" />
+                        <textarea required aria-label={'模块任务 ' + (index + 1)} rows={3} value={task.text} onChange={(e) => setEditingProject({ ...editingProject, tasks: editingProject.tasks.map((item) => item.id === task.id ? { ...item, text: e.target.value } : item) })} className="flex-1 min-w-0 p-2.5 rounded-xl bg-black/50 border border-white/10 text-white" />
+                        <button type="button" aria-label={'删除任务 ' + (index + 1)} onClick={() => setEditingProject({ ...editingProject, tasks: editingProject.tasks.filter((item) => item.id !== task.id) })} className="p-2 text-zinc-400 hover:text-rose-400"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => setEditingProject({ ...editingProject, tasks: [...editingProject.tasks, { id: 't-' + crypto.randomUUID(), text: '', done: false }] })} className="text-cyan-300 px-3 py-2 rounded-xl border border-cyan-500/30">+ 添加模块任务</button>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button type="button" onClick={() => setEditingProject(null)} className="px-4 py-2 text-zinc-400 hover:text-white">取消</button>
+                    <button type="submit" className="px-4 py-2 rounded-xl linear-btn-primary">保存系统规划</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

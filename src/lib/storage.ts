@@ -29,6 +29,7 @@ import {
 import { getSupabase, isSupabaseConfigured } from './supabase'
 import { normalizeJobStatus } from './feishu-parser'
 import { getLocalDateKey } from './utils'
+import { LEGACY_MODELS, LEGACY_PROJECTS } from './legacy-research-plan'
 import { THESIS_TITLE, THESIS_CHAPTER_TITLES, THESIS_CHAPTER_NOTES, THESIS_OUTLINE } from './thesis-outline'
 
 const LEGACY_CHAPTER_NOTES = [
@@ -136,6 +137,24 @@ async function syncKeyToCloud(key: string, value: any) {
     currentSyncStatus = 'error'
     dispatchStatusChange()
   }
+}
+
+
+// 仅升级完整匹配的旧版默认记录，保留编辑记录与显式清空。
+export function upgradeResearchDefaults<T extends { id: string }>(items: T[], legacy: T[], defaults: T[]): T[] {
+  const canonical = (value: unknown): string => {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']'
+    if (value !== null && typeof value === 'object') {
+      const object = value as Record<string, unknown>
+      return '{' + Object.keys(object).sort().map((key) => JSON.stringify(key) + ':' + canonical(object[key])).join(',') + '}'
+    }
+    return JSON.stringify(value) ?? 'undefined'
+  }
+  return items.flatMap((item) => {
+    const isLegacyDefault = legacy.some((old) => old.id === item.id && canonical(item) === canonical(old))
+    if (!isLegacyDefault) return [item]
+    return defaults.filter((next) => !items.some((existing) => existing.id === next.id && existing.id !== item.id))
+  })
 }
 
 export const StorageService = {
@@ -339,10 +358,10 @@ export const StorageService = {
     }
   },
 
-  getModels: (): ModelExperiment[] => getItem(STORAGE_KEYS.MODELS, INITIAL_MODELS),
+  getModels: (): ModelExperiment[] => upgradeResearchDefaults(getItem(STORAGE_KEYS.MODELS, INITIAL_MODELS), LEGACY_MODELS, INITIAL_MODELS),
   saveModels: (models: ModelExperiment[]) => setItem(STORAGE_KEYS.MODELS, models),
 
-  getProjects: (): ResearchProject[] => getItem(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS),
+  getProjects: (): ResearchProject[] => upgradeResearchDefaults(getItem(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS), LEGACY_PROJECTS, INITIAL_PROJECTS),
   saveProjects: (projects: ResearchProject[]) => setItem(STORAGE_KEYS.PROJECTS, projects),
 
   getMilestones: (): MilestoneItem[] => getItem(STORAGE_KEYS.MILESTONES, INITIAL_MILESTONES),
