@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
+import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey, WORKSPACE_DEADLINES } from '@/lib/utils'
 import {
   JobApplication,
@@ -216,9 +217,7 @@ export default function DashboardPage() {
   const activeInterviews = jobs.filter((j) => ['interview1', 'interview2', 'hr'].includes(j.status))
   const offersCount = jobs.filter((j) => j.status === 'offer').length
 
-  const totalCurrentWords = thesis?.chapters.reduce((acc, ch) => acc + (ch.currentWords || 0), 0) || 0
-  const totalTargetWords = thesis?.chapters.reduce((acc, ch) => acc + (ch.targetWords || 0), 0) || 1
-  const thesisPercent = Math.round((totalCurrentWords / totalTargetWords) * 100)
+  const { totalCurrentWords, percent: thesisPercent } = getThesisWordProgress(thesis?.chapters)
   
   const today = getLocalDateKey()
   const dueReviews = leetcode.filter((item) => item.nextReview <= today)

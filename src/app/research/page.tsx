@@ -29,6 +29,7 @@ import {
   MilestoneItem,
 } from '@/types'
 import { StorageService } from '@/lib/storage'
+import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey } from '@/lib/utils'
 
 export default function ResearchPage() {
@@ -92,9 +93,7 @@ export default function ResearchPage() {
     return () => window.removeEventListener('workspace-data-updated', loadAll)
   }, [])
 
-  const totalCurrentWords = thesis.chapters.reduce((acc, ch) => acc + (ch.currentWords || 0), 0)
-  const totalTargetWords = thesis.chapters.reduce((acc, ch) => acc + (ch.targetWords || 0), 0)
-  const overallProgress = totalTargetWords > 0 ? Math.round((totalCurrentWords / totalTargetWords) * 100) : 0
+  const { totalCurrentWords, totalTargetWords, completedWords, percent: overallProgress } = getThesisWordProgress(thesis.chapters)
 
   // 论文题目与关键节点更新
   const handleOpenThesisDatesModal = (focusField?: 'blindReview' | 'defense') => {
@@ -421,10 +420,13 @@ export default function ResearchPage() {
 
               <div className="flex items-center gap-4 shrink-0 self-end md:self-auto">
                 <div className="text-right">
-                  <p className="text-xs text-zinc-400">总字数完成度</p>
+                  <p className="text-xs text-zinc-400" title="每章最多按目标字数计入完成度，超出部分不抵扣其他章节">总字数完成度</p>
                   <p className="text-xl sm:text-2xl font-bold font-mono text-white">
-                    {totalCurrentWords.toLocaleString()} <span className="text-xs font-normal text-zinc-500">/ {totalTargetWords.toLocaleString()} 字</span>
+                    {completedWords.toLocaleString()} <span className="text-xs font-normal text-zinc-500">/ {totalTargetWords.toLocaleString()} 字</span>
                   </p>
+                  {totalCurrentWords > completedWords && (
+                    <p className="text-xs text-zinc-500 mt-1">实际已写 {totalCurrentWords.toLocaleString()} 字</p>
+                  )}
                 </div>
                 <div className="w-14 h-14 rounded-full bg-white/[0.06] border-2 border-white/80 flex items-center justify-center font-bold font-mono text-sm text-white shadow-lg">
                   {overallProgress}%
