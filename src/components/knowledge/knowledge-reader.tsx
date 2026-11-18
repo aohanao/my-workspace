@@ -83,11 +83,11 @@ export function KnowledgeReader({ id, initialEditing = false }: { id: string; in
   }
 
   if (loading) return <div className="flex justify-center gap-2 py-20 text-sm text-zinc-500"><Loader2 className="h-4 w-4 animate-spin" />正在打开文档…</div>
-  if (!document || !draft) return <div className="linear-card space-y-4 p-6"><p role="alert" className="text-sm text-rose-200">{error || '文档不存在或当前账户无权访问'}</p><div className="flex gap-3"><Link href="/knowledge" className={button}>返回文档库</Link><button className={button} onClick={() => setReload((value) => value + 1)}>重新加载</button></div></div>
+  if (!document || !draft) return <div className="linear-card space-y-4 p-6"><p role="alert" className="text-sm text-rose-200">{error || '文档不存在或当前账户无权访问'}</p><div className="flex gap-3"><Link href="/knowledge/documents" className={button}>返回文档库</Link><button className={button} onClick={() => setReload((value) => value + 1)}>重新加载</button></div></div>
 
   return <div className="space-y-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <Link href="/knowledge" className="flex items-center gap-2 text-xs text-zinc-400 hover:text-white"><ArrowLeft className="h-4 w-4" />返回文档库</Link>
+      <Link href="/knowledge/documents" className="flex items-center gap-2 text-xs text-zinc-400 hover:text-white"><ArrowLeft className="h-4 w-4" />返回文档库</Link>
       <div className="flex flex-wrap gap-2">
         <button className={button} onClick={() => downloadMarkdown(editing ? draft.title : document.title, editing ? draft.markdown : document.markdown)}><Download className="h-3.5 w-3.5" />导出 Markdown</button>
         {!editing && !document.deleted_at && <><button disabled={busy} className={button} onClick={() => run(async () => { accept(await KnowledgeService.update(document, { favorite: !document.favorite })) })}><Star className={`h-3.5 w-3.5 ${document.favorite ? 'fill-amber-200 text-amber-200' : ''}`} />{document.favorite ? '已收藏' : '收藏'}</button><button className={`${button} !bg-white !text-black`} onClick={() => { setEditing(true); setPreview(false) }}><Edit3 className="h-3.5 w-3.5" />编辑文档</button></>}

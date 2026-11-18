@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { CalendarDays, Check, ChevronLeft, ChevronRight, CornerDownRight, ListTodo, Pencil, Plus, RotateCcw, Trash2, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CalendarDays, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CornerDownRight, ListTodo, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { StorageService } from '@/lib/storage'
 import { getCarryoverTasks, getPlanPeriod, shiftPlanPeriod } from '@/lib/plan-period'
 import { getLocalDateKey } from '@/lib/utils'
@@ -10,7 +10,7 @@ import type { DailyTop3Item, PlanScope, PlanTask } from '@/types'
 const iconButton = 'rounded-lg p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-30'
 
 export function PlanWindow() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [scope, setScope] = useState<PlanScope>('week')
   const [today, setToday] = useState('')
   const [viewStart, setViewStart] = useState<string | null>(null)
@@ -20,8 +20,6 @@ export function PlanWindow() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
   const [message, setMessage] = useState('')
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const panelRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const refresh = () => {
@@ -42,19 +40,6 @@ export function PlanWindow() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!open) return
-    panelRef.current?.focus()
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) {
-        setOpen(false)
-        triggerRef.current?.focus()
-      }
-    }
-    document.addEventListener('keydown', onEscape)
-    return () => document.removeEventListener('keydown', onEscape)
-  }, [open])
-
   const current = getPlanPeriod(scope, today ? new Date(`${today}T12:00:00`) : new Date())
   const period = viewStart ? getPlanPeriod(scope, new Date(`${viewStart}T12:00:00`)) : current
   const isCurrent = period.start === current.start
@@ -68,10 +53,6 @@ export function PlanWindow() {
 
   const updateTask = (id: string, changes: Partial<PlanTask>) => {
     StorageService.savePlanTasks(StorageService.getPlanTasks().map((task) => task.id === id ? { ...task, ...changes } : task))
-  }
-  const close = () => {
-    setOpen(false)
-    triggerRef.current?.focus()
   }
   const changeView = () => {
     setEditingId(null)
@@ -90,18 +71,14 @@ export function PlanWindow() {
   }
 
   return (
-    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 sm:bottom-6 sm:right-6">
+    <aside aria-label="周月计划" className="relative min-w-0 self-start overflow-hidden rounded-3xl border border-cyan-200/20 bg-[#101824]/90 text-white shadow-[0_14px_45px_-12px_rgba(0,0,0,0.65),0_0_30px_-15px_rgba(103,232,249,0.2)] backdrop-blur-2xl">
+      <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+        <div className="flex items-center gap-2.5"><span className="rounded-xl border border-cyan-200/15 bg-cyan-200/10 p-2 text-cyan-200"><CalendarDays className="h-4 w-4" /></span><div><h2 className="text-sm font-semibold">周月计划</h2><p className="mt-1 text-[11px] text-zinc-500">{label}还有 {remaining} 项待办 · 把目标安排到今天</p></div></div>
+        <button type="button" aria-label={open ? '收起周月计划' : '展开周月计划'} aria-expanded={open} aria-controls="plan-window" onClick={() => setOpen(!open)} className={iconButton}>{open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
+      </div>
       {open && (
-        <section ref={panelRef} id="plan-window" tabIndex={-1} aria-labelledby="plan-window-title"
-          className="absolute bottom-16 right-0 flex max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-white/15 bg-[#0d111b]/95 text-white shadow-[0_24px_80px_rgba(0,0,0,0.65)] outline-none backdrop-blur-2xl sm:w-[350px]">
+        <section id="plan-window" aria-label="周月任务清单" className="flex max-h-[650px] flex-col">
           <div className="shrink-0 border-b border-white/[0.08] p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-2 text-cyan-200"><CalendarDays className="h-4 w-4" /></span>
-                <div><h2 id="plan-window-title" className="text-sm font-semibold">计划清单</h2><p className="mt-0.5 text-[11px] text-zinc-500">把目标拆小，让今天更清楚</p></div>
-              </div>
-              <button type="button" aria-label="收起计划清单" onClick={close} className={iconButton}><X className="h-4 w-4" /></button>
-            </div>
             <div className="flex gap-1 rounded-xl bg-black/30 p-1">
               {(['week', 'month'] as const).map((item) => (
                 <button type="button" key={item} aria-pressed={scope === item} onClick={() => { setScope(item); setViewStart(null); changeView() }}
@@ -169,10 +146,6 @@ export function PlanWindow() {
           </div>
         </section>
       )}
-      <button ref={triggerRef} type="button" aria-expanded={open} aria-controls="plan-window" onClick={() => setOpen(!open)}
-        className="flex h-12 items-center gap-2.5 rounded-full border border-white/15 bg-[#141b29]/95 px-4 text-xs text-white shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-colors hover:border-cyan-200/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300">
-        <CalendarDays className="h-4 w-4 text-cyan-200" /><span>{label}待办</span><span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-cyan-100">{remaining} 项</span>
-      </button>
-    </div>
+    </aside>
   )
 }

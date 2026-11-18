@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
+import { PlanWindow } from '@/components/layout/plan-window'
 import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey, WORKSPACE_DEADLINES } from '@/lib/utils'
 import {
@@ -538,8 +539,11 @@ export default function DashboardPage() {
           </form>
         </div>
 
-        {/* 右侧 1 列：全系统推进概览（带丰富色彩的高级指标） & 力扣算法到期复习速览 */}
-        <div className="space-y-6">
+        <PlanWindow />
+      </div>
+
+      {/* 全系统推进与复习速览，移到计划区下方 */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* 进度概览卡片 —— 带有精致色彩的品牌化指标 */}
           <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
             <div className="border-b border-white/[0.06] pb-3">
@@ -672,7 +676,6 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </div>
       </div>
 
       {/* 第二行：秋招进行中面试 & 论文章节进展 (展示全部章节，删除前面的 01. 序号) */}

@@ -20,6 +20,13 @@ function checkError(error: { message: string; code?: string } | null) {
 }
 
 export const KnowledgeService = {
+  async favoritesCount(signal?: AbortSignal) {
+    let query = client().from('knowledge_documents').select('id', { count: 'exact', head: true }).is('deleted_at', null).eq('favorite', true)
+    if (signal) query = query.abortSignal(signal)
+    const { count, error } = await query
+    checkError(error)
+    return count || 0
+  },
   async list({ search = '', topic = 'all', view = 'all', page = 0, signal }: {
     search?: string; topic?: KnowledgeTopic | 'all'; view?: 'all' | 'favorites' | 'trash'; page?: number; signal?: AbortSignal
   }) {

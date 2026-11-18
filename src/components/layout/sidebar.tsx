@@ -23,6 +23,7 @@ import { useState, useEffect } from 'react'
 import { StorageService, CloudSyncStatus } from '@/lib/storage'
 import { CloudConfigModal } from './cloud-config-modal'
 import { getSupabase } from '@/lib/supabase'
+import { KNOWLEDGE_SECTIONS, knowledgeSectionActive } from '@/components/knowledge/knowledge-sections'
 
 const NAV_ITEMS = [
   { href: '/', label: '控制中枢', sub: 'Overview', icon: LayoutDashboard },
@@ -153,7 +154,7 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                 </Link>
                 {item.href === '/knowledge' && isActive && (
                   <div className="ml-5 mt-1 space-y-1 border-l border-white/10 pl-3">
-                    {[{ href: '/knowledge', label: '文档库', active: !pathname.startsWith('/knowledge/review') }, { href: '/knowledge/review', label: '知识与算法复盘', active: pathname.startsWith('/knowledge/review') }].map((child) => <Link key={child.href} href={child.href} onClick={onClose} aria-current={child.active ? 'page' : undefined} className={`block rounded-lg px-3 py-2 text-xs ${child.active ? 'bg-white/5 text-cyan-200' : 'text-zinc-500 hover:text-white'}`}>{child.label}</Link>)}
+                    {KNOWLEDGE_SECTIONS.map((child) => <Link key={child.href} href={child.href} onClick={onClose} aria-current={knowledgeSectionActive(pathname, child.href) ? 'page' : undefined} className={`block rounded-lg px-3 py-2 text-xs ${knowledgeSectionActive(pathname, child.href) ? 'bg-white/5 text-cyan-200' : 'text-zinc-500 hover:text-white'}`}>{child.label}</Link>)}
                   </div>
                 )}
                 </div>

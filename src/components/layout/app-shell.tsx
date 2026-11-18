@@ -6,7 +6,7 @@ import { Sidebar } from './sidebar'
 import { TopHeader } from './top-header'
 import { TechCursorEffect } from './tech-cursor-effect'
 import { AuthGate } from './auth-gate'
-import { PlanWindow } from './plan-window'
+import { AssistantWindow } from '@/components/knowledge/assistant-window'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-      <PlanWindow />
+      <AssistantWindow />
       </div>
     </AuthGate>
   )

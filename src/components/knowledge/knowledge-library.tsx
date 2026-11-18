@@ -10,13 +10,13 @@ import type { KnowledgeDocumentSummary, KnowledgeTopic } from '@/types/knowledge
 
 const button = 'flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-zinc-300 hover:bg-white/10 disabled:opacity-40 sm:text-sm'
 
-export function KnowledgeLibrary() {
+export function KnowledgeLibrary({ initialSearch = '', initialTopic = 'all' }: { initialSearch?: string; initialTopic?: KnowledgeTopic | 'all' }) {
   const router = useRouter()
   const [documents, setDocuments] = useState<KnowledgeDocumentSummary[]>([])
   const [count, setCount] = useState(0)
-  const [search, setSearch] = useState('')
-  const [query, setQuery] = useState('')
-  const [topic, setTopic] = useState<KnowledgeTopic | 'all'>('all')
+  const [search, setSearch] = useState(initialSearch)
+  const [query, setQuery] = useState(initialSearch)
+  const [topic, setTopic] = useState<KnowledgeTopic | 'all'>(initialTopic)
   const [view, setView] = useState<'all' | 'favorites' | 'trash'>('all')
   const [page, setPage] = useState(0)
   const [refresh, setRefresh] = useState(0)
@@ -76,7 +76,7 @@ export function KnowledgeLibrary() {
 
   return <div className="space-y-5">
     <div className="linear-card flex flex-col justify-between gap-5 p-5 sm:flex-row sm:items-center sm:p-6">
-      <div><p className="mb-2 text-[10px] tracking-[0.2em] text-cyan-200/70">PERSONAL LIBRARY</p><h2 className="text-xl font-semibold">让读过的内容，成为自己的积累</h2><p className="mt-2 max-w-xl text-xs leading-6 text-zinc-400">将 Markdown 笔记和阅读资料放在一起，按主题整理，随时查阅与复盘。</p></div>
+      <div><p className="mb-2 text-[10px] tracking-[0.2em] text-cyan-200/70">DOCUMENT LIBRARY</p><h2 className="text-xl font-semibold">文档库</h2><p className="mt-2 max-w-xl text-xs leading-6 text-zinc-400">保存原始笔记与阅读资料，为检索、知识关联和复盘积累内容。</p></div>
       <div className="flex shrink-0 flex-wrap gap-2">
         <button disabled={busy} className={button} onClick={() => uploadRef.current?.click()}><Upload className="h-4 w-4" />导入 Markdown</button>
         <button disabled={busy} className={`${button} !bg-white !text-black`} onClick={() => run(async () => {
