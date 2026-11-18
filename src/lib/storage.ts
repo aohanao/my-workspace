@@ -9,6 +9,7 @@ import {
   LeetCodeItem,
   KnowledgeFlashcard,
   DailyTop3Item,
+  PlanTask,
   HabitItem,
   QuickCaptureNote,
   EnergyMoodLog,
@@ -50,6 +51,7 @@ export const STORAGE_KEYS = {
   LEETCODE: 'workspace_leetcode_v4',
   FLASHCARDS: 'workspace_flashcards_v4',
   TOP3: 'workspace_top3_v4',
+  PLAN_TASKS: 'workspace_plan_tasks_v1',
   HABITS: 'workspace_habits_v4',
   NOTES: 'workspace_notes_v4',
   ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v4',
@@ -238,6 +240,7 @@ export const StorageService = {
         { key: STORAGE_KEYS.LEETCODE, value: StorageService.getLeetCode() },
         { key: STORAGE_KEYS.FLASHCARDS, value: StorageService.getFlashcards() },
         { key: STORAGE_KEYS.TOP3, value: StorageService.getTop3() },
+        { key: STORAGE_KEYS.PLAN_TASKS, value: StorageService.getPlanTasks() },
         { key: STORAGE_KEYS.HABITS, value: StorageService.getHabits() },
         { key: STORAGE_KEYS.NOTES, value: StorageService.getNotes() },
         { key: STORAGE_KEYS.ENERGY_MOOD_LOGS, value: StorageService.getEnergyMoodLogs() },
@@ -375,6 +378,9 @@ export const StorageService = {
   saveFlashcards: (cards: KnowledgeFlashcard[]) => setItem(STORAGE_KEYS.FLASHCARDS, cards),
 
   // 生活与日常待办事项 (支持每日独立刷新与历史按天归档)
+  getPlanTasks: (): PlanTask[] => getItem(STORAGE_KEYS.PLAN_TASKS, []),
+  savePlanTasks: (tasks: PlanTask[]) => setItem(STORAGE_KEYS.PLAN_TASKS, tasks),
+
   getAllTop3: (): DailyTop3Item[] => {
     const list = getItem<DailyTop3Item[]>(STORAGE_KEYS.TOP3, [])
     const todayStr = getLocalDateKey()
@@ -474,6 +480,7 @@ export const StorageService = {
       leetcode: StorageService.getLeetCode(),
       flashcards: StorageService.getFlashcards(),
       top3: StorageService.getTop3(),
+      planTasks: StorageService.getPlanTasks(),
       habits: StorageService.getHabits(),
       timeBlocks: StorageService.getTimeBlocks(),
       notes: StorageService.getNotes(),
@@ -490,6 +497,7 @@ export const StorageService = {
     if (data.leetcode) StorageService.saveLeetCode(data.leetcode)
     if (data.flashcards) StorageService.saveFlashcards(data.flashcards)
     if (data.top3) StorageService.saveTop3(data.top3)
+    if (data.planTasks) StorageService.savePlanTasks(data.planTasks)
     if (data.habits) StorageService.saveHabits(data.habits)
     if (data.timeBlocks) StorageService.saveTimeBlocks(data.timeBlocks)
     if (data.notes) StorageService.saveNotes(data.notes)

@@ -6,6 +6,7 @@ import { Sidebar } from './sidebar'
 import { TopHeader } from './top-header'
 import { TechCursorEffect } from './tech-cursor-effect'
 import { AuthGate } from './auth-gate'
+import { PlanWindow } from './plan-window'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -46,10 +47,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* 主工作区 */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         <TopHeader onOpenMobileMenu={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-5 md:p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-5 md:p-8 pb-24 sm:pb-24 md:pb-24 space-y-6">
           {children}
         </main>
       </div>
+      <PlanWindow />
       </div>
     </AuthGate>
   )

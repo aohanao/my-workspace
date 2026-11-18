@@ -133,6 +133,18 @@ export interface KnowledgeFlashcard {
 // 日常生活与待办四象限
 export type TaskPriority = '重急' | '轻急' | '重缓' | '轻缓'
 
+export type PlanScope = 'week' | 'month'
+
+export interface PlanTask {
+  id: string
+  text: string
+  done: boolean
+  scope: PlanScope
+  periodStart: string
+  createdAt: string
+  carriedFromId?: string
+}
+
 export interface DailyTop3Item {
   id: string
   text: string
