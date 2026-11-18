@@ -7,7 +7,7 @@ import {
   Briefcase,
   BarChart3,
   GraduationCap,
-  Brain,
+  Library,
   Smile,
   Layers,
   Cloud,
@@ -29,7 +29,7 @@ const NAV_ITEMS = [
   { href: '/career', label: '秋招求职管家', sub: 'Pipeline', icon: Briefcase },
   { href: '/career/analytics', label: '秋招量化大屏', sub: 'Analytics', icon: BarChart3 },
   { href: '/research', label: '硕士毕业管理', sub: 'Thesis & System', icon: GraduationCap },
-  { href: '/study', label: '知识与算法复盘', sub: 'Study & LeetCode', icon: Brain },
+  { href: '/knowledge', label: '知识库', sub: 'Knowledge', icon: Library },
   { href: '/life', label: '生活管理', sub: 'Life & Daily', icon: Smile },
 ]
 
@@ -121,11 +121,11 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
           <nav className="p-3 space-y-1.5">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href || (item.href === '/knowledge' && pathname.startsWith('/knowledge/'))
 
               return (
+                <div key={item.href}>
                 <Link
-                  key={item.href}
                   href={item.href}
                   onClick={onClose}
                   className={cn(
@@ -151,6 +151,12 @@ export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
                     <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                   )}
                 </Link>
+                {item.href === '/knowledge' && isActive && (
+                  <div className="ml-5 mt-1 space-y-1 border-l border-white/10 pl-3">
+                    {[{ href: '/knowledge', label: '文档库', active: !pathname.startsWith('/knowledge/review') }, { href: '/knowledge/review', label: '知识与算法复盘', active: pathname.startsWith('/knowledge/review') }].map((child) => <Link key={child.href} href={child.href} onClick={onClose} aria-current={child.active ? 'page' : undefined} className={`block rounded-lg px-3 py-2 text-xs ${child.active ? 'bg-white/5 text-cyan-200' : 'text-zinc-500 hover:text-white'}`}>{child.label}</Link>)}
+                  </div>
+                )}
+                </div>
               )
             })}
           </nav>

@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 知识库 Markdown 阅读排版；长代码和表格在正文内独立滚动。 */
+.knowledge-markdown { color: #cbd5e1; font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+.knowledge-markdown > :first-child { margin-top: 0; }
+.knowledge-markdown h1, .knowledge-markdown h2, .knowledge-markdown h3,
+.knowledge-markdown h4, .knowledge-markdown h5, .knowledge-markdown h6 { color: #f4f4f5; font-weight: 650; line-height: 1.5; margin: 1.8em 0 .7em; }
+.knowledge-markdown h1 { font-size: 1.8em; }
+.knowledge-markdown h2 { font-size: 1.5em; padding-bottom: .4em; border-bottom: 1px solid #ffffff12; }
+.knowledge-markdown h3 { font-size: 1.25em; }
+.knowledge-markdown p, .knowledge-markdown ul, .knowledge-markdown ol, .knowledge-markdown blockquote, .knowledge-markdown pre { margin: 1em 0; }
+.knowledge-markdown ul { list-style: disc; padding-left: 1.6em; }
+.knowledge-markdown ol { list-style: decimal; padding-left: 1.6em; }
+.knowledge-markdown li { margin: .35em 0; }
+.knowledge-markdown a { color: #a5f3fc; text-decoration: underline; text-underline-offset: 3px; }
+.knowledge-markdown blockquote { border-left: 3px solid #67e8f966; padding: .5em 1em; background: #67e8f908; color: #94a3b8; }
+.knowledge-markdown pre { overflow-x: auto; border: 1px solid #ffffff12; border-radius: 12px; padding: 1em; background: #050810; }
+.knowledge-markdown code { font-family: ui-monospace, monospace; font-size: .9em; }
+.knowledge-markdown :not(pre) > code { background: #ffffff0a; color: #a5f3fc; border-radius: 5px; padding: .15em .4em; }
+.knowledge-markdown table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: .9em; }
+.knowledge-markdown th, .knowledge-markdown td { border: 1px solid #ffffff18; padding: .6em .9em; white-space: normal; }
+.knowledge-markdown th { background: #ffffff08; color: #e4e4e7; text-align: left; }
+.knowledge-markdown img { max-width: 100%; height: auto; border-radius: 12px; margin: 1em 0; }
+.knowledge-markdown hr { border-color: #ffffff15; margin: 2em 0; }
+.knowledge-markdown input[type=checkbox] { margin-right: .5em; accent-color: #a5f3fc; }
+.knowledge-markdown strong { color: #f4f4f5; }
+
 @layer base {
   :root {
     --background: 222 47% 4%;

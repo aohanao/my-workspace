@@ -164,6 +164,7 @@ export const StorageService = {
   clearLocalCache: () => {
     if (typeof window === 'undefined') return
     Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key))
+    Object.keys(sessionStorage).filter((key) => key.startsWith('knowledge-draft:')).forEach((key) => sessionStorage.removeItem(key))
   },
 
   // 云端同步状态

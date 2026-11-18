@@ -600,7 +600,7 @@ export default function DashboardPage() {
 
               {/* 力扣算法题库卡片 (Amber / Warm Gold) */}
               <Link
-                href="/study"
+                href="/knowledge/review"
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
@@ -634,7 +634,7 @@ export default function DashboardPage() {
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 力扣算法到期复习速览
               </h4>
-              <Link href="/study" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1">
+              <Link href="/knowledge/review" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1">
                 <span>全部题库</span>
                 <ExternalLink className="w-3 h-3" />
               </Link>
@@ -652,7 +652,7 @@ export default function DashboardPage() {
                   return (
                     <Link
                       key={item.id}
-                      href="/study"
+                      href="/knowledge/review"
                       className="p-3 rounded-2xl bg-black/40 border border-white/[0.06] hover:border-white/[0.14] transition-colors flex items-center justify-between gap-2 group"
                     >
                       <div className="min-w-0 flex items-center gap-2">
