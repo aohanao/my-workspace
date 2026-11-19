@@ -159,13 +159,7 @@ export default function LifePage() {
       })
       .join(' + ')
 
-    if (shorts.length === 1) {
-      return { text: shorts[0], full, count: 1 }
-    } else if (shorts.length === 2) {
-      return { text: `${shorts[0]}${shorts[1]}`, full, count: 2 }
-    } else {
-      return { text: `${shorts[0]}+${shorts.length - 1}`, full, count: shorts.length }
-    }
+    return { text: shorts.join(''), full, count: shorts.length }
   }
 
   const handleToggleHabit = (habitId: string, dateStr: string, forceVal?: boolean) => {
@@ -477,7 +471,7 @@ export default function LifePage() {
                               })
                             }}
                             className={`h-8 rounded-xl border flex items-center justify-center transition-all mx-auto cursor-pointer ${
-                              isMultiPart ? 'w-[46px]' : 'w-8'
+                              isMultiPart ? 'w-max min-w-[46px] px-2' : 'w-8'
                             } ${
                               isChecked
                                 ? 'bg-emerald-500 border-emerald-500 text-white font-medium leading-none shadow-sm shadow-emerald-500/25 scale-105 hover:bg-emerald-600'
@@ -492,7 +486,7 @@ export default function LifePage() {
                             }
                           >
                             {isChecked ? (
-                              <span className="leading-none select-none text-center font-medium text-white text-[12.5px] tracking-tight">
+                              <span className="leading-none select-none text-center font-medium text-white text-[12.5px] tracking-tight whitespace-nowrap">
                                 {displayPart || '练'}
                               </span>
                             ) : (
