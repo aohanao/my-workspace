@@ -24,6 +24,9 @@ import {
 import Link from 'next/link'
 import { StorageService } from '@/lib/storage'
 import { PlanWindow } from '@/components/layout/plan-window'
+import { DashboardDisplaySettings } from '@/components/dashboard/display-settings'
+import { DashboardModule, DashboardModuleLayout } from '@/components/dashboard/module-layout'
+import { DASHBOARD_MODULES, DEFAULT_DASHBOARD_VISIBILITY, type DashboardModuleId, type DashboardVisibility } from '@/lib/dashboard'
 import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey, WORKSPACE_DEADLINES } from '@/lib/utils'
 import {
@@ -75,6 +78,7 @@ export default function DashboardPage() {
   const [habits, setHabits] = useState<HabitItem[]>([])
   const [careerDeadline, setCareerDeadline] = useState('2026-11-20')
   const [thesisDeadline, setThesisDeadline] = useState('2026-12-20')
+  const [moduleVisibility, setModuleVisibility] = useState<DashboardVisibility>(DEFAULT_DASHBOARD_VISIBILITY)
   
   // 倒计时修改弹窗状态
   const [editingDeadline, setEditingDeadline] = useState<{
@@ -111,6 +115,7 @@ export default function DashboardPage() {
     setHabits(StorageService.getHabits())
     setCareerDeadline(StorageService.getCareerDeadline())
     setThesisDeadline(StorageService.getThesisDraftDeadline())
+    setModuleVisibility(StorageService.getDashboardVisibility())
   }
 
   useEffect(() => {
@@ -131,6 +136,18 @@ export default function DashboardPage() {
       title: '调整秋招冲刺目标日期',
       currentDate: current,
     })
+  }
+
+  const toggleModule = (id: DashboardModuleId) => {
+    const updated = { ...moduleVisibility, [id]: !moduleVisibility[id] }
+    setModuleVisibility(updated)
+    StorageService.saveDashboardVisibility(updated)
+  }
+
+  const setAllModules = (visible: boolean) => {
+    const updated = Object.fromEntries(DASHBOARD_MODULES.map(({ id }) => [id, visible])) as DashboardVisibility
+    setModuleVisibility(updated)
+    StorageService.saveDashboardVisibility(updated)
   }
 
   const handleOpenEditThesis = () => {
@@ -232,14 +249,14 @@ export default function DashboardPage() {
     : dailyTasks.filter((t) => (t.priority || '重急') === priorityFilter)
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="dashboard-container space-y-6 max-w-7xl mx-auto">
       {/* 顶部 Hero 横幅 - DeepSeek 风格高级深色大片 */}
-      <div className="linear-card p-6 sm:p-8 rounded-3xl relative overflow-hidden border border-white/[0.08]">
+      <div className="linear-card p-4 sm:p-8 rounded-3xl relative overflow-hidden border border-white/[0.08]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
-              <span className="text-xs font-mono font-medium text-zinc-300 tracking-wider uppercase">
+              <span className="min-w-0 text-xs font-mono font-medium text-zinc-300 tracking-wider uppercase">
                 AI WORKSPACE OS · CONTROL CENTER
               </span>
             </div>
@@ -252,9 +269,12 @@ export default function DashboardPage() {
           </div>
 
           {/* 双核心关键倒计时胶囊 */}
-          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 shrink-0 w-full lg:w-auto">
+          {(moduleVisibility.careerCountdown || moduleVisibility.thesisCountdown) && (
+          <div className={`grid ${moduleVisibility.careerCountdown && moduleVisibility.thesisCountdown ? 'grid-cols-2' : 'grid-cols-1'} gap-3.5 sm:gap-4 shrink-0 w-full lg:w-auto`}>
             {/* 秋招倒计时 */}
-            <div
+            {moduleVisibility.careerCountdown && <button
+              type="button"
+              data-dashboard-module="careerCountdown"
               onClick={handleOpenEditCareer}
               className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/20 transition-all cursor-pointer sm:min-w-[155px]"
               title="点击调整秋招冲刺目标日期"
@@ -266,10 +286,12 @@ export default function DashboardPage() {
                 {careerCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
               <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{careerDeadline.replaceAll('-', '.')}</span>
-            </div>
+            </button>}
 
             {/* 论文初稿完成送审倒计时 */}
-            <div
+            {moduleVisibility.thesisCountdown && <button
+              type="button"
+              data-dashboard-module="thesisCountdown"
               onClick={handleOpenEditThesis}
               className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] text-center hover:border-white/20 transition-all cursor-pointer sm:min-w-[155px]"
               title="点击调整论文送审目标日期"
@@ -281,24 +303,37 @@ export default function DashboardPage() {
                 {thesisCountdown.days} <span className="text-sm sm:text-base font-medium text-zinc-300">天</span>
               </div>
               <span className="text-xs sm:text-sm text-zinc-400 block mt-1 font-mono">{thesisDeadline.replaceAll('-', '.')}</span>
-            </div>
+            </button>}
           </div>
+          )}
         </div>
       </div>
 
+      <DashboardDisplaySettings visibility={moduleVisibility} onToggle={toggleModule} onSetAll={setAllModules} />
+
+      {!DASHBOARD_MODULES.some(({ id }) => moduleVisibility[id]) && (
+        <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center sm:p-12">
+          <Layers className="mx-auto mb-3 h-7 w-7 text-zinc-500" />
+          <p className="text-sm font-medium text-zinc-200">只留你想看的内容</p>
+          <p className="mt-2 text-xs text-zinc-500">在「自定义显示」中勾选模块，随时搭建你的控制中枢。</p>
+          <button type="button" onClick={() => setAllModules(true)} className="mt-5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200 hover:bg-white/10">恢复全部显示</button>
+        </div>
+      )}
+
       {/* ===================== 核心模块：今日全天日程安排与核心待办 (支持四象限级别) ===================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 左侧 2 列：今日核心待办大版面 */}
-        <div className="lg:col-span-2 linear-card p-6 sm:p-7 rounded-3xl space-y-5 border border-white/[0.08] flex flex-col justify-between">
+      <DashboardModuleLayout>
+        {/* 模块开关关闭后，剩余卡片按实际高度自动补位。 */}
+        {moduleVisibility.tasks && <DashboardModule id="tasks">
+        <div className="min-w-0 linear-card p-4 sm:p-6 rounded-3xl space-y-5 border border-white/[0.08] flex flex-col">
           <div className="space-y-4">
             {/* 待办顶栏：标题、四象限筛选 Tab、达成度 */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5 flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-white/[0.06] text-white border border-white/[0.1]">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="shrink-0 p-2.5 rounded-2xl bg-white/[0.06] text-white border border-white/[0.1]">
                   <ListTodo className="w-5 h-5" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-2.5">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base sm:text-lg text-white tracking-tight flex flex-wrap items-center gap-2.5">
                     <span>今日安排与核心待办</span>
                     <span className="text-xs font-mono font-medium text-zinc-300 bg-white/[0.06] px-2.5 py-0.5 rounded-full border border-white/[0.1]">
                       {completedCount} / {dailyTasks.length} 完成
@@ -391,7 +426,7 @@ export default function DashboardPage() {
 
                     {/* 任务文本或编辑框 */}
                     {editingTaskId === task.id ? (
-                      <div className="flex-1 flex gap-2">
+                      <div className="min-w-0 flex-1 flex flex-wrap gap-2">
                         <input
                           type="text"
                           value={editingTaskText}
@@ -400,7 +435,7 @@ export default function DashboardPage() {
                             if (e.key === 'Enter') handleSaveEditTask(task.id)
                           }}
                           autoFocus
-                          className="flex-1 px-3 py-1.5 text-xs sm:text-sm bg-black border border-white/30 rounded-xl text-white"
+                          className="min-w-0 flex-1 px-3 py-1.5 text-xs sm:text-sm bg-black border border-white/30 rounded-xl text-white"
                         />
                         <button
                           onClick={() => handleSaveEditTask(task.id)}
@@ -412,7 +447,7 @@ export default function DashboardPage() {
                     ) : (
                       <span
                         onClick={() => handleToggleTask(task.id)}
-                        className={`text-xs sm:text-sm flex-1 break-words cursor-pointer leading-relaxed ${
+                        className={`min-w-0 text-xs sm:text-sm flex-1 break-words cursor-pointer leading-relaxed ${
                           task.done ? 'line-through text-zinc-500' : 'text-zinc-200 font-medium'
                         }`}
                       >
@@ -539,13 +574,14 @@ export default function DashboardPage() {
           </form>
         </div>
 
-        <PlanWindow />
-      </div>
+        </DashboardModule>}
 
-      {/* 全系统推进与复习速览，移到计划区下方 */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {moduleVisibility.plans && <DashboardModule id="plans"><PlanWindow /></DashboardModule>}
+
+      {/* 推进与复习速览 */}
           {/* 进度概览卡片 —— 带有精致色彩的品牌化指标 */}
-          <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
+          {moduleVisibility.overview && <DashboardModule id="overview">
+          <div className="linear-card p-4 sm:p-6 rounded-3xl space-y-4 border border-white/[0.08]">
             <div className="border-b border-white/[0.06] pb-3">
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
                 <Layers className="w-4 h-4 text-zinc-300" />
@@ -631,9 +667,12 @@ export default function DashboardPage() {
             </Link>
           </div>
 
+          </DashboardModule>}
+
           {/* 专属：力扣算法到期复习速览 (与面试完全拆开独立) */}
-          <div className="linear-card p-6 rounded-3xl space-y-3.5 border border-white/[0.08] text-xs sm:text-sm">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+          {moduleVisibility.reviews && <DashboardModule id="reviews">
+          <div className="linear-card p-4 sm:p-6 rounded-3xl space-y-3.5 border border-white/[0.08] text-xs sm:text-sm">
+            <div className="flex flex-wrap gap-2 items-center justify-between border-b border-white/[0.06] pb-2.5">
               <h4 className="font-bold text-white flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 力扣算法到期复习速览
@@ -676,13 +715,13 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-      </div>
+          </DashboardModule>}
 
-      {/* 第二行：秋招进行中面试 & 论文章节进展 (展示全部章节，删除前面的 01. 序号) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* 面试与论文章节 */}
         {/* 近期紧要面试排期 (专属面试板块) */}
-        <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+        {moduleVisibility.interviews && <DashboardModule id="interviews">
+        <div className="linear-card p-4 sm:p-6 rounded-3xl space-y-4 border border-white/[0.08]">
+          <div className="flex flex-wrap gap-2 items-center justify-between border-b border-white/[0.06] pb-3">
             <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
               <Clock className="w-4 h-4 text-amber-400" />
               面试中流程 ({activeInterviews.length})
@@ -720,9 +759,12 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        </DashboardModule>}
+
         {/* 论文写作章节进展 (展示全部章节，删除前面的 01. 序号) */}
-        <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+        {moduleVisibility.chapters && <DashboardModule id="chapters">
+        <div className="linear-card p-4 sm:p-6 rounded-3xl space-y-4 border border-white/[0.08]">
+          <div className="flex flex-wrap gap-2 items-center justify-between border-b border-white/[0.06] pb-3">
             <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2 tracking-tight">
               <GraduationCap className="w-4 h-4 text-indigo-400" />
               学位论文章节进展 ({thesis?.chapters.length || 0}章全景)
@@ -758,11 +800,12 @@ export default function DashboardPage() {
             })}
           </div>
         </div>
-      </div>
+        </DashboardModule>}
+      </DashboardModuleLayout>
 
       {/* 修改倒计时目标日期轻量模态框 */}
       {editingDeadline && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+        <div className="!mt-0 fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div className="bg-[#0e121a] border border-white/[0.12] rounded-2xl p-5 w-full max-w-sm shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">

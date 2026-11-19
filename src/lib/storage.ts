@@ -32,6 +32,7 @@ import { normalizeJobStatus } from './feishu-parser'
 import { getLocalDateKey } from './utils'
 import { LEGACY_MODELS, LEGACY_PROJECTS } from './legacy-research-plan'
 import { THESIS_TITLE, THESIS_CHAPTER_TITLES, THESIS_CHAPTER_NOTES, THESIS_OUTLINE } from './thesis-outline'
+import { normalizeDashboardVisibility, type DashboardVisibility } from './dashboard'
 
 const LEGACY_CHAPTER_NOTES = [
   '明确“少人化、机械化、智能化”需求，综述隧道开挖支护机理与智能决策系统。',
@@ -52,6 +53,7 @@ export const STORAGE_KEYS = {
   FLASHCARDS: 'workspace_flashcards_v4',
   TOP3: 'workspace_top3_v4',
   PLAN_TASKS: 'workspace_plan_tasks_v1',
+  DASHBOARD_VISIBILITY: 'workspace_dashboard_visibility_v1',
   HABITS: 'workspace_habits_v4',
   NOTES: 'workspace_notes_v4',
   ENERGY_MOOD_LOGS: 'workspace_energy_mood_logs_v4',
@@ -242,6 +244,7 @@ export const StorageService = {
         { key: STORAGE_KEYS.FLASHCARDS, value: StorageService.getFlashcards() },
         { key: STORAGE_KEYS.TOP3, value: StorageService.getTop3() },
         { key: STORAGE_KEYS.PLAN_TASKS, value: StorageService.getPlanTasks() },
+        { key: STORAGE_KEYS.DASHBOARD_VISIBILITY, value: StorageService.getDashboardVisibility() },
         { key: STORAGE_KEYS.HABITS, value: StorageService.getHabits() },
         { key: STORAGE_KEYS.NOTES, value: StorageService.getNotes() },
         { key: STORAGE_KEYS.ENERGY_MOOD_LOGS, value: StorageService.getEnergyMoodLogs() },
@@ -382,6 +385,9 @@ export const StorageService = {
   getPlanTasks: (): PlanTask[] => getItem(STORAGE_KEYS.PLAN_TASKS, []),
   savePlanTasks: (tasks: PlanTask[]) => setItem(STORAGE_KEYS.PLAN_TASKS, tasks),
 
+  getDashboardVisibility: (): DashboardVisibility => normalizeDashboardVisibility(getItem<unknown>(STORAGE_KEYS.DASHBOARD_VISIBILITY, null)),
+  saveDashboardVisibility: (visibility: DashboardVisibility) => setItem(STORAGE_KEYS.DASHBOARD_VISIBILITY, normalizeDashboardVisibility(visibility)),
+
   getAllTop3: (): DailyTop3Item[] => {
     const list = getItem<DailyTop3Item[]>(STORAGE_KEYS.TOP3, [])
     const todayStr = getLocalDateKey()
@@ -482,6 +488,7 @@ export const StorageService = {
       flashcards: StorageService.getFlashcards(),
       top3: StorageService.getTop3(),
       planTasks: StorageService.getPlanTasks(),
+      dashboardVisibility: StorageService.getDashboardVisibility(),
       habits: StorageService.getHabits(),
       timeBlocks: StorageService.getTimeBlocks(),
       notes: StorageService.getNotes(),
@@ -499,6 +506,7 @@ export const StorageService = {
     if (data.flashcards) StorageService.saveFlashcards(data.flashcards)
     if (data.top3) StorageService.saveTop3(data.top3)
     if (data.planTasks) StorageService.savePlanTasks(data.planTasks)
+    if (data.dashboardVisibility) StorageService.saveDashboardVisibility(data.dashboardVisibility)
     if (data.habits) StorageService.saveHabits(data.habits)
     if (data.timeBlocks) StorageService.saveTimeBlocks(data.timeBlocks)
     if (data.notes) StorageService.saveNotes(data.notes)
