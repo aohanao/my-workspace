@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { JobApplication } from '@/types'
-import { isJobApplied, hasReachedStage, getJobStageBadge } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
+import { getCareerStageBadge as getJobStageBadge } from '@/lib/career-theme'
 import {
   X,
   TrendingUp,
@@ -60,8 +61,8 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
       title: '技术一面',
       jobs: round1Jobs,
       rate: rate1,
-      tagColor: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-      barColor: 'bg-amber-400',
+      tagColor: 'text-amber-300 border-amber-300/30 bg-amber-300/10',
+      barColor: 'bg-amber-300',
       passLabel: '投递约面率',
       passRate: rate1,
     },
@@ -70,8 +71,8 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
       title: '技术二面',
       jobs: round2Jobs,
       rate: rate2,
-      tagColor: 'text-orange-400 border-orange-500/30 bg-orange-500/10',
-      barColor: 'bg-orange-400',
+      tagColor: 'text-orange-300 border-orange-300/30 bg-orange-300/10',
+      barColor: 'bg-orange-300',
       passLabel: '一面通过率',
       passRate: passRate1to2,
     },
@@ -80,8 +81,8 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
       title: '技术三面 / 主管面',
       jobs: round3Jobs,
       rate: rate3,
-      tagColor: 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10',
-      barColor: 'bg-indigo-400',
+      tagColor: 'text-violet-300 border-violet-300/30 bg-violet-300/10',
+      barColor: 'bg-violet-300',
       passLabel: '二面通过率',
       passRate: passRate2to3,
     },
@@ -90,8 +91,8 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
       title: '终面 / HR面',
       jobs: hrJobs,
       rate: rateHr,
-      tagColor: 'text-pink-400 border-pink-500/30 bg-pink-500/10',
-      barColor: 'bg-pink-400',
+      tagColor: 'text-fuchsia-300 border-fuchsia-300/30 bg-fuchsia-300/10',
+      barColor: 'bg-fuchsia-300',
       passLabel: '技术面通过率',
       passRate: passRate3toHr,
     },
@@ -100,8 +101,8 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
       title: '录用 / Offer 🎉',
       jobs: offerJobs,
       rate: rateOffer,
-      tagColor: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-      barColor: 'bg-emerald-400',
+      tagColor: 'text-emerald-300 border-emerald-300/30 bg-emerald-300/10',
+      barColor: 'bg-emerald-300',
       passLabel: '终面转化率',
       passRate: passRateHrToOffer,
     },
@@ -110,18 +111,18 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
   const currentStageMeta = STAGES.find((s) => s.id === activeStageTab) || STAGES[0]
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
-      <div className="bg-[#10131d] border border-indigo-500/30 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="career-modal-backdrop fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+      <div role="dialog" aria-modal="true" aria-label="技术面试转化率" className="career-dialog border w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* 头部标题栏 */}
         <div className="px-5 sm:px-6 py-4 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
+            <div className="p-2 rounded-xl bg-violet-300/15 text-violet-300 border border-violet-300/30">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+              <h3 className="font-bold text-white text-sm sm:text-base flex flex-wrap items-center gap-2">
                 <span>技术面试各阶段转化率全景透视</span>
-                <span className="text-[10px] bg-blue-500/10 text-blue-300 font-mono px-2 py-0.5 rounded-full border border-blue-500/20">
+                <span className="text-[10px] bg-cyan-300/10 text-cyan-300 font-mono px-2 py-0.5 rounded-full border border-cyan-300/20">
                   实际已投 {totalApplied} 家基准
                 </span>
               </h3>
@@ -133,6 +134,7 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
 
           <button
             onClick={onClose}
+            aria-label="关闭转化率窗口"
             className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
@@ -152,7 +154,7 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
                   onClick={() => setActiveStageTab(stg.id)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 relative overflow-hidden ${
                     isActive
-                      ? `${stg.tagColor} shadow-md scale-[1.02] border-current`
+                      ? `${stg.tagColor} shadow-sm border-current`
                       : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] text-zinc-400'
                   }`}
                 >
@@ -187,7 +189,7 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
           <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-indigo-400" />
+                <TrendingUp className="w-4 h-4 text-violet-300" />
                 秋招漏斗层级流转漏斗
               </span>
               <span className="text-[11px] text-zinc-500 font-mono">
@@ -225,7 +227,7 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
                 <span className="font-bold text-white text-xs sm:text-sm">
                   到达「{currentStageMeta.title}」的企业明细清单
                 </span>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-violet-300/10 text-violet-300 border border-violet-300/20">
                   共 {currentStageMeta.jobs.length} 家
                 </span>
               </div>
@@ -245,11 +247,11 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
                   className="p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] transition-colors flex items-center justify-between gap-3 cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold flex items-center justify-center text-xs shrink-0 border border-indigo-500/20">
+                    <div className="w-8 h-8 rounded-lg bg-violet-300/10 text-violet-300 font-bold flex items-center justify-center text-xs shrink-0 border border-violet-300/20">
                       {job.company.substring(0, 1)}
                     </div>
                     <div className="min-w-0">
-                      <h5 className="font-semibold text-white text-xs group-hover:text-indigo-300 transition-colors truncate">
+                      <h5 className="font-semibold text-white text-xs group-hover:text-violet-300 transition-colors truncate">
                         {job.company}
                       </h5>
                       <p className="text-[11px] text-zinc-400 truncate mt-0.5">
@@ -286,7 +288,7 @@ export function InterviewConversionModal({ isOpen, onClose, jobs, onSelectJob }:
         {/* 底部按钮栏 */}
         <div className="px-5 sm:px-6 py-3.5 border-t border-white/[0.08] bg-white/[0.02] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-zinc-400">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <Sparkles className="w-3.5 h-3.5 text-violet-300" />
             <span className="text-[11px]">面试转化率根据实际已投递家数动态量化</span>
           </div>
           <button

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import {
   BarChart3,
   TrendingUp,
@@ -27,15 +28,16 @@ import {
 } from 'recharts'
 import { JobApplication, JobStatus } from '@/types'
 import { StorageService } from '@/lib/storage'
-import { isJobApplied, hasReachedStage, getJobStageBadge } from '@/lib/feishu-parser'
+import { isJobApplied, hasReachedStage } from '@/lib/feishu-parser'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
-
-const PALETTE = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b', '#ef4444', '#06b6d4', '#6366f1']
+import { CAREER_STAGE_COLORS, getCareerStageBadge as getJobStageBadge } from '@/lib/career-theme'
+import '../career-theme.css'
 
 export default function CareerAnalyticsPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [funnelView, setFunnelView] = useState<'overview' | 'rounds'>('overview')
   const [isConversionModalOpen, setIsConversionModalOpen] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   const loadData = () => {
     setJobs(StorageService.getJobs())
@@ -83,20 +85,20 @@ export default function CareerAnalyticsPage() {
 
   // 1. 全流程主漏斗
   const overviewFunnelData: FunnelItem[] = [
-    { stage: '实际已投递', count: totalApplied, rate: '100%', fill: '#3b82f6' },
-    { stage: '初筛/笔试通过', count: passScreening, rate: totalApplied ? `${Math.round((passScreening / totalApplied) * 100)}%` : '0%', fill: '#8b5cf6' },
-    { stage: '进入技术面试', count: round1Jobs.length, rate: totalApplied ? `${rate1}%` : '0%', fill: '#f59e0b' },
-    { stage: '终面 / HR面', count: reachedFinal.length, rate: totalApplied ? `${Math.round((reachedFinal.length / totalApplied) * 100)}%` : '0%', fill: '#ec4899' },
-    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', fill: '#10b981' },
+    { stage: '实际已投递', count: totalApplied, rate: '100%', fill: CAREER_STAGE_COLORS.applied },
+    { stage: '初筛/笔试通过', count: passScreening, rate: totalApplied ? `${Math.round((passScreening / totalApplied) * 100)}%` : '0%', fill: CAREER_STAGE_COLORS.assessment },
+    { stage: '进入技术面试', count: round1Jobs.length, rate: totalApplied ? `${rate1}%` : '0%', fill: CAREER_STAGE_COLORS.interview1 },
+    { stage: '终面 / HR面', count: reachedFinal.length, rate: totalApplied ? `${Math.round((reachedFinal.length / totalApplied) * 100)}%` : '0%', fill: CAREER_STAGE_COLORS.hr },
+    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', fill: CAREER_STAGE_COLORS.offer },
   ]
 
   // 2. 技术面试各轮次细分漏斗 (一面 -> 二面 -> 三面 -> 录用)
   const roundsFunnelData: FunnelItem[] = [
-    { stage: '实际已投递企业', count: totalApplied, rate: '100%', detail: '基数', fill: '#3b82f6' },
-    { stage: '技术一面到达', count: round1Jobs.length, rate: `${rate1}%`, detail: `占投递 ${rate1}%`, fill: '#f59e0b' },
-    { stage: '技术二面到达', count: round2Jobs.length, rate: `${rate2}%`, detail: `一面通过率 ${passRate1to2}%`, fill: '#f97316' },
-    { stage: '技术三面到达', count: round3Jobs.length, rate: `${rate3}%`, detail: `二面通过率 ${passRate2to3}%`, fill: '#6366f1' },
-    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', detail: '录用', fill: '#10b981' },
+    { stage: '实际已投递企业', count: totalApplied, rate: '100%', detail: '基数', fill: CAREER_STAGE_COLORS.applied },
+    { stage: '技术一面到达', count: round1Jobs.length, rate: `${rate1}%`, detail: `占投递 ${rate1}%`, fill: CAREER_STAGE_COLORS.interview1 },
+    { stage: '技术二面到达', count: round2Jobs.length, rate: `${rate2}%`, detail: `一面通过率 ${passRate1to2}%`, fill: CAREER_STAGE_COLORS.interview2 },
+    { stage: '技术三面到达', count: round3Jobs.length, rate: `${rate3}%`, detail: `二面通过率 ${passRate2to3}%`, fill: CAREER_STAGE_COLORS.interview3 },
+    { stage: '斩获录用 / Offer', count: offers, rate: totalApplied ? `${Math.round((offers / totalApplied) * 100)}%` : '0%', detail: '录用', fill: CAREER_STAGE_COLORS.offer },
   ]
 
   const statusCounts: Record<string, { label: string; count: number }> = {
@@ -117,7 +119,9 @@ export default function CareerAnalyticsPage() {
     }
   })
 
-  const statusPieData = Object.values(statusCounts).filter((item) => item.count > 0)
+  const statusPieData = Object.entries(statusCounts)
+    .map(([status, item]) => ({ ...item, fill: CAREER_STAGE_COLORS[status as JobStatus] }))
+    .filter((item) => item.count > 0)
 
   const cityMap: Record<string, number> = {}
   jobs.forEach((j) => {
@@ -191,9 +195,9 @@ export default function CareerAnalyticsPage() {
     .map((item) => item.job)
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="career-theme space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部导航与操作 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
+      <div className="career-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/career"
@@ -202,8 +206,9 @@ export default function CareerAnalyticsPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
+            <p className="career-eyebrow">CAREER WORKSPACE / ANALYTICS</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-              <div className="p-2 sm:p-2.5 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <div className="career-hero-icon p-2 sm:p-2.5 rounded-2xl border">
                 <BarChart3 className="w-5 sm:w-6 h-5 sm:h-6" />
               </div>
               <span>秋招求职量化大屏</span>
@@ -215,8 +220,8 @@ export default function CareerAnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs bg-emerald-500/10 text-emerald-400 font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="text-xs bg-emerald-300/10 text-emerald-300 font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-emerald-300/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
             数据实时统计
           </span>
         </div>
@@ -225,9 +230,9 @@ export default function CareerAnalyticsPage() {
       {/* 核心指标统计横幅 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-3.5">
         {/* 实际已投递企业 */}
-        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+        <div className="career-metric linear-card p-3.5 sm:p-4 rounded-2xl">
           <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-            <Building2 className="w-3.5 h-3.5 text-blue-400" />
+            <Building2 className="w-3.5 h-3.5 text-cyan-300" />
             实际已投递
           </p>
           <div className="flex items-baseline gap-1 mt-1.5">
@@ -235,61 +240,65 @@ export default function CareerAnalyticsPage() {
             <span className="text-xs text-zinc-400">家</span>
           </div>
           <p className="text-xs text-zinc-400 mt-1.5">
-            储备未投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家 (共{jobs.length}家)
+            储备未投 <span className="font-mono font-semibold text-amber-300">{notAppliedCount}</span> 家 (共{jobs.length}家)
           </p>
         </div>
 
         {/* 技术一面转化率 (点击弹窗查看多轮面试全景漏斗) */}
         <div
+          data-tone="amber"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setIsConversionModalOpen(true) } }}
           onClick={() => setIsConversionModalOpen(true)}
-          className="linear-card p-3.5 sm:p-4 rounded-2xl cursor-pointer hover:border-amber-500/40 hover:bg-white/[0.04] transition-all group select-none"
+          className="career-metric linear-card p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all group select-none"
           title="点击弹窗查看一面、二面、三面、终面各阶段全景转化率与企业明细"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="shrink-0 text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-amber-300" />
               <span>技术一面转化率</span>
             </p>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold flex items-center gap-1">
+            <span className="shrink-0 whitespace-nowrap text-[10px] px-1.5 py-0.5 rounded bg-amber-300/10 text-amber-300 font-semibold flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               明细 ↗
             </span>
           </div>
           <div className="flex items-baseline gap-1 mt-1.5">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">{rate1}%</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-300">{rate1}%</span>
             <span className="text-xs text-zinc-400">({round1Jobs.length}家)</span>
           </div>
-          <p className="text-xs text-zinc-400 mt-1.5 group-hover:text-amber-300/90 transition-colors">
-            占已投递 {rate1}% · 点击查看转化率
+          <p className="flex flex-wrap gap-x-1.5 gap-y-1 text-xs text-zinc-400 mt-1.5 group-hover:text-amber-300/90 transition-colors">
+            <span>占已投递 {rate1}%</span><span>· 点击查看转化率</span>
           </p>
         </div>
 
         {/* 斩获 Offer */}
-        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+        <div data-tone="mint" className="career-metric linear-card p-3.5 sm:p-4 rounded-2xl">
           <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-emerald-400" />
+            <Award className="w-3.5 h-3.5 text-emerald-300" />
             斩获 Offer
           </p>
           <div className="flex items-baseline gap-1 mt-1.5">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">{offers}</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-300">{offers}</span>
             <span className="text-xs text-zinc-400">份</span>
           </div>
-          <p className="text-xs text-emerald-400 mt-1.5 font-medium">
+          <p className="text-xs text-emerald-300 mt-1.5 font-medium">
             全投递录用率 {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
           </p>
         </div>
 
         {/* 沉淀考点真题 */}
-        <div className="linear-card p-3.5 sm:p-4 rounded-2xl">
+        <div data-tone="violet" className="career-metric linear-card p-3.5 sm:p-4 rounded-2xl">
           <p className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <Sparkles className="w-3.5 h-3.5 text-violet-300" />
             沉淀考点真题
           </p>
           <div className="flex items-baseline gap-1 mt-1.5">
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-indigo-400">{totalQuestionsCount}</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-violet-300">{totalQuestionsCount}</span>
             <span className="text-xs text-zinc-400">道</span>
           </div>
-          <p className="text-xs text-indigo-300 mt-1.5 font-medium">专属面经复盘考点库</p>
+          <p className="text-xs text-violet-300 mt-1.5 font-medium">专属面经复盘考点库</p>
         </div>
       </div>
 
@@ -300,17 +309,18 @@ export default function CareerAnalyticsPage() {
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 border-b border-white/[0.06] pb-3">
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-blue-400" />
+                <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-300" />
                 <span>秋招全流程漏斗转化分析</span>
               </h3>
 
               {/* 漏斗视图切换：全流程 vs 技术面试多轮细分 */}
-              <div className="flex items-center gap-1.5 bg-white/[0.04] p-1 rounded-xl border border-white/[0.08]">
+              <div className="career-tabs flex items-center gap-1.5 p-1 rounded-xl border">
                 <button
                   onClick={() => setFunnelView('overview')}
+                  aria-pressed={funnelView === 'overview'}
                   className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     funnelView === 'overview'
-                      ? 'bg-blue-500/20 text-blue-300 font-semibold shadow-sm'
+                      ? 'career-tab-active font-semibold'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -318,9 +328,10 @@ export default function CareerAnalyticsPage() {
                 </button>
                 <button
                   onClick={() => setFunnelView('rounds')}
+                  aria-pressed={funnelView === 'rounds'}
                   className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     funnelView === 'rounds'
-                      ? 'bg-indigo-500/20 text-indigo-300 font-semibold shadow-sm'
+                      ? 'career-tab-active font-semibold'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -354,10 +365,11 @@ export default function CareerAnalyticsPage() {
                 </div>
                 <div className="w-full bg-black/40 rounded-full h-3 overflow-hidden p-0.5 border border-white/[0.06]">
                   <div
-                    className="h-full rounded-full transition-all duration-500"
+                    className="career-progress-fill h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${Math.max(5, (item.count / (totalApplied || 1)) * 100)}%`,
                       backgroundColor: item.fill,
+                      backgroundImage: `linear-gradient(90deg, ${item.fill}80, ${item.fill})`,
                     }}
                   />
                 </div>
@@ -371,7 +383,7 @@ export default function CareerAnalyticsPage() {
                 ? '💡 建议：一面着手八股算法，二面业务架构，终面系统思考'
                 : `💡 一面通过率 ${passRate1to2}% · 二面通过率 ${passRate2to3}%`}
             </span>
-            <span className="font-mono text-blue-400 font-semibold text-xs sm:text-sm">
+            <span className="font-mono text-cyan-300 font-semibold text-xs sm:text-sm">
               终面录用转化: {totalApplied ? Math.round((offers / totalApplied) * 100) : 0}%
             </span>
           </div>
@@ -382,7 +394,7 @@ export default function CareerAnalyticsPage() {
           <div>
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-2">
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <PieIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-400" />
+                <PieIcon className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-300" />
                 当前流程状态占比
               </h3>
             </div>
@@ -401,9 +413,13 @@ export default function CareerAnalyticsPage() {
                   innerRadius={50}
                   outerRadius={75}
                   paddingAngle={3}
+                  stroke="#101824"
+                  strokeWidth={2}
+                  isAnimationActive={!reducedMotion}
+                  animationDuration={600}
                 >
                   {statusPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PALETTE[index % PALETTE.length]} />
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
                 <Tooltip
@@ -411,7 +427,7 @@ export default function CareerAnalyticsPage() {
                     if (active && payload && payload.length) {
                       const data = payload[0]
                       return (
-                        <div className="bg-[#101422] border border-white/20 px-3 py-2 rounded-xl shadow-2xl backdrop-blur-md">
+                        <div className="career-chart-tooltip px-3 py-2 rounded-xl backdrop-blur-md">
                           <p className="text-white text-xs font-medium flex items-center gap-2">
                             <span
                               className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm"
@@ -433,7 +449,7 @@ export default function CareerAnalyticsPage() {
           <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm pt-2 border-t border-white/[0.06]">
             {statusPieData.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2 text-zinc-300 text-xs sm:text-sm">
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
                 <span className="truncate">{item.label}:</span>
                 <span className="font-mono font-bold text-white">{item.count}</span>
               </div>
@@ -448,7 +464,7 @@ export default function CareerAnalyticsPage() {
         <div className="linear-card p-4 sm:p-6 rounded-2xl space-y-4">
           <div className="flex items-center justify-between mb-2 border-b border-white/[0.06] pb-3">
             <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-              <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-400" />
+              <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-300" />
               工作地点 / Base 分布
             </h3>
             <span className="text-xs sm:text-sm text-zinc-400">意向城市</span>
@@ -458,18 +474,19 @@ export default function CareerAnalyticsPage() {
             {cityData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="city" fontSize={12} stroke="#a1a1aa" />
-                  <YAxis allowDecimals={false} fontSize={12} stroke="#a1a1aa" />
+                  <defs><linearGradient id="career-city-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a5f3fc" stopOpacity={.95} /><stop offset="100%" stopColor="#67e8f9" stopOpacity={.3} /></linearGradient></defs>
+                  <CartesianGrid strokeDasharray="3 5" stroke="rgba(165,243,252,0.07)" vertical={false} />
+                  <XAxis dataKey="city" fontSize={12} stroke="#94a3b8" axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} fontSize={12} stroke="#94a3b8" axisLine={false} tickLine={false} />
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0]
                         return (
-                          <div className="bg-[#101422] border border-white/20 px-3 py-2 rounded-xl shadow-2xl backdrop-blur-md">
+                          <div className="career-chart-tooltip px-3 py-2 rounded-xl backdrop-blur-md">
                             <p className="text-zinc-300 text-[11px] mb-1 font-medium">{label || data.name}</p>
                             <p className="text-white text-xs font-medium flex items-center gap-2">
-                              <span className="w-2.5 h-2.5 rounded-full inline-block bg-blue-500 shrink-0 shadow-sm" />
+                              <span className="w-2.5 h-2.5 rounded-full inline-block bg-cyan-300 shrink-0 shadow-sm" />
                               <span className="text-white font-semibold">投递数 :</span>
                               <span className="font-mono font-bold text-white text-sm">{data.value}</span>
                             </p>
@@ -479,7 +496,7 @@ export default function CareerAnalyticsPage() {
                       return null
                     }}
                   />
-                  <Bar dataKey="count" name="投递数" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" name="投递数" fill="url(#career-city-bar)" radius={[6, 6, 0, 0]} maxBarSize={44} isAnimationActive={!reducedMotion} animationDuration={600} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -495,7 +512,7 @@ export default function CareerAnalyticsPage() {
           <div>
             <div className="flex items-center justify-between mb-2 border-b border-white/[0.06] pb-3">
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-amber-400" />
+                <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-amber-300" />
                 重点大厂攻坚矩阵
               </h3>
               <span className="text-xs sm:text-sm text-zinc-400 font-mono">大厂名单 · 深圳优先</span>
@@ -512,14 +529,14 @@ export default function CareerAnalyticsPage() {
                   className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between gap-3 hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-cyan-300/10 text-cyan-300 font-bold flex items-center justify-center text-sm border border-cyan-300/20 shrink-0">
                       {job.company.substring(0, 1)}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <h5 className="font-bold text-sm sm:text-base text-white truncate">{job.company}</h5>
                         {isShenzhen && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0 font-medium">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-300/15 text-amber-300 border border-amber-300/30 shrink-0 font-medium">
                             深圳 Base
                           </span>
                         )}
@@ -538,7 +555,7 @@ export default function CareerAnalyticsPage() {
                       )
                     })()}
                     {job.salary && (
-                      <p className="text-xs sm:text-sm text-emerald-400 mt-1 font-mono font-semibold">
+                      <p className="text-xs sm:text-sm text-emerald-300 mt-1 font-mono font-semibold">
                         {job.salary}
                       </p>
                     )}

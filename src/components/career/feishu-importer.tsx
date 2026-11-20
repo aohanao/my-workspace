@@ -10,7 +10,8 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
-import { parseFeishuClipboardText, parseFeishuExcelFile, isJobApplied, getJobDisplayTags } from '@/lib/feishu-parser'
+import { parseFeishuClipboardText, parseFeishuExcelFile, isJobApplied } from '@/lib/feishu-parser'
+import { getCareerDisplayTags as getJobDisplayTags } from '@/lib/career-theme'
 import { FeishuImportResult } from '@/types'
 import { StorageService } from '@/lib/storage'
 
@@ -81,18 +82,18 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#10131d] border border-white/[0.1] w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+    <div className="career-modal-backdrop fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+      <div role="dialog" aria-modal="true" aria-label="导入飞书求职记录" className="career-dialog border w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         {/* 头部 */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shrink-0">
+            <div className="p-2 bg-cyan-300/10 text-cyan-300 rounded-xl border border-cyan-300/20 shrink-0">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold text-white text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 truncate">
                 智能导入飞书多维表格
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-normal px-2 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline">
+                <span className="text-[10px] bg-emerald-300/10 text-emerald-300 font-normal px-2 py-0.5 rounded-full border border-emerald-300/20 hidden sm:inline">
                   全 11 字段对齐
                 </span>
               </h3>
@@ -103,6 +104,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="关闭导入窗口"
             className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
@@ -146,7 +148,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 onChange={(e) => setPasteText(e.target.value)}
                 placeholder={`👉 打开您的飞书秋招多维表格：\n1. 框选记录（可带表头或不带表头，包含：投递公司 | 优先级 | 投递日期 | 投递状态 | 类型与岗位 | base地 | 职位 | 行业 | 官网 | 备注 | 状态）\n2. 按下 Ctrl+C 复制后直接粘贴到这里\n3. 点击下方「开始智能识别」`}
                 rows={8}
-                className="w-full text-xs font-mono p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500 placeholder:text-zinc-600 resize-none leading-relaxed"
+                className="w-full text-xs font-mono p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300 placeholder:text-zinc-600 resize-none leading-relaxed"
               />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <p className="text-[11px] text-zinc-500">
@@ -168,7 +170,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
           {activeTab === 'file' && !parsedResult && (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border border-dashed border-white/[0.1] hover:border-blue-500/50 bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center cursor-pointer transition-all group"
+              className="border border-dashed border-white/[0.1] hover:border-cyan-300/50 bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center cursor-pointer transition-all group"
             >
               <input
                 type="file"
@@ -177,7 +179,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 accept=".xlsx,.xls,.csv"
                 className="hidden"
               />
-              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-full group-hover:scale-105 transition-transform mb-2">
+              <div className="p-3 bg-cyan-300/10 text-cyan-300 rounded-full group-hover:scale-105 transition-transform mb-2">
                 <UploadCloud className="w-6 h-6" />
               </div>
               <p className="text-xs font-medium text-white text-center">点击选择或拖拽 Excel / CSV 文件</p>
@@ -192,15 +194,15 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 const previewApplied = parsedResult.jobs.filter((j) => isJobApplied(j)).length
                 const previewNotApplied = parsedResult.jobs.length - previewApplied
                 return (
-                  <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-300/10 border border-emerald-300/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
                       <div>
                         <h4 className="text-xs font-semibold text-white">
                           已精准识别 {parsedResult.successCount} 条求职记录
                         </h4>
                         <p className="text-[11px] text-zinc-400 mt-0.5">
-                          实际已投递 <span className="text-blue-400 font-semibold">{previewApplied}</span> 家 · 意向储备(未投) <span className="text-amber-400 font-semibold">{previewNotApplied}</span> 家
+                          实际已投递 <span className="text-cyan-300 font-semibold">{previewApplied}</span> 家 · 意向储备(未投) <span className="text-amber-300 font-semibold">{previewNotApplied}</span> 家
                         </p>
                       </div>
                     </div>
@@ -240,7 +242,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                           <td className="p-2.5 pl-3 font-semibold text-white whitespace-nowrap">{job.company}</td>
                           <td className="p-2.5 whitespace-nowrap">
                             {job.priority ? (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-300/10 text-amber-300 border border-amber-300/20 font-medium">
                                 {job.priority}
                               </span>
                             ) : '-'}
@@ -249,10 +251,10 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                           <td className="p-2.5 whitespace-nowrap">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                               applied
-                                ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                ? 'bg-cyan-300/15 text-cyan-300 border-cyan-300/30'
+                                : 'bg-amber-300/15 text-amber-300 border-amber-300/30'
                             }`}>
-                              <span className={`w-1 h-1 rounded-full ${applied ? 'bg-blue-400' : 'bg-amber-400'}`} />
+                              <span className={`w-1 h-1 rounded-full ${applied ? 'bg-cyan-300' : 'bg-amber-300'}`} />
                               <span>{applied ? '已投递' : '未投递'}</span>
                             </span>
                           </td>
@@ -264,7 +266,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                           <td className="p-2.5 text-zinc-400 max-w-[100px] truncate">{job.industry || '-'}</td>
                           <td className="p-2.5 whitespace-nowrap">
                             {job.jobUrl ? (
-                              <span className="text-blue-400 text-[11px] truncate max-w-[80px] inline-block">{job.jobUrl}</span>
+                              <span className="text-cyan-300 text-[11px] truncate max-w-[80px] inline-block">{job.jobUrl}</span>
                             ) : '-'}
                           </td>
                           <td className="p-2.5 whitespace-nowrap">
@@ -302,7 +304,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 onClick={() => setImportMode('replace')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   importMode === 'replace'
-                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 font-semibold'
+                    ? 'bg-rose-300/15 text-rose-300 border-rose-300/30 font-semibold'
                     : 'bg-white/[0.03] text-zinc-400 border-white/[0.06]'
                 }`}
               >
@@ -313,7 +315,7 @@ export function FeishuImporter({ isOpen, onClose, onSuccess }: Props) {
                 onClick={() => setImportMode('append')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   importMode === 'append'
-                    ? 'bg-blue-500/15 text-blue-300 border-blue-500/30 font-semibold'
+                    ? 'bg-cyan-300/15 text-cyan-300 border-cyan-300/30 font-semibold'
                     : 'bg-white/[0.03] text-zinc-400 border-white/[0.06]'
                 }`}
               >

@@ -27,14 +27,14 @@ interface Props {
 
 const STATUS_OPTIONS: { value: JobStatus; label: string; color: string }[] = [
   { value: 'wishlist', label: '意向准备/未投递', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
-  { value: 'applied', label: '已投递', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  { value: 'assessment', label: '笔试/测评', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  { value: 'interview1', label: '技术一面', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  { value: 'interview2', label: '技术二面/交叉', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  { value: 'interview3', label: '技术三面/主管', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-  { value: 'hr', label: 'HR面/谈薪', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
-  { value: 'offer', label: '录用 / Offer 🎉', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  { value: 'rejected', label: '流程终止 / 挂', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+  { value: 'applied', label: '已投递', color: 'bg-cyan-300/10 text-cyan-300 border-cyan-300/20' },
+  { value: 'assessment', label: '笔试/测评', color: 'bg-indigo-300/10 text-indigo-300 border-indigo-300/20' },
+  { value: 'interview1', label: '技术一面', color: 'bg-amber-300/10 text-amber-300 border-amber-300/20' },
+  { value: 'interview2', label: '技术二面/交叉', color: 'bg-orange-300/10 text-orange-300 border-orange-300/20' },
+  { value: 'interview3', label: '技术三面/主管', color: 'bg-violet-300/10 text-violet-300 border-violet-300/20' },
+  { value: 'hr', label: 'HR面/谈薪', color: 'bg-fuchsia-300/10 text-fuchsia-300 border-fuchsia-300/20' },
+  { value: 'offer', label: '录用 / Offer 🎉', color: 'bg-emerald-300/10 text-emerald-300 border-emerald-300/20' },
+  { value: 'rejected', label: '流程终止 / 挂', color: 'bg-rose-300/10 text-rose-300 border-rose-300/20' },
 ]
 
 export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props) {
@@ -127,12 +127,12 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
   const currentInterview = formData.interviews?.[activeInterviewIndex]
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#10131d] border border-white/[0.1] w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+    <div className="career-modal-backdrop fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+      <div role="dialog" aria-modal="true" aria-label="企业投递详情" className="career-dialog border w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         {/* 顶部标题栏 */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/[0.06] flex items-center justify-between bg-white/[0.02]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-base sm:text-lg shrink-0">
+            <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-cyan-300/10 text-cyan-300 border border-cyan-300/20 flex items-center justify-center font-bold text-base sm:text-lg shrink-0">
               {formData.company.substring(0, 1) || '企'}
             </div>
             <div className="min-w-0">
@@ -142,7 +142,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.company}
                 onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                 placeholder="投递公司名称..."
-                className="font-bold text-base sm:text-lg text-white bg-transparent border-b border-transparent hover:border-white/20 focus:border-blue-500 focus:outline-none w-full"
+                className="font-bold text-base sm:text-lg text-white bg-transparent border-b border-transparent hover:border-white/20 focus:border-cyan-300 focus:outline-none w-full"
               />
               <p className="text-[11px] text-zinc-400 mt-0.5">秋招企业投递与全流程管理</p>
             </div>
@@ -150,6 +150,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
 
           <button
             onClick={onClose}
+            aria-label="关闭企业详情"
             className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors"
           >
             <X className="w-5 h-5" />
@@ -170,7 +171,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 onClick={() => handleApplyStatusToggle(true)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   (formData.applyStatus !== '未投递' && formData.status !== 'wishlist')
-                    ? 'bg-blue-500 text-white font-semibold shadow-sm'
+                    ? 'bg-cyan-300 text-white font-semibold shadow-sm'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -181,7 +182,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 onClick={() => handleApplyStatusToggle(false)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   (formData.applyStatus === '未投递' || formData.status === 'wishlist')
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold shadow-sm'
+                    ? 'bg-amber-300/20 text-amber-300 border border-amber-300/30 font-semibold shadow-sm'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -237,7 +238,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
 
           {/* 若流程已挂，提供终止前阶段标记 */}
           {formData.status === 'rejected' && (
-            <div className="p-3 rounded-xl bg-rose-500/[0.04] border border-rose-500/20 space-y-2">
+            <div className="p-3 rounded-xl bg-rose-300/[0.04] border border-rose-300/20 space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-rose-300 font-semibold text-xs block">
                   终止阶段标记（计入面试各轮转化率）：
@@ -261,7 +262,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                       onClick={() => handleLastStageChange(stg.value as JobStatus)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
                         isCurrentLast
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold'
+                          ? 'bg-rose-300/20 text-rose-300 border border-rose-300/40 font-semibold'
                           : 'bg-white/[0.03] text-zinc-400 border border-white/[0.06] hover:text-white'
                       }`}
                     >
@@ -286,7 +287,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 placeholder="如: AI Agent技术研发工程师"
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -300,7 +301,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.category || ''}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="如: 秋招 研发 / 算法 / 产品"
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -314,9 +315,9 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                 className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none"
               >
-                <option value="高" className="bg-[#10131d]">高 (核心意向 / 保底)</option>
-                <option value="中" className="bg-[#10131d]">中 (主要投递)</option>
-                <option value="低" className="bg-[#10131d]">低 (随缘/备选)</option>
+                <option value="高" className="bg-[#101824]">高 (核心意向 / 保底)</option>
+                <option value="中" className="bg-[#101824]">中 (主要投递)</option>
+                <option value="低" className="bg-[#101824]">低 (随缘/备选)</option>
               </select>
             </div>
 
@@ -330,7 +331,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.location || ''}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="如: 广州 / 深圳 / 成都"
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -343,7 +344,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 type="date"
                 value={formData.applyDate}
                 onChange={(e) => setFormData({ ...formData, applyDate: e.target.value })}
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -357,7 +358,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.industry || ''}
                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 placeholder="如: 互联网/科技 / 智能建造"
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -371,7 +372,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.jobUrl || ''}
                 onChange={(e) => setFormData({ ...formData, jobUrl: e.target.value })}
                 placeholder="https://job.bytedance.com / https://careers.tencent.com"
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono focus:outline-none focus:border-blue-500"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white font-mono focus:outline-none focus:border-cyan-300"
               />
             </div>
 
@@ -385,7 +386,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                 value={formData.notes || ''}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="记录内推人、网申进度、面试重点要求..."
-                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500 leading-relaxed resize-none"
+                className="w-full p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300 leading-relaxed resize-none"
               />
             </div>
           </div>
@@ -394,7 +395,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
           <div className="pt-3 border-t border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <label className="font-semibold text-white flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 text-amber-400" />
+                <MessageSquare className="w-4 h-4 text-amber-300" />
                 面试考点与问答复盘记录
               </label>
               <button
@@ -418,7 +419,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                         key={iv.id}
                         className={`group/tab relative inline-flex items-center rounded-xl transition-all border shrink-0 ${
                           isActive
-                            ? 'bg-amber-500/15 text-amber-400 border-amber-500/40 font-semibold shadow-sm'
+                            ? 'bg-amber-300/15 text-amber-300 border-amber-300/40 font-semibold shadow-sm'
                             : 'bg-white/[0.02] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.04]'
                         }`}
                       >
@@ -436,7 +437,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                             e.stopPropagation()
                             handleRemoveInterview(idx)
                           }}
-                          className="p-1 mr-1 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/20 rounded-md transition-colors"
+                          className="p-1 mr-1 text-zinc-500 hover:text-rose-300 hover:bg-rose-300/20 rounded-md transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -460,7 +461,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                       <button
                         type="button"
                         onClick={() => handleRemoveInterview(activeInterviewIndex)}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-medium transition-colors"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-300 hover:text-rose-300 bg-rose-300/10 hover:bg-rose-300/20 border border-rose-300/20 text-xs font-medium transition-colors"
                         title="删除当前选中的面试轮次"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -500,7 +501,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                           <button
                             type="button"
                             onClick={() => handleRemoveQuestion(qIdx)}
-                            className="text-zinc-500 hover:text-rose-400 p-1"
+                            className="text-zinc-500 hover:text-rose-300 p-1"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -520,7 +521,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                               handleAddQuestion()
                             }
                           }}
-                          className="flex-1 p-2 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-blue-500"
+                          className="flex-1 p-2 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
                         />
                         <button
                           type="button"
@@ -552,7 +553,7 @@ export function JobDetailModal({ job, isOpen, onClose, onSave, onDelete }: Props
                     onClose()
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-300 hover:bg-rose-300/10 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>删除记录</span>

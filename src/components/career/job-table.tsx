@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { JobApplication, JobStatus } from '@/types'
-import { isJobApplied, getJobStageBadge, getJobDisplayTags, smartTransformJob } from '@/lib/feishu-parser'
+import { isJobApplied, smartTransformJob } from '@/lib/feishu-parser'
+import { getCareerDisplayTags as getJobDisplayTags } from '@/lib/career-theme'
 import {
   Search,
   Download,
@@ -30,14 +31,14 @@ interface Props {
 
 const STATUS_LABELS: Record<JobStatus, { label: string; badge: string }> = {
   wishlist: { label: '意向备战', badge: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
-  applied: { label: '已投递', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  assessment: { label: '笔试/测评', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  interview1: { label: '技术一面', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  interview2: { label: '技术二面', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  interview3: { label: '技术三面', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-  hr: { label: 'HR面/谈薪', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
-  offer: { label: '已获 Offer 🎉', badge: 'bg-emerald-500/15 text-emerald-400 font-bold border-emerald-500/30' },
-  rejected: { label: '流程终止', badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+  applied: { label: '已投递', badge: 'bg-cyan-300/10 text-cyan-300 border-cyan-300/20' },
+  assessment: { label: '笔试/测评', badge: 'bg-indigo-300/10 text-indigo-300 border-indigo-300/20' },
+  interview1: { label: '技术一面', badge: 'bg-amber-300/10 text-amber-300 border-amber-300/20' },
+  interview2: { label: '技术二面', badge: 'bg-orange-300/10 text-orange-300 border-orange-300/20' },
+  interview3: { label: '技术三面', badge: 'bg-violet-300/10 text-violet-300 border-violet-300/20' },
+  hr: { label: 'HR面/谈薪', badge: 'bg-fuchsia-300/10 text-fuchsia-300 border-fuchsia-300/20' },
+  offer: { label: '已获 Offer 🎉', badge: 'bg-emerald-300/15 text-emerald-300 font-bold border-emerald-300/30' },
+  rejected: { label: '流程终止', badge: 'bg-rose-300/10 text-rose-300 border-rose-300/20' },
 }
 
 export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchUpdateJobs, onBatchDeleteJobs }: Props) {
@@ -180,15 +181,15 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
   }
 
   return (
-    <div className={`space-y-3.5 ${isFullscreen ? 'fixed inset-3 sm:inset-6 z-50 bg-[#070a12]/95 backdrop-blur-2xl p-4 sm:p-6 rounded-3xl border border-cyan-500/30 shadow-2xl flex flex-col' : ''}`}>
+    <div className={`space-y-3.5 ${isFullscreen ? 'fixed inset-3 sm:inset-6 z-50 bg-[#070a12]/95 backdrop-blur-2xl p-4 sm:p-6 rounded-3xl border border-cyan-300/30 shadow-2xl flex flex-col' : ''}`}>
       {/* 顶部标签切换栏：已投递 vs 未投递 / 意向储备 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl linear-card shrink-0">
+      <div className="career-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl linear-card shrink-0">
         <div className="flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0">
           <button
             onClick={() => setApplyTab('all')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
               applyTab === 'all'
-                ? 'bg-white/[0.12] text-white font-semibold shadow-sm border border-white/[0.15]'
+                ? 'career-tab-active font-semibold border border-transparent'
                 : 'text-zinc-400 hover:text-white bg-white/[0.02] border border-transparent'
             }`}
           >
@@ -202,13 +203,13 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
             onClick={() => setApplyTab('applied')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
               applyTab === 'applied'
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-blue-300 bg-white/[0.02] border border-transparent'
+                ? 'bg-cyan-300/20 text-cyan-300 border border-cyan-300/40 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-cyan-300 bg-white/[0.02] border border-transparent'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-300" />
             <span>实际已投递</span>
-            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300">
+            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-cyan-300/20 text-cyan-300">
               {appliedCount}
             </span>
           </button>
@@ -217,13 +218,13 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
             onClick={() => setApplyTab('not_applied')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
               applyTab === 'not_applied'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
+                ? 'bg-amber-300/20 text-amber-300 border border-amber-300/40 font-semibold shadow-sm'
                 : 'text-zinc-400 hover:text-amber-300 bg-white/[0.02] border border-transparent'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-300" />
             <span>未投递 / 意向储备</span>
-            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300">
+            <span className="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-amber-300/20 text-amber-300">
               {notAppliedCount}
             </span>
           </button>
@@ -231,23 +232,23 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
 
         {/* 批量操作工具栏 */}
         {selectedIds.size > 0 ? (
-          <div className="flex items-center gap-2 flex-wrap text-xs bg-blue-500/10 border border-blue-500/25 px-3 py-1.5 rounded-xl animate-in fade-in duration-150">
-            <span className="text-blue-300 font-medium font-mono">已选中 {selectedIds.size} 项:</span>
+          <div className="flex items-center gap-2 flex-wrap text-xs bg-cyan-300/10 border border-cyan-300/25 px-3 py-1.5 rounded-xl animate-in fade-in duration-150">
+            <span className="text-cyan-300 font-medium font-mono">已选中 {selectedIds.size} 项:</span>
             <button
               onClick={() => handleBatchSetApplyStatus(true)}
-              className="px-2.5 py-1 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors shadow-sm"
+              className="px-2.5 py-1 rounded-lg bg-cyan-300 text-white font-medium hover:bg-blue-600 transition-colors shadow-sm"
             >
               设为「已投递」
             </button>
             <button
               onClick={() => handleBatchSetApplyStatus(false)}
-              className="px-2.5 py-1 rounded-lg bg-white/[0.08] text-amber-300 hover:bg-white/[0.15] border border-amber-500/30 transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-white/[0.08] text-amber-300 hover:bg-white/[0.15] border border-amber-300/30 transition-colors"
             >
               设为「未投递」
             </button>
             <button
               onClick={handleBatchDelete}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 font-medium transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-300/20 text-rose-300 hover:bg-rose-300/30 border border-rose-300/30 font-medium transition-colors"
               title="批量删除选中的投递记录"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -270,13 +271,13 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
       {/* ===================== 二级终端视窗 (Sub-Window Terminal) ===================== */}
       <div className={`sub-window-terminal rounded-2xl overflow-hidden flex flex-col relative transition-all border border-white/[0.1] ${isFullscreen ? 'flex-1 min-h-0' : 'h-[580px]'}`}>
         {/* 视窗标题栏与控制台 (Sub-window Header) */}
-        <div className="px-4 py-2.5 bg-[#090d16]/95 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 flex-wrap select-none">
+        <div className="px-4 py-2.5 bg-[#101824]/95 border-b border-white/[0.08] flex items-center justify-between gap-3 shrink-0 flex-wrap select-none">
           <div className="flex items-center gap-3">
             {/* 拟物终端小红绿点 */}
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block shadow-[0_0_6px_rgba(244,63,94,0.4)]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block shadow-[0_0_6px_rgba(245,158,11,0.4)]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-300/80 inline-block shadow-[0_0_6px_rgba(244,63,94,0.4)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-300/80 inline-block shadow-[0_0_6px_rgba(245,158,11,0.4)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-300/80 inline-block shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
             </div>
 
             <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -295,7 +296,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                   }}
                   placeholder="搜索投递公司"
                   aria-label="搜索投递公司名称"
-                  className="w-36 sm:w-48 rounded-full bg-white/[0.06] border border-white/[0.12] py-1 pl-8 pr-3 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400/60"
+                  className="w-36 sm:w-48 rounded-full bg-white/[0.06] border border-white/[0.12] py-1 pl-8 pr-3 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-300/60"
                 />
               </label>
             </div>
@@ -338,25 +339,25 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
         >
           <table className="w-full text-left text-xs border-collapse min-w-[1100px]">
             {/* 表头固定在二级窗口顶部 */}
-            <thead className="sticky top-0 z-20 bg-[#090d18]/95 backdrop-blur-md text-zinc-300 border-b border-cyan-500/20 font-semibold shadow-sm">
+            <thead className="sticky top-0 z-20 bg-[#101824]/95 backdrop-blur-md text-zinc-300 border-b border-cyan-300/20 font-semibold shadow-sm">
               <tr>
                 {/* 勾选列 */}
-                <th className="py-2.5 px-3 pl-3.5 sticky left-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] w-10 text-center">
+                <th className="py-2.5 px-3 pl-3.5 sticky left-0 z-30 bg-[#101824]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] w-10 text-center">
                   <input
                     type="checkbox"
                     checked={filtered.length > 0 && selectedIds.size === filtered.length}
                     onChange={handleToggleSelectAll}
-                    className="rounded bg-black/40 border-white/20 text-blue-500 focus:ring-0 cursor-pointer"
+                    className="rounded bg-black/40 border-white/20 text-cyan-300 focus:ring-0 cursor-pointer"
                     title="全选/取消全选"
                   />
                 </th>
-                <th className="py-2.5 px-3 sticky left-10 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[150px]">
+                <th className="py-2.5 px-3 sticky left-10 z-30 bg-[#101824]/95 backdrop-blur-md shadow-[2px_0_8px_rgba(0,0,0,0.5)] min-w-[150px]">
                   投递公司
                 </th>
                 <th className="py-2.5 px-3 min-w-[105px]">
                   <div className="flex items-center gap-1">
                     <span>投递状态</span>
-                    <Sparkles className="w-3 h-3 text-cyan-400" />
+                    <Sparkles className="w-3 h-3 text-cyan-300" />
                   </div>
                 </th>
                 <th className="py-2.5 px-3 min-w-[75px]">优先级</th>
@@ -368,7 +369,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                 <th className="py-2.5 px-3 min-w-[75px]">官网</th>
                 <th className="py-2.5 px-3 min-w-[110px]">当前进展</th>
                 <th className="py-2.5 px-3 min-w-[200px]">复盘与备注</th>
-                <th className="py-2.5 px-3 pr-3.5 text-right min-w-[80px] sticky right-0 z-30 bg-[#090d18]/95 backdrop-blur-md shadow-[-2px_0_8px_rgba(0,0,0,0.5)]">
+                <th className="py-2.5 px-3 pr-3.5 text-right min-w-[80px] sticky right-0 z-30 bg-[#101824]/95 backdrop-blur-md shadow-[-2px_0_8px_rgba(0,0,0,0.5)]">
                   操作
                 </th>
               </tr>
@@ -383,27 +384,27 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                   <tr
                     key={job.id}
                     onClick={() => onSelectJob(job)}
-                    className={`hover:bg-cyan-500/[0.04] transition-colors cursor-pointer group ${
-                      isSelected ? 'bg-blue-500/[0.06]' : ''
+                    className={`hover:bg-cyan-300/[0.04] transition-colors cursor-pointer group ${
+                      isSelected ? 'bg-cyan-300/[0.06]' : ''
                     }`}
                   >
                     {/* 勾选框 */}
                     <td
-                      className="py-2 px-3 pl-3.5 sticky left-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] text-center"
+                      className="py-2 px-3 pl-3.5 sticky left-0 z-10 bg-[#0d1522]/90 group-hover:bg-[#162438] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] text-center"
                       onClick={(e) => handleToggleSelectRow(job.id, e)}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="rounded bg-black/40 border-white/20 text-blue-500 focus:ring-0 cursor-pointer"
+                        className="rounded bg-black/40 border-white/20 text-cyan-300 focus:ring-0 cursor-pointer"
                       />
                     </td>
 
                     {/* 投递公司 (左侧固定微粘滞) */}
-                    <td className="py-2 px-3 sticky left-10 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] font-semibold text-white text-xs sm:text-sm whitespace-nowrap">
+                    <td className="py-2 px-3 sticky left-10 z-10 bg-[#0d1522]/90 group-hover:bg-[#162438] transition-colors shadow-[2px_0_8px_rgba(0,0,0,0.4)] font-semibold text-white text-xs sm:text-sm whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-cyan-400' : 'bg-amber-400'} group-hover:scale-125 transition-transform`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-cyan-300' : 'bg-amber-300'} group-hover:scale-125 transition-transform`} />
                         <span>{job.company}</span>
                       </div>
                     </td>
@@ -418,11 +419,11 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                         title="点击直接切换状态：已投递 ⇄ 未投递"
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all hover:scale-105 active:scale-95 ${
                           applied
-                            ? 'bg-blue-500/15 text-blue-300 border-blue-500/30 hover:bg-blue-500/25'
-                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
+                            ? 'bg-cyan-300/15 text-cyan-300 border-cyan-300/30 hover:bg-cyan-300/25'
+                            : 'bg-amber-300/15 text-amber-300 border-amber-300/30 hover:bg-amber-300/25'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-blue-400' : 'bg-amber-400'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${applied ? 'bg-cyan-300' : 'bg-amber-300'}`} />
                         <span>{applied ? '已投递' : '未投递'}</span>
                         <ArrowUpDown className="w-2.5 h-2.5 opacity-60 ml-0.5" />
                       </button>
@@ -433,9 +434,9 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                       {job.priority ? (
                         <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border ${
                           job.priority === '高'
-                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                            ? 'bg-rose-300/10 text-rose-300 border-rose-300/25'
                             : job.priority === '中'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                            ? 'bg-amber-300/10 text-amber-300 border-amber-300/25'
                             : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/25'
                         }`}>
                           {job.priority}
@@ -477,7 +478,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                           href={job.jobUrl.startsWith('http') ? job.jobUrl : `https://${job.jobUrl}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-cyan-300 hover:text-cyan-300 hover:underline"
                         >
                           <Globe className="w-3.5 h-3.5" />
                           <span>投递官网</span>
@@ -513,7 +514,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
 
                     {/* 操作 (右侧固定微粘滞) */}
                     <td
-                      className="py-2 px-3 pr-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-[#070a13]/90 group-hover:bg-[#0c1220] transition-colors shadow-[-2px_0_8px_rgba(0,0,0,0.4)]"
+                      className="py-2 px-3 pr-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-[#0d1522]/90 group-hover:bg-[#162438] transition-colors shadow-[-2px_0_8px_rgba(0,0,0,0.4)]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-1">
@@ -531,7 +532,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
                                 onDeleteJob(job.id)
                               }
                             }}
-                            className="p-1 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.08] rounded-lg transition-colors"
+                            className="p-1 text-zinc-500 hover:text-rose-300 hover:bg-white/[0.08] rounded-lg transition-colors"
                             title="删除记录"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -558,7 +559,7 @@ export function JobTable({ jobs, onSelectJob, onDeleteJob, onUpdateJob, onBatchU
         </div>
 
         {/* 视窗底部常驻水平滑动控制条 (解决拉到最下面才能右滑的问题) */}
-        <div className="px-4 py-2 bg-[#090d18] border-t border-white/[0.08] flex items-center justify-between gap-3 text-xs text-zinc-400 shrink-0 select-none">
+        <div className="px-4 py-2 bg-[#101824] border-t border-white/[0.08] flex items-center justify-between gap-3 text-xs text-zinc-400 shrink-0 select-none">
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline">HORIZONTAL SCROLL:</span>
             <span className="text-[11px] text-zinc-400">可直接在此滑动或拖移右看完整标题</span>

@@ -24,6 +24,7 @@ import { JobTable } from '@/components/career/job-table'
 import { FeishuImporter } from '@/components/career/feishu-importer'
 import { JobDetailModal } from '@/components/career/job-detail-modal'
 import { InterviewConversionModal } from '@/components/career/interview-conversion-modal'
+import './career-theme.css'
 
 export default function CareerPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
@@ -111,12 +112,13 @@ export default function CareerPage() {
   const passRate2to3 = round2Jobs.length > 0 ? Math.round((round3Jobs.length / round2Jobs.length) * 100) : 0
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="career-theme space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部标题与操作区 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
+      <div className="career-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
+          <p className="career-eyebrow">CAREER WORKSPACE / APPLICATIONS</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
+            <div className="career-hero-icon p-2 sm:p-2.5 rounded-2xl border">
               <Briefcase className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span>秋招求职管家</span>
@@ -145,7 +147,7 @@ export default function CareerPage() {
                   setJobs([])
                 }
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-rose-500/10 hover:text-rose-400 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-rose-300/10 hover:text-rose-300 text-zinc-400 text-xs font-medium border border-white/[0.08] transition-colors"
               title="一键清空所有投递记录"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -158,11 +160,11 @@ export default function CareerPage() {
       {/* 核心数据概览 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
         {/* 实际已投递企业 */}
-        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
+        <div className="career-metric p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
             <div className="flex items-center gap-1.5">
               <p className="text-xs text-zinc-300 font-medium">实际已投递</p>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 font-mono">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-300/10 text-cyan-300 font-mono">
                 已投
               </span>
             </div>
@@ -171,71 +173,75 @@ export default function CareerPage() {
               <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
-              储备待投 <span className="font-mono font-semibold text-amber-400">{notAppliedCount}</span> 家 (共{totalCount}家)
+              储备待投 <span className="font-mono font-semibold text-amber-300">{notAppliedCount}</span> 家 (共{totalCount}家)
             </p>
           </div>
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
+          <div className="p-2 rounded-xl bg-cyan-300/10 text-cyan-300 shrink-0">
             <Layers className="w-4 h-4" />
           </div>
         </div>
 
         {/* 面试推进中流程 */}
-        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
+        <div data-tone="amber" className="career-metric p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
             <p className="text-xs text-zinc-300 font-medium">面试推进中</p>
             <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
-              <h3 className="text-xl sm:text-2xl font-bold font-mono text-amber-400">{interviewCount}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-amber-300">{interviewCount}</h3>
               <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
               待初筛/笔试 {screeningCount + assessmentCount} · 已挂 {rejectedCount}
             </p>
           </div>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
+          <div className="p-2 rounded-xl bg-amber-300/10 text-amber-300 shrink-0">
             <TrendingUp className="w-4 h-4" />
           </div>
         </div>
 
         {/* 已获 Offer */}
-        <div className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
+        <div data-tone="mint" className="career-metric p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between">
           <div>
             <p className="text-xs text-zinc-300 font-medium">已获 Offer</p>
             <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
-              <h3 className="text-xl sm:text-2xl font-bold font-mono text-emerald-400">{offerCount}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-emerald-300">{offerCount}</h3>
               <span className="text-xs text-zinc-400">家</span>
             </div>
             <p className="text-xs text-zinc-400 mt-1 sm:mt-1.5">
               录用率 {appliedCount > 0 ? Math.round((offerCount / appliedCount) * 100) : 0}% · 终止 {rejectedCount}家
             </p>
           </div>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+          <div className="p-2 rounded-xl bg-emerald-300/10 text-emerald-300 shrink-0">
             <Award className="w-4 h-4" />
           </div>
         </div>
 
         {/* 技术一面转化率 (点击弹窗查看各阶段详情) */}
         <div
+          data-tone="violet"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setIsConversionModalOpen(true) } }}
           onClick={() => setIsConversionModalOpen(true)}
-          className="p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between cursor-pointer hover:border-indigo-500/40 hover:bg-white/[0.04] transition-all group relative overflow-hidden"
+          className="career-metric p-3.5 sm:p-4 rounded-2xl linear-card flex items-center justify-between cursor-pointer transition-all group relative overflow-hidden"
           title="点击弹窗查看一面、二面、三面、终面各阶段转化率与企业清单"
         >
           <div>
             <div className="flex items-center gap-1.5">
               <p className="text-xs text-zinc-300 font-medium">技术一面转化率</p>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-semibold flex items-center gap-1">
+              <span className="shrink-0 whitespace-nowrap text-[10px] px-1.5 py-0.5 rounded bg-violet-300/15 text-violet-300 font-semibold flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 明细
               </span>
             </div>
             <div className="flex items-baseline gap-1 mt-1 sm:mt-1.5">
-              <h3 className="text-xl sm:text-2xl font-bold font-mono text-indigo-400">{rate1}%</h3>
+              <h3 className="text-xl sm:text-2xl font-bold font-mono text-violet-300">{rate1}%</h3>
               <span className="text-xs text-zinc-400">({round1Jobs.length}家)</span>
             </div>
-            <p className="text-xs text-indigo-300 mt-1 sm:mt-1.5 flex items-center gap-1 group-hover:text-indigo-200 transition-colors">
+            <p className="text-xs text-violet-300 mt-1 sm:mt-1.5 flex items-center gap-1 group-hover:text-indigo-200 transition-colors">
               <span>点击查看各阶段漏斗 ↗</span>
             </p>
           </div>
-          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
+          <div className="p-2 rounded-xl bg-violet-300/10 text-violet-300 shrink-0 group-hover:scale-[1.03] transition-transform">
             <TrendingUp className="w-4 h-4" />
           </div>
         </div>
@@ -243,12 +249,13 @@ export default function CareerPage() {
 
       {/* 视图切换控制 */}
       <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5">
-        <div className="flex items-center gap-1.5 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06]">
+        <div className="career-tabs flex items-center gap-1.5 p-1 rounded-xl border">
           <button
             onClick={() => setViewMode('kanban')}
+            aria-pressed={viewMode === 'kanban'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               viewMode === 'kanban'
-                ? 'bg-white/[0.08] text-white shadow-sm font-semibold'
+                ? 'career-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -257,9 +264,10 @@ export default function CareerPage() {
           </button>
           <button
             onClick={() => setViewMode('table')}
+            aria-pressed={viewMode === 'table'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               viewMode === 'table'
-                ? 'bg-white/[0.08] text-white shadow-sm font-semibold'
+                ? 'career-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
