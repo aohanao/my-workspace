@@ -31,6 +31,7 @@ import {
 import { StorageService } from '@/lib/storage'
 import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey } from '@/lib/utils'
+import '@/styles/workspace-theme.css'
 
 export default function ResearchPage() {
   const [activeTab, setActiveTab] = useState<'thesis' | 'models' | 'projects' | 'milestones'>('thesis')
@@ -303,12 +304,13 @@ export default function ResearchPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="workspace-theme space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部导航与 Tab */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
-        <div>
+      <div className="workspace-hero flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 sm:gap-4">
+        <div className="min-w-0">
+          <p className="workspace-eyebrow">ACADEMIC WORKSPACE / RESEARCH</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
+            <div className="workspace-hero-icon p-2 sm:p-2.5 rounded-2xl border">
               <GraduationCap className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span>硕士毕业管理</span>
@@ -319,12 +321,13 @@ export default function ResearchPage() {
         </div>
 
         {/* 4 大子版块切换 Tab */}
-        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/[0.08] overflow-x-auto max-w-full">
+        <div className="workspace-tabs flex items-center gap-1 p-1 rounded-full border overflow-x-auto max-w-full shrink-0">
           <button
             onClick={() => setActiveTab('thesis')}
+            aria-pressed={activeTab === 'thesis'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'thesis'
-                ? 'bg-white text-black font-semibold shadow-md'
+                ? 'workspace-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -333,9 +336,10 @@ export default function ResearchPage() {
           </button>
           <button
             onClick={() => setActiveTab('models')}
+            aria-pressed={activeTab === 'models'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'models'
-                ? 'bg-white text-black font-semibold shadow-md'
+                ? 'workspace-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -344,9 +348,10 @@ export default function ResearchPage() {
           </button>
           <button
             onClick={() => setActiveTab('projects')}
+            aria-pressed={activeTab === 'projects'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'projects'
-                ? 'bg-white text-black font-semibold shadow-md'
+                ? 'workspace-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -355,9 +360,10 @@ export default function ResearchPage() {
           </button>
           <button
             onClick={() => setActiveTab('milestones')}
+            aria-pressed={activeTab === 'milestones'}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
               activeTab === 'milestones'
-                ? 'bg-white text-black font-semibold shadow-md'
+                ? 'workspace-tab-active font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -371,7 +377,7 @@ export default function ResearchPage() {
       {activeTab === 'thesis' && (
         <div className="space-y-4 sm:space-y-6">
           {/* 论文总体进展卡片 */}
-          <div className="p-5 sm:p-6 rounded-2xl linear-card">
+          <div className="workspace-feature p-4 sm:p-6 rounded-2xl linear-card">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
                 <span className="text-xs font-medium text-zinc-300 bg-white/[0.06] px-3 py-1 rounded-full border border-white/[0.1] inline-block">
@@ -391,7 +397,7 @@ export default function ResearchPage() {
                     setIsEditingOutline(false)
                     setIsOutlineOpen(true)
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 text-xs font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-300/10 hover:bg-cyan-300/20 border border-cyan-300/30 text-cyan-200 text-xs font-medium transition-colors"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   查看论文大纲
@@ -400,7 +406,7 @@ export default function ResearchPage() {
                   <button
                     type="button"
                     onClick={() => handleOpenThesisDatesModal('blindReview')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-300/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
                     title="点击直接修改初稿完成送审日期"
                   >
                     <span className="text-zinc-400">初稿完成送审:</span>
@@ -409,7 +415,7 @@ export default function ResearchPage() {
                   <button
                     type="button"
                     onClick={() => handleOpenThesisDatesModal('defense')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-300/40 text-zinc-300 hover:text-white transition-all cursor-pointer text-xs shadow-sm"
                     title="点击直接修改正式答辩节点日期"
                   >
                     <span className="text-zinc-400">正式答辩节点:</span>
@@ -428,7 +434,7 @@ export default function ResearchPage() {
                     <p className="text-xs text-zinc-500 mt-1">实际已写 {totalCurrentWords.toLocaleString()} 字</p>
                   )}
                 </div>
-                <div className="w-14 h-14 rounded-full bg-white/[0.06] border-2 border-white/80 flex items-center justify-center font-bold font-mono text-sm text-white shadow-lg">
+                <div className="w-14 h-14 rounded-full bg-cyan-200/[0.05] border-2 border-cyan-200/30 flex items-center justify-center font-bold font-mono text-sm text-cyan-200 shadow-sm">
                   {overallProgress}%
                 </div>
               </div>
@@ -437,22 +443,22 @@ export default function ResearchPage() {
             {/* 总体进度条 */}
             <div className="w-full bg-black/40 rounded-full h-1.5 mt-5 overflow-hidden border border-white/[0.08]">
               <div
-                className="h-full bg-white rounded-full transition-all duration-500"
+                className="workspace-progress h-full rounded-full transition-all duration-500"
                 style={{ width: `${overallProgress}%` }}
               />
             </div>
           </div>
 
           {isOutlineOpen && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
-              <div role="dialog" aria-modal="true" aria-label="论文大纲" className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+              <div role="dialog" aria-modal="true" aria-label="论文大纲" className="workspace-dialog bg-[#0e121e] border border-cyan-300/30 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between gap-3 p-4 sm:p-5 border-b border-white/[0.08]">
                   <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-cyan-400" />论文大纲
+                    <FileText className="w-5 h-5 text-cyan-300" />论文大纲
                   </h3>
                   <div className="flex items-center gap-2">
                     {!isEditingOutline && (
-                      <button type="button" onClick={() => setIsEditingOutline(true)} className="px-3 py-1.5 rounded-lg text-xs text-cyan-200 hover:bg-cyan-500/10 border border-cyan-500/20">编辑大纲</button>
+                      <button type="button" onClick={() => setIsEditingOutline(true)} className="px-3 py-1.5 rounded-lg text-xs text-cyan-200 hover:bg-cyan-300/10 border border-cyan-300/20">编辑大纲</button>
                     )}
                     <button type="button" aria-label="关闭论文大纲" onClick={() => setIsOutlineOpen(false)} className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08]"><X className="w-4 h-4" /></button>
                   </div>
@@ -463,7 +469,7 @@ export default function ResearchPage() {
                       aria-label="编辑论文大纲"
                       value={outlineDraft}
                       onChange={(e) => setOutlineDraft(e.target.value)}
-                      className="w-full min-h-[60vh] p-4 rounded-xl bg-black/40 border border-white/[0.1] text-zinc-100 text-sm leading-7 focus:outline-none focus:border-cyan-500 resize-y"
+                      className="w-full min-h-[60vh] p-4 rounded-xl bg-black/40 border border-white/[0.1] text-zinc-100 text-sm leading-7 focus:outline-none focus:border-cyan-300 resize-y"
                     />
                   ) : (
                     <div className="space-y-1 text-sm leading-7">
@@ -499,7 +505,7 @@ export default function ResearchPage() {
                       className="min-w-0 flex-1 cursor-pointer group/title"
                       title="点击直接编辑章节详情"
                     >
-                      <span className="text-xs font-mono text-cyan-400/80">
+                      <span className="text-xs font-mono text-cyan-300/80">
                         SECTION 0{idx + 1}
                       </span>
                       <h4 className="font-semibold text-sm sm:text-base text-white mt-0.5 leading-tight group-hover/title:text-cyan-300 transition-colors">
@@ -513,11 +519,11 @@ export default function ResearchPage() {
                         onChange={(e) => handleUpdateChapter(ch.id, { status: e.target.value as any })}
                         className="text-xs font-medium bg-black/40 px-2.5 py-1 rounded-lg border border-white/[0.1] text-white focus:outline-none shrink-0"
                       >
-                        <option value="not_started" className="bg-[#10131d]">未开始 (0%)</option>
-                        <option value="in_progress" className="bg-[#10131d]">撰写中</option>
-                        <option value="drafted" className="bg-[#10131d]">初稿成型</option>
-                        <option value="revised" className="bg-[#10131d]">导师批改后修改</option>
-                        <option value="completed" className="bg-[#10131d]">已定稿</option>
+                        <option value="not_started" className="bg-[#101824]">未开始 (0%)</option>
+                        <option value="in_progress" className="bg-[#101824]">撰写中</option>
+                        <option value="drafted" className="bg-[#101824]">初稿成型</option>
+                        <option value="revised" className="bg-[#101824]">导师批改后修改</option>
+                        <option value="completed" className="bg-[#101824]">已定稿</option>
                       </select>
                     </div>
                   </div>
@@ -530,17 +536,17 @@ export default function ResearchPage() {
                         type="number"
                         value={ch.currentWords}
                         onChange={(e) => handleUpdateChapter(ch.id, { currentWords: Number(e.target.value) || 0 })}
-                        className="w-20 px-2 py-1 bg-black/50 rounded-lg border border-white/[0.1] text-xs sm:text-sm font-mono font-semibold text-white focus:outline-none focus:border-cyan-500"
+                        className="w-20 px-2 py-1 bg-black/50 rounded-lg border border-white/[0.1] text-xs sm:text-sm font-mono font-semibold text-white focus:outline-none focus:border-cyan-300"
                       />
                       <span className="text-zinc-500 text-xs">/ {ch.targetWords} 字</span>
                     </div>
-                    <span className="font-mono font-bold text-cyan-400 text-xs sm:text-sm">{chProgress}%</span>
+                    <span className="font-mono font-bold text-cyan-300 text-xs sm:text-sm">{chProgress}%</span>
                   </div>
 
                   {/* 进度条 */}
                   <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden border border-white/[0.06]">
                     <div
-                      className="h-full bg-cyan-500 rounded-full transition-all duration-300"
+                      className="workspace-progress h-full rounded-full transition-all duration-300"
                       style={{ width: `${chProgress}%` }}
                     />
                   </div>
@@ -557,10 +563,10 @@ export default function ResearchPage() {
 
           {/* 章节编辑模态弹窗 */}
           {editingChapter && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="编辑章节信息" className="workspace-dialog bg-[#0e121e] border border-cyan-300/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-cyan-400" />
+                  <Edit3 className="w-4 h-4 text-cyan-300" />
                   编辑章节信息
                 </h3>
                 <form onSubmit={handleSaveChapterModal} className="space-y-3.5 text-xs sm:text-sm">
@@ -571,7 +577,7 @@ export default function ResearchPage() {
                       required
                       value={editingChapter.title}
                       onChange={(e) => setEditingChapter({ ...editingChapter, title: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                     />
                   </div>
 
@@ -643,11 +649,11 @@ export default function ResearchPage() {
 
           {/* 修改论文及毕业关键时间节点模态框 */}
           {isEditingThesisDates && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="修改毕业与论文时间节点" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0e121e] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <h3 className="font-bold text-base text-white flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4 text-cyan-400" />
+                    <CalendarDays className="w-4 h-4 text-cyan-300" />
                     <span>修改毕业与论文时间节点</span>
                   </h3>
                   <button
@@ -669,7 +675,7 @@ export default function ResearchPage() {
                       required
                       value={thesisDatesForm.title}
                       onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, title: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500 text-xs sm:text-sm"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300 text-xs sm:text-sm"
                       placeholder="请输入硕士学位论文题目"
                     />
                   </div>
@@ -680,7 +686,7 @@ export default function ResearchPage() {
                         初稿完成送审目标日期：
                       </label>
                       {thesisDatesForm.blindReviewDate && (
-                        <span className="text-[11px] font-mono text-cyan-400">
+                        <span className="text-[11px] font-mono text-cyan-300">
                           {getDaysLeft(thesisDatesForm.blindReviewDate).isOverdue
                             ? '已截止'
                             : `倒计 ${getDaysLeft(thesisDatesForm.blindReviewDate).days} 天`}
@@ -693,7 +699,7 @@ export default function ResearchPage() {
                       required
                       value={thesisDatesForm.blindReviewDate}
                       onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, blindReviewDate: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-300"
                     />
                     <p className="text-[11px] text-zinc-500 mt-1">
                       对应研究生院初稿定稿、查重及预审/双盲送审关键节点
@@ -706,7 +712,7 @@ export default function ResearchPage() {
                         正式答辩目标节点日期：
                       </label>
                       {thesisDatesForm.defenseDate && (
-                        <span className="text-[11px] font-mono text-emerald-400">
+                        <span className="text-[11px] font-mono text-emerald-300">
                           {getDaysLeft(thesisDatesForm.defenseDate).isOverdue
                             ? '已截止'
                             : `倒计 ${getDaysLeft(thesisDatesForm.defenseDate).days} 天`}
@@ -719,7 +725,7 @@ export default function ResearchPage() {
                       required
                       value={thesisDatesForm.defenseDate}
                       onChange={(e) => setThesisDatesForm({ ...thesisDatesForm, defenseDate: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white font-mono focus:outline-none focus:border-cyan-300"
                     />
                     <p className="text-[11px] text-zinc-500 mt-1">
                       对应西南交通大学硕士研究生终审与公开答辩节点
@@ -755,7 +761,7 @@ export default function ResearchPage() {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <Network className="w-4 h-4 text-cyan-400" />
+                <Network className="w-4 h-4 text-cyan-300" />
                 硕士课题算法与模型训练计划
               </h3>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
@@ -777,8 +783,8 @@ export default function ResearchPage() {
               <div key={exp.id} className="p-5 sm:p-6 rounded-2xl linear-card space-y-4 border border-white/[0.08]">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
-                    <span className="text-xs font-medium px-3 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1] uppercase">
+                    <span data-state={exp.status} className="workspace-state-dot w-2 h-2 rounded-full" />
+                    <span data-state={exp.status} className="workspace-state-badge text-xs font-medium px-3 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono border border-white/[0.1] uppercase">
                       {{ not_started: '规划启动阶段', training: '训练中', completed: '已完成', failed: '失败', aborted: '已中止' }[exp.status]}
                     </span>
                     <span className="text-xs text-zinc-500 font-mono">登记日期: {exp.date}</span>
@@ -788,7 +794,7 @@ export default function ResearchPage() {
                     <button onClick={() => setEditingExp({ ...exp })} className="flex items-center gap-1 px-2 py-1 text-xs text-cyan-300 hover:text-white"><Edit3 className="w-3.5 h-3.5" />编辑</button>
                     <button
                       onClick={() => handleDeleteExp(exp.id)}
-                      className="p-1 text-zinc-500 hover:text-rose-400 rounded-lg transition-colors"
+                      className="p-1 text-zinc-500 hover:text-rose-300 rounded-lg transition-colors"
                       title="删除记录"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -837,10 +843,10 @@ export default function ResearchPage() {
 
           {/* 编辑算法模态弹窗 */}
           {editingExp && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="修改算法模型参数" className="workspace-dialog bg-[#0e121e] border border-cyan-300/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-cyan-400" />
+                  <Edit3 className="w-4 h-4 text-cyan-300" />
                   修改算法模型参数
                 </h3>
                 <form onSubmit={handleUpdateExistingExp} className="space-y-3.5 text-xs sm:text-sm"><label className="block text-zinc-400">训练状态<select value={editingExp.status} onChange={(e) => setEditingExp({ ...editingExp, status: e.target.value as ModelExperiment['status'] })} className="mt-1 w-full p-2.5 rounded-xl bg-black/50 border border-white/10 text-white"><option value="not_started">未开始</option><option value="training">训练中</option><option value="completed">已完成</option><option value="failed">失败</option><option value="aborted">已中止</option></select></label>
@@ -851,7 +857,7 @@ export default function ResearchPage() {
                       required
                       value={editingExp.modelName}
                       onChange={(e) => setEditingExp({ ...editingExp, modelName: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                     />
                   </div>
 
@@ -927,8 +933,8 @@ export default function ResearchPage() {
 
           {/* 新增算法弹窗 */}
           {isAddExpOpen && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="新建实验与算法模型" className="workspace-dialog bg-[#0e121e] border border-cyan-300/30 w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white">新建实验与算法模型</h3>
                 <form onSubmit={handleSaveExp} className="space-y-3 text-xs sm:text-sm">
                   <input
@@ -937,7 +943,7 @@ export default function ResearchPage() {
                     placeholder="模型名称（如：时空 Transformer 支护决策）"
                     value={newExp.modelName}
                     onChange={(e) => setNewExp({ ...newExp, modelName: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                   />
                   <input
                     type="text"
@@ -1002,7 +1008,7 @@ export default function ResearchPage() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-cyan-400" />
+                <Code2 className="w-4 h-4 text-cyan-300" />
                 全工序机械化施工智能决策与协同配置大系统
               </h3>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
@@ -1013,11 +1019,11 @@ export default function ResearchPage() {
 
           <div className="grid grid-cols-1 gap-6">
             {projects.map((proj) => (
-              <div key={proj.id} className="p-5 sm:p-7 rounded-2xl linear-card space-y-5 border border-cyan-500/20">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div key={proj.id} className="p-5 sm:p-7 rounded-2xl linear-card space-y-5 border border-cyan-300/20">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="px-2.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 text-xs font-semibold border border-cyan-500/30">
+                      <span className="px-2.5 py-0.5 rounded-md bg-cyan-300/15 text-cyan-300 text-xs font-semibold border border-cyan-300/30">
                         核心系统架构
                       </span>
                       <span className="font-mono text-xs text-zinc-500">ID: {proj.id}</span>
@@ -1025,9 +1031,9 @@ export default function ResearchPage() {
                     <h4 className="font-bold text-base sm:text-xl text-white">{proj.name}</h4>
                     <p className="text-xs sm:text-sm text-zinc-300 mt-1 leading-relaxed">{proj.description}</p>
                   </div>
-                  <div className="text-right shrink-0 space-y-2">
-                    <button onClick={() => setEditingProject({ ...proj, techStack: [...proj.techStack], tasks: proj.tasks.map((task) => ({ ...task })) })} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-cyan-500/30 text-xs text-cyan-300 hover:bg-cyan-500/10"><Edit3 className="w-4 h-4" />编辑系统与任务</button>
-                    <span className="font-mono font-bold text-base sm:text-xl text-cyan-400">{proj.progress}%</span>
+                  <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:block sm:w-auto sm:text-right shrink-0 sm:space-y-2">
+                    <button onClick={() => setEditingProject({ ...proj, techStack: [...proj.techStack], tasks: proj.tasks.map((task) => ({ ...task })) })} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-cyan-300/30 text-xs text-cyan-300 hover:bg-cyan-300/10"><Edit3 className="w-4 h-4" />编辑系统与任务</button>
+                    <span className="font-mono font-bold text-base sm:text-xl text-cyan-300">{proj.progress}%</span>
                     <p className="text-[11px] text-zinc-500">子系统协同进度</p>
                   </div>
                 </div>
@@ -1047,7 +1053,7 @@ export default function ResearchPage() {
                 {/* 进度条 */}
                 <div className="w-full bg-black/40 rounded-full h-2 overflow-hidden border border-white/[0.06]">
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-300"
+                    className="workspace-progress h-full rounded-full transition-all duration-300"
                     style={{ width: `${proj.progress}%` }}
                   />
                 </div>
@@ -1056,7 +1062,7 @@ export default function ResearchPage() {
                 <div className="space-y-3 pt-3 border-t border-white/[0.08]">
                   <div className="flex items-center justify-between">
                     <p className="text-xs sm:text-sm font-semibold text-white flex items-center gap-2">
-                      <Wrench className="w-4 h-4 text-cyan-400" />
+                      <Wrench className="w-4 h-4 text-cyan-300" />
                       子系统与板块任务清单 ({proj.tasks.filter((t) => t.done).length} / {proj.tasks.length} 已完成)
                     </p>
                   </div>
@@ -1072,7 +1078,7 @@ export default function ResearchPage() {
                           type="checkbox"
                           checked={task.done}
                           onChange={() => {}}
-                          className="rounded text-cyan-500 cursor-pointer mt-1"
+                          className="rounded text-cyan-300 cursor-pointer mt-1"
                         />
                         <span className={`flex-1 text-xs sm:text-sm leading-relaxed ${task.done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
                           {task.text}
@@ -1082,7 +1088,7 @@ export default function ResearchPage() {
                             e.stopPropagation()
                             handleDeleteProjectTask(proj.id, task.id)
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-rose-400 transition-opacity"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-rose-300 transition-opacity"
                           title="删除该任务"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1098,7 +1104,7 @@ export default function ResearchPage() {
                       value={newProjectTaskText}
                       onChange={(e) => setNewProjectTaskText(e.target.value)}
                       placeholder="为大系统追加子模块或研发任务..."
-                      className="flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500"
+                      className="flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
                     />
                     <button
                       onClick={() => handleAddTaskToProject(proj.id)}
@@ -1113,8 +1119,8 @@ export default function ResearchPage() {
           </div>
 
           {editingProject && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div role="dialog" aria-modal="true" aria-labelledby="project-editor-title" className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-labelledby="project-editor-title" className="workspace-dialog bg-[#0e121e] border border-cyan-300/30 w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-2xl shadow-2xl p-6">
                 <h3 id="project-editor-title" className="font-bold text-white mb-4">编辑大系统与模块任务</h3>
                 <form onSubmit={handleSaveProject} className="space-y-4 text-sm">
                   <label className="block text-zinc-400">系统名称
@@ -1132,10 +1138,10 @@ export default function ResearchPage() {
                       <div key={task.id} className="flex items-start gap-2">
                         <input type="checkbox" aria-label={'任务 ' + (index + 1) + ' 已完成'} checked={task.done} onChange={(e) => setEditingProject({ ...editingProject, tasks: editingProject.tasks.map((item) => item.id === task.id ? { ...item, done: e.target.checked } : item) })} className="mt-3" />
                         <textarea required aria-label={'模块任务 ' + (index + 1)} rows={3} value={task.text} onChange={(e) => setEditingProject({ ...editingProject, tasks: editingProject.tasks.map((item) => item.id === task.id ? { ...item, text: e.target.value } : item) })} className="flex-1 min-w-0 p-2.5 rounded-xl bg-black/50 border border-white/10 text-white" />
-                        <button type="button" aria-label={'删除任务 ' + (index + 1)} onClick={() => setEditingProject({ ...editingProject, tasks: editingProject.tasks.filter((item) => item.id !== task.id) })} className="p-2 text-zinc-400 hover:text-rose-400"><Trash2 className="w-4 h-4" /></button>
+                        <button type="button" aria-label={'删除任务 ' + (index + 1)} onClick={() => setEditingProject({ ...editingProject, tasks: editingProject.tasks.filter((item) => item.id !== task.id) })} className="p-2 text-zinc-400 hover:text-rose-300"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     ))}
-                    <button type="button" onClick={() => setEditingProject({ ...editingProject, tasks: [...editingProject.tasks, { id: 't-' + crypto.randomUUID(), text: '', done: false }] })} className="text-cyan-300 px-3 py-2 rounded-xl border border-cyan-500/30">+ 添加模块任务</button>
+                    <button type="button" onClick={() => setEditingProject({ ...editingProject, tasks: [...editingProject.tasks, { id: 't-' + crypto.randomUUID(), text: '', done: false }] })} className="text-cyan-300 px-3 py-2 rounded-xl border border-cyan-300/30">+ 添加模块任务</button>
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <button type="button" onClick={() => setEditingProject(null)} className="px-4 py-2 text-zinc-400 hover:text-white">取消</button>
@@ -1151,11 +1157,11 @@ export default function ResearchPage() {
       {/* ===================== 板块 4: 毕业关键节点 (中期在12月份且未完成) ===================== */}
       {activeTab === 'milestones' && (
         <div className="space-y-4 sm:space-y-6">
-          <div className="p-5 sm:p-7 rounded-2xl linear-card space-y-6 border border-cyan-500/20">
+          <div className="p-5 sm:p-7 rounded-2xl linear-card space-y-6 border border-cyan-300/20">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
-                  <CalendarDays className="w-5 h-5 text-cyan-400" />
+                  <CalendarDays className="w-5 h-5 text-cyan-300" />
                   西南交通大学 硕士毕业全周期里程碑时间轴
                 </h3>
                 <p className="text-xs sm:text-sm text-zinc-400 mt-1">
@@ -1183,20 +1189,20 @@ export default function ResearchPage() {
                       className={`absolute -left-[15px] top-0 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-110 shadow-sm ${
                         ms.completed
                           ? 'bg-emerald-500 text-white'
-                          : 'bg-[#0a0e19] border-2 border-cyan-500 text-cyan-400'
+                          : 'bg-[#0a0e19] border-2 border-cyan-300 text-cyan-300'
                       }`}
                     >
                       {ms.completed ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                     </div>
 
-                    <div className="p-4 sm:p-5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 group hover:border-cyan-500/30 transition-colors">
+                    <div className="p-4 sm:p-5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 group hover:border-cyan-300/30 transition-colors">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div
                           onClick={() => setEditingMilestone(ms)}
                           className="flex items-center gap-2.5 cursor-pointer group/title"
                           title="点击直接修改里程碑节点"
                         >
-                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-cyan-300/10 text-cyan-300 border border-cyan-300/25">
                             {ms.category}
                           </span>
                           <h4 className={`font-bold text-sm sm:text-base group-hover/title:text-cyan-300 transition-colors ${ms.completed ? 'line-through text-zinc-500' : 'text-white'}`}>
@@ -1207,14 +1213,14 @@ export default function ResearchPage() {
                         <div className="flex items-center gap-3">
                           <span
                             onClick={() => setEditingMilestone(ms)}
-                            className="text-xs sm:text-sm font-mono text-cyan-400 font-bold cursor-pointer hover:underline"
+                            className="text-xs sm:text-sm font-mono text-cyan-300 font-bold cursor-pointer hover:underline"
                             title="点击直接修改目标日期"
                           >
                             {ms.targetDate}
                           </span>
                           <button
                             onClick={() => handleDeleteMilestone(ms.id)}
-                            className="p-1 text-zinc-500 hover:text-rose-400 rounded transition-colors"
+                            className="p-1 text-zinc-500 hover:text-rose-300 rounded transition-colors"
                             title="删除节点"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1225,12 +1231,12 @@ export default function ResearchPage() {
                       <div className="flex items-center justify-between text-xs sm:text-sm pt-1 gap-2 flex-wrap">
                         <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">{ms.notes || '暂无备注说明'}</p>
                         {!ms.completed && (
-                          <span className="font-mono text-amber-400 font-semibold bg-amber-500/10 px-3 py-1 rounded-full text-xs border border-amber-500/20 shrink-0">
+                          <span className="font-mono text-amber-300 font-semibold bg-amber-300/10 px-3 py-1 rounded-full text-xs border border-amber-300/20 shrink-0">
                             {isOverdue ? `已逾期 ${days} 天` : `倒计时: 剩余 ${days} 天`}
                           </span>
                         )}
                         {ms.completed && (
-                          <span className="font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-3 py-1 rounded-full text-xs border border-emerald-500/20 shrink-0">
+                          <span className="font-mono text-emerald-300 font-semibold bg-emerald-300/10 px-3 py-1 rounded-full text-xs border border-emerald-300/20 shrink-0">
                             已考核通过
                           </span>
                         )}
@@ -1244,10 +1250,10 @@ export default function ResearchPage() {
 
           {/* 编辑里程碑弹窗 */}
           {editingMilestone && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="修改里程碑节点" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0e121e] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-cyan-400" />
+                  <Edit3 className="w-4 h-4 text-cyan-300" />
                   修改里程碑节点
                 </h3>
                 <form onSubmit={handleUpdateMilestoneModal} className="space-y-3.5 text-xs sm:text-sm">
@@ -1258,7 +1264,7 @@ export default function ResearchPage() {
                       required
                       value={editingMilestone.title}
                       onChange={(e) => setEditingMilestone({ ...editingMilestone, title: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                     />
                   </div>
 
@@ -1296,7 +1302,7 @@ export default function ResearchPage() {
                       id="completed-check"
                       checked={editingMilestone.completed}
                       onChange={(e) => setEditingMilestone({ ...editingMilestone, completed: e.target.checked })}
-                      className="rounded text-cyan-500 cursor-pointer"
+                      className="rounded text-cyan-300 cursor-pointer"
                     />
                     <label htmlFor="completed-check" className="text-zinc-300 cursor-pointer text-xs sm:text-sm">
                       标记为已考核完成
@@ -1335,8 +1341,8 @@ export default function ResearchPage() {
 
           {/* 新增里程碑弹窗 */}
           {isAddMilestoneOpen && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#0e121e] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+            <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div role="dialog" aria-modal="true" aria-label="新增毕业里程碑节点" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0e121e] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-base text-white">新增毕业里程碑节点</h3>
                 <form onSubmit={handleSaveMilestone} className="space-y-3.5 text-xs sm:text-sm">
                   <div>
@@ -1347,7 +1353,7 @@ export default function ResearchPage() {
                       placeholder="如: 学位论文中期考核答辩"
                       value={newMilestone.title}
                       onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                     />
                   </div>
 

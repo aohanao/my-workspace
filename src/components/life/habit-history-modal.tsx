@@ -45,11 +45,11 @@ export default function HabitHistoryModal({ habits, today, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-      <section role="dialog" aria-modal="true" aria-label="历史打卡日历" className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/[0.12] bg-[#0c101c] p-4 sm:p-6 shadow-2xl space-y-5">
+    <div className="workspace-modal-backdrop fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+      <section role="dialog" aria-modal="true" aria-label="历史打卡日历" className="workspace-dialog w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl border p-4 sm:p-6 space-y-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="flex items-center gap-2 text-lg sm:text-xl font-bold text-white"><CalendarDays className="w-5 h-5 text-cyan-400" />历史打卡日历</h2>
+            <h2 className="flex items-center gap-2 text-lg sm:text-xl font-bold text-white"><CalendarDays className="w-5 h-5 text-cyan-300" />历史打卡日历</h2>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">按日期查看完成情况与缺漏；已有记录从 {firstDate} 起展示。</p>
           </div>
           <button type="button" onClick={onClose} aria-label="关闭历史打卡日历" className="p-2 rounded-xl text-zinc-400 hover:bg-white/[0.08] hover:text-white"><X className="w-5 h-5" /></button>

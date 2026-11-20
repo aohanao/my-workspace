@@ -23,6 +23,7 @@ import { EnergyMoodLog, HabitItem, QuickCaptureNote, TimeBlockItem } from '@/typ
 import { StorageService } from '@/lib/storage'
 import { getLocalDateKey } from '@/lib/utils'
 import HabitHistoryModal from '@/components/life/habit-history-modal'
+import '@/styles/workspace-theme.css'
 
 export default function LifePage() {
   const [habits, setHabits] = useState<HabitItem[]>([])
@@ -323,12 +324,13 @@ export default function LifePage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="workspace-theme space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 头部标题 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
+      <div className="workspace-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
+          <p className="workspace-eyebrow">PERSONAL WORKSPACE / LIFE</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5 sm:gap-3 tracking-tight">
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.08] text-white border border-white/[0.12]">
+            <div className="workspace-hero-icon p-2 sm:p-2.5 rounded-2xl border">
               <Smile className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span>生活管理</span>
@@ -348,7 +350,7 @@ export default function LifePage() {
       </div>
 
       {/* 1. 周计划时间块结构 (Time-Blocking) —— 支持全方位自定义修改 */}
-      <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
+      <div className="workspace-feature linear-card p-4 sm:p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
           <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2.5 tracking-tight">
             <Clock className="w-5 h-5 text-zinc-300" />
@@ -361,7 +363,7 @@ export default function LifePage() {
             <div
               key={block.id}
               onClick={() => setEditingTimeBlock(block)}
-              className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3 flex flex-col justify-between group hover:border-white/20 transition-all cursor-pointer"
+              className="workspace-inset p-4 sm:p-5 rounded-2xl border space-y-3 flex flex-col justify-between group transition-all cursor-pointer"
               title="点击编辑此时段规划"
             >
               <div>
@@ -390,7 +392,7 @@ export default function LifePage() {
       </div>
 
       {/* 2. 日常任务矩阵与 7 天打卡表格 */}
-      <div className="linear-card p-6 rounded-3xl space-y-4 border border-white/[0.08]">
+      <div className="linear-card p-4 sm:p-6 rounded-3xl space-y-4 border border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 flex-wrap gap-2">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
@@ -408,7 +410,7 @@ export default function LifePage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse min-w-[700px]">
-            <thead className="bg-[#0c101b] text-zinc-300 border-b border-cyan-500/20 font-semibold">
+            <thead className="bg-[#101824] text-zinc-300 border-b border-cyan-500/20 font-semibold">
               <tr>
                 <th className="p-3.5 pl-4 w-32 text-xs sm:text-sm font-semibold text-zinc-300">分类</th>
                 <th className="p-3.5 w-60 text-xs sm:text-sm font-semibold text-zinc-300">项目清单</th>
@@ -534,42 +536,43 @@ export default function LifePage() {
       {/* 3. 状态能量与速记备忘 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* 今日精力与状态日志 */}
-        <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20">
+        <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-300/20">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2.5 tracking-tight">
-              <BatteryCharging className="w-5 h-5 text-cyan-400" />
+              <BatteryCharging className="w-5 h-5 text-cyan-300" />
               今日能量与状态自评
             </h3>
-            <span className="text-xs sm:text-sm font-mono text-cyan-400">{today}</span>
+            <span className="text-xs sm:text-sm font-mono text-cyan-300">{today}</span>
           </div>
 
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>⚡ 专注精力等级:</span>
-                <span className="font-mono font-bold text-sm text-blue-300/90">{energy} / 5</span>
+                <span className="font-mono font-bold text-sm text-cyan-300/90">{energy} / 5</span>
               </div>
               <div className="relative h-6 flex items-center group cursor-pointer px-1">
                 {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
                 <div className="w-full h-2 rounded-full bg-slate-900/90 border border-slate-700/60 relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 transition-all duration-150 relative overflow-hidden"
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-300 to-cyan-200 transition-all duration-150 relative overflow-hidden"
                     style={{ width: `${(Math.max(0, Math.min(5, energy)) / 5) * 100}%` }}
                   >
                     {energy > 0 && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent workspace-slider-sheen pointer-events-none" />
                     )}
                   </div>
                 </div>
                 {/* 发光滑块点：提高至 z-20 绝对置顶，位置精确对准 */}
                 <div
-                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.9)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
+                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.22)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
                   style={{ left: `calc(8px + ${(Math.max(0, Math.min(5, energy)) / 5)} * (100% - 16px))` }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-300" />
                 </div>
                 <input
                   type="range"
+                  aria-label="专注精力等级"
                   min="0"
                   max="5"
                   step="1"
@@ -587,29 +590,30 @@ export default function LifePage() {
             <div>
               <div className="flex justify-between mb-1.5 text-sm font-medium text-zinc-200">
                 <span>😊 心情状态指数:</span>
-                <span className="font-mono font-bold text-sm text-purple-300/90">{mood} / 5</span>
+                <span className="font-mono font-bold text-sm text-violet-300/90">{mood} / 5</span>
               </div>
               <div className="relative h-6 flex items-center group cursor-pointer px-1">
                 {/* 清晰可见的深色底槽，确保全长 100% 完整显示不缺失 */}
                 <div className="w-full h-2 rounded-full bg-slate-900/90 border border-slate-700/60 relative overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-600 via-violet-500 to-fuchsia-400 transition-all duration-150 relative overflow-hidden"
+                    className="h-full rounded-full bg-gradient-to-r from-violet-500 via-violet-300 to-fuchsia-200 transition-all duration-150 relative overflow-hidden"
                     style={{ width: `${(Math.max(0, Math.min(5, mood)) / 5) * 100}%` }}
                   >
                     {mood > 0 && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer-sweep pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent workspace-slider-sheen pointer-events-none" />
                     )}
                   </div>
                 </div>
                 {/* 发光滑块点：提高至 z-20 绝对置顶，位置精确对准 */}
                 <div
-                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.9)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
+                  className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-violet-300 shadow-[0_0_10px_rgba(196,181,253,0.22)] pointer-events-none transition-all duration-150 flex items-center justify-center z-20"
                   style={{ left: `calc(8px + ${(Math.max(0, Math.min(5, mood)) / 5)} * (100% - 16px))` }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-300" />
                 </div>
                 <input
                   type="range"
+                  aria-label="心情状态指数"
                   min="0"
                   max="5"
                   step="1"
@@ -634,18 +638,18 @@ export default function LifePage() {
                   saveWellbeing({ journal: e.target.value })
                 }}
                 placeholder="记录今日学习心得、面试感受、算法感悟..."
-                className="w-full p-3.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500 resize-none text-sm leading-relaxed"
+                className="w-full p-3.5 rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300 resize-none text-sm leading-relaxed"
               />
             </div>
           </div>
         </div>
 
         {/* 灵感速记与待办转存 */}
-        <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20 flex flex-col justify-between">
+        <div className="linear-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-300/20 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2.5 tracking-tight">
-                <ListTodo className="w-5 h-5 text-purple-400" />
+                <ListTodo className="w-5 h-5 text-violet-300" />
                 灵感速记箱 ({notes.length})
               </h3>
               <span className="text-xs text-zinc-400">可自由编辑 / 转入今日Top3</span>
@@ -658,7 +662,7 @@ export default function LifePage() {
                 value={newNoteContent}
                 onChange={(e) => setNewNoteContent(e.target.value)}
                 placeholder="快速记录一条灵感或即时备忘..."
-                className="flex-1 px-4 py-2.5 text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-500"
+                className="min-w-0 flex-1 px-4 py-2.5 text-sm rounded-xl bg-black/50 border border-white/[0.08] text-white focus:outline-none focus:border-cyan-300"
               />
               <button
                 type="submit"
@@ -672,7 +676,7 @@ export default function LifePage() {
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 text-sm group hover:border-cyan-500/30 transition-colors"
+                  className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2 text-sm group hover:border-cyan-300/30 transition-colors"
                 >
                   <p className="text-zinc-200 leading-relaxed break-words">{note.content}</p>
                   <div className="flex items-center justify-between pt-1 text-xs text-zinc-400">
@@ -680,7 +684,7 @@ export default function LifePage() {
                     <div className="flex items-center gap-2.5">
                       <button
                         onClick={() => handleConvertNoteToTask(note)}
-                        className="text-cyan-400 hover:text-cyan-300 font-medium hover:underline"
+                        className="text-cyan-300 hover:text-cyan-300 font-medium hover:underline"
                       >
                         转为今日待办 ➔
                       </button>
@@ -692,7 +696,7 @@ export default function LifePage() {
                       </button>
                       <button
                         onClick={() => handleDeleteNote(note.id)}
-                        className="text-zinc-500 hover:text-rose-400"
+                        className="text-zinc-500 hover:text-rose-300"
                       >
                         删除
                       </button>
@@ -715,12 +719,12 @@ export default function LifePage() {
 
       {/* ================= 健身部位多选记录弹窗 ================= */}
       {fitnessModalTarget && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
+        <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div role="dialog" aria-modal="true" aria-label="记录健身部位" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0c101c] border border-cyan-300/30 w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-amber-400" />
+                  <Flame className="w-4 h-4 text-amber-300" />
                   <span>记录健身部位</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
@@ -754,7 +758,7 @@ export default function LifePage() {
                       }}
                       className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-sm shadow-emerald-500/20 scale-[1.02]'
+                          ? 'bg-emerald-300/20 border-emerald-300 text-emerald-300 shadow-sm shadow-emerald-500/20 scale-[1.02]'
                           : 'bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:bg-white/[0.07] hover:border-white/20'
                       }`}
                     >
@@ -763,7 +767,7 @@ export default function LifePage() {
                         <span>{item.label}</span>
                       </span>
                       {isSelected ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-emerald-300" />
                       ) : (
                         <span className="w-3.5 h-3.5 rounded-full border border-white/20" />
                       )}
@@ -794,7 +798,7 @@ export default function LifePage() {
                     handleToggleHabit(fitnessModalTarget.habitId, fitnessModalTarget.dateStr, false)
                     setFitnessModalTarget(null)
                   }}
-                  className="text-xs text-rose-400 hover:text-rose-300 px-3 py-2 rounded-xl hover:bg-rose-500/10 transition-colors cursor-pointer"
+                  className="text-xs text-rose-300 hover:text-rose-300 px-3 py-2 rounded-xl hover:bg-rose-300/10 transition-colors cursor-pointer"
                 >
                   清除打卡
                 </button>
@@ -836,10 +840,10 @@ export default function LifePage() {
 
       {/* ================= 编辑习惯弹窗 ================= */}
       {editingHabit && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+        <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-label="修改习惯项目" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0c101c] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Flame className="w-4 h-4 text-cyan-400" />
+              <Flame className="w-4 h-4 text-cyan-300" />
               修改习惯项目
             </h3>
             <form onSubmit={handleUpdateHabit} className="space-y-3.5 text-xs sm:text-sm">
@@ -887,10 +891,10 @@ export default function LifePage() {
 
       {/* ================= 新增打卡项目弹窗 ================= */}
       {isAddHabitOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+        <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-label="新增日常打卡项目" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0c101c] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Plus className="w-4 h-4 text-cyan-400" />
+              <Plus className="w-4 h-4 text-cyan-300" />
               新增日常打卡项目
             </h3>
             <form onSubmit={handleAddHabit} className="space-y-3.5 text-xs sm:text-sm">
@@ -914,7 +918,7 @@ export default function LifePage() {
                   placeholder="如: 力扣 2 道真题 / 健身肩胸背腿"
                   value={newHabitName}
                   onChange={(e) => setNewHabitName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full p-2.5 rounded-xl bg-black/50 border border-white/[0.1] text-white focus:outline-none focus:border-cyan-300"
                 />
               </div>
 
@@ -940,10 +944,10 @@ export default function LifePage() {
 
       {/* ================= 编辑时间块弹窗 ================= */}
       {editingTimeBlock && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+        <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-label="自定义时间块与作息规划" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0c101c] border border-cyan-300/30 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-cyan-400" />
+              <Clock className="w-4 h-4 text-cyan-300" />
               自定义时间块与作息规划
             </h3>
             <form onSubmit={handleSaveTimeBlock} className="space-y-3.5 text-xs sm:text-sm">
@@ -1030,10 +1034,10 @@ export default function LifePage() {
 
       {/* ================= 编辑速记弹窗 ================= */}
       {editingNote && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0c101c] border border-cyan-500/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
+        <div className="workspace-modal-backdrop fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-label="修改速记内容" className="workspace-dialog max-h-[90dvh] overflow-y-auto bg-[#0c101c] border border-cyan-300/30 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in">
             <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <ListTodo className="w-4 h-4 text-cyan-400" />
+              <ListTodo className="w-4 h-4 text-cyan-300" />
               修改速记内容
             </h3>
             <form onSubmit={handleSaveEditNote} className="space-y-3.5 text-xs sm:text-sm">
