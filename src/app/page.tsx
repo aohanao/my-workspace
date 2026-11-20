@@ -5,7 +5,7 @@ import {
   Clock,
   Briefcase,
   GraduationCap,
-  Brain,
+  BookOpen,
   ArrowRight,
   TrendingUp,
   Layers,
@@ -638,20 +638,20 @@ export default function DashboardPage() {
                 </div>
               </Link>
 
-              {/* 力扣算法题库卡片 (Amber / Warm Gold) */}
+              {/* 知识库入口 */}
               <Link
-                href="/knowledge/review"
+                href="/knowledge"
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center shadow-sm shrink-0">
-                    <Brain className="w-4 h-4" />
+                    <BookOpen className="w-4 h-4" />
                   </div>
-                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">力扣算法题库</span>
+                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">知识库</span>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <span className="text-xs sm:text-sm font-bold font-mono text-amber-300">
-                    {leetcode.length} 道精选题
+                    进入知识库
                   </span>
                   <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:translate-x-1 transition-transform" />
                 </div>

@@ -3,7 +3,7 @@ export const DASHBOARD_MODULES = [
   { id: 'thesisCountdown', label: '论文倒计时', description: '初稿完成送审日期' },
   { id: 'tasks', label: '今日安排与核心待办', description: '今日任务、四象限与完成进度' },
   { id: 'plans', label: '周月计划', description: '本周、本月目标与历史归档' },
-  { id: 'overview', label: '全系统推进概览', description: '求职、论文与算法题库进度' },
+  { id: 'overview', label: '全系统推进概览', description: '求职、论文进度与知识库入口' },
   { id: 'reviews', label: '力扣到期复习', description: '需要复习的算法题目' },
   { id: 'interviews', label: '面试中流程', description: '正在推进的面试记录' },
   { id: 'chapters', label: '学位论文章节进展', description: '各章节字数与完成进度' },
