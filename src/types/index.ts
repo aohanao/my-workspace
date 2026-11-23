@@ -143,6 +143,8 @@ export interface PlanTask {
   periodStart: string
   createdAt: string
   carriedFromId?: string
+  plannedDate?: string
+  completedDate?: string
   researchProgressId?: string
 }
 

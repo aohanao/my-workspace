@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { CalendarDays, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CornerDownRight, ListTodo, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { StorageService } from '@/lib/storage'
 import { getCarryoverTasks, getPlanPeriod, shiftPlanPeriod } from '@/lib/plan-period'
+import { chinaDate } from '@/lib/plan-reminders'
 import { getLocalDateKey } from '@/lib/utils'
 import type { DailyTop3Item, PlanScope, PlanTask } from '@/types'
 
@@ -19,6 +20,7 @@ export function PlanWindow() {
   const [text, setText] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
+  const [editingDate, setEditingDate] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export function PlanWindow() {
               <button type="button" onClick={() => {
                 const latest = StorageService.getPlanTasks()
                 const pending = getCarryoverTasks(latest, scope, current.start)
-                StorageService.savePlanTasks([...latest, ...pending.map((task) => ({ ...task, id: crypto.randomUUID(), periodStart: current.start, carriedFromId: task.id, createdAt: new Date().toISOString() }))])
+                StorageService.savePlanTasks([...latest, ...pending.map((task) => ({ ...task, id: crypto.randomUUID(), periodStart: current.start, carriedFromId: task.id, createdAt: new Date().toISOString(), plannedDate: undefined, completedDate: undefined }))])
                 setMessage(`已顺延 ${pending.length} 项任务，原记录保留在历史归档`)
               }} className="mb-3 flex w-full items-center gap-2 rounded-xl border border-amber-200/10 bg-amber-200/5 px-3 py-2.5 text-left text-xs text-amber-200/80 hover:bg-amber-200/10"><RotateCcw className="h-3.5 w-3.5 shrink-0" />有 {carryover.length} 项往期未完成，顺延到{label}<ChevronRight className="ml-auto h-3 w-3 shrink-0" /></button>
             )}
@@ -113,10 +115,13 @@ export function PlanWindow() {
                 const addedToday = dailyTasks.some((daily) => daily.id === `plan-${task.id}-${today}`)
                 return <li key={task.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3">
                   <div className="flex items-start gap-2.5">
-                    <button type="button" aria-label={`${task.done ? '标记未完成' : '完成'}：${task.text}`} aria-pressed={task.done} onClick={() => updateTask(task.id, { done: !task.done })} className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 ${task.done ? 'border-cyan-200 bg-cyan-200 text-black' : 'border-zinc-600 hover:border-cyan-200'}`}>{task.done && <Check className="h-3 w-3" />}</button>
+                    <button type="button" aria-label={`${task.done ? '标记未完成' : '完成'}：${task.text}`} aria-pressed={task.done} onClick={() => updateTask(task.id, { done: !task.done, completedDate: task.done ? undefined : chinaDate() })} className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 ${task.done ? 'border-cyan-200 bg-cyan-200 text-black' : 'border-zinc-600 hover:border-cyan-200'}`}>{task.done && <Check className="h-3 w-3" />}</button>
                     {editingId === task.id ? (
-                      <form className="min-w-0 flex-1" onSubmit={(event) => { event.preventDefault(); if (!editingText.trim()) return; updateTask(task.id, { text: editingText.trim() }); setEditingId(null) }}>
+                      <form className="min-w-0 flex-1" onSubmit={(event) => { event.preventDefault(); if (!editingText.trim()) return; updateTask(task.id, { text: editingText.trim(), plannedDate: editingDate || undefined }); setEditingId(null) }}>
                         <input aria-label="编辑计划内容" autoFocus maxLength={300} value={editingText} onChange={(event) => setEditingText(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); setEditingId(null) } }} className="w-full rounded-lg border border-white/20 bg-black/30 px-2 py-1 text-xs outline-none focus:border-cyan-200" />
+                        <label className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-400">计划完成日（可选）
+                          <input type="date" min={period.start} max={period.end} value={editingDate} onChange={(event) => setEditingDate(event.target.value)} className="rounded-md border border-white/15 bg-black/30 px-1.5 py-1 text-zinc-200 [color-scheme:dark]" />
+                        </label>
                         <div className="mt-2 flex gap-3 text-xs"><button type="submit" disabled={!editingText.trim()} className="text-cyan-200 disabled:opacity-40">保存</button><button type="button" onClick={() => setEditingId(null)} className="text-zinc-500">取消</button></div>
                       </form>
                     ) : <p className={`min-w-0 flex-1 whitespace-pre-wrap break-words text-xs leading-5 ${task.done ? 'text-zinc-600 line-through' : 'text-zinc-200'}`}>{task.text}</p>}
@@ -124,7 +129,8 @@ export function PlanWindow() {
                   <div className="ml-6 mt-2 flex items-center gap-1">
                     {isCurrent && !task.done && <button type="button" disabled={addedToday} onClick={() => addToday(task)} className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[10px] text-zinc-400 hover:bg-white/5 hover:text-cyan-200 disabled:text-cyan-200/60"><CornerDownRight className="h-3 w-3" />{addedToday ? '已加入今日' : '加入今日'}</button>}
                     {carriedIds.has(task.id) && <span className="text-[10px] text-amber-200/60">已顺延</span>}
-                    <div className="ml-auto flex"><button type="button" aria-label={`编辑：${task.text}`} onClick={() => { setEditingId(task.id); setEditingText(task.text) }} className={iconButton}><Pencil className="h-3 w-3" /></button><button type="button" aria-label={`删除：${task.text}`} onClick={() => { StorageService.savePlanTasks(StorageService.getPlanTasks().filter((item) => item.id !== task.id)); setMessage('任务已删除') }} className={iconButton}><Trash2 className="h-3 w-3" /></button></div>
+                    {task.plannedDate && <span className="text-[10px] text-zinc-400">{task.plannedDate.slice(5)} 到期</span>}
+                    <div className="ml-auto flex"><button type="button" aria-label={`编辑：${task.text}`} onClick={() => { setEditingId(task.id); setEditingText(task.text); setEditingDate(task.plannedDate ?? '') }} className={iconButton}><Pencil className="h-3 w-3" /></button><button type="button" aria-label={`删除：${task.text}`} onClick={() => { StorageService.savePlanTasks(StorageService.getPlanTasks().filter((item) => item.id !== task.id)); setMessage('任务已删除') }} className={iconButton}><Trash2 className="h-3 w-3" /></button></div>
                   </div>
                 </li>
               })}

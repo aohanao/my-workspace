@@ -1,6 +1,7 @@
 'use client'
 
 import { getSupabase } from './supabase'
+import type { PlanReminder } from './plan-reminders'
 import type { KnowledgeChatMessage, KnowledgeChatResponse, KnowledgeGraphResponse, KnowledgeIntegrations, KnowledgeSearchRequest, KnowledgeSearchResponse } from '@/types/knowledge-integrations'
 
 async function request<T>(operation: string, body?: unknown, signal?: AbortSignal): Promise<T> {
@@ -18,6 +19,7 @@ async function request<T>(operation: string, body?: unknown, signal?: AbortSigna
 
 export const KnowledgeAPI = {
   status: (signal?: AbortSignal) => request<KnowledgeIntegrations>('status', undefined, signal),
+  planReminder: (signal?: AbortSignal) => request<{ reminder: PlanReminder | null }>('plan-reminder', undefined, signal),
   search: (query: KnowledgeSearchRequest, signal?: AbortSignal) => request<KnowledgeSearchResponse>('search', query, signal),
   graph: (query: { query?: string; limit?: number; depth?: number }, signal?: AbortSignal) => request<KnowledgeGraphResponse>('graph', query, signal),
   chat: (messages: KnowledgeChatMessage[], document_id?: string, signal?: AbortSignal) => request<KnowledgeChatResponse>('chat', { messages, document_id }, signal),

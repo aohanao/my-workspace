@@ -3,9 +3,10 @@ import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseCredentials } from '@/lib/supabase'
 import { KNOWLEDGE_TOPICS } from '@/types/knowledge'
+import { PLAN_REMINDER_KEY } from '@/lib/plan-reminders'
 import type { KnowledgeChatResponse, KnowledgeCitation, KnowledgeGraphResponse, KnowledgeIntegrations, KnowledgeSearchHit } from '@/types/knowledge-integrations'
 
-type Operation = 'status' | 'search' | 'graph' | 'chat' | 'documents' | 'document'
+type Operation = 'status' | 'search' | 'graph' | 'chat' | 'plan-reminder' | 'documents' | 'document'
 type Service = 'rag' | 'graph' | 'assistant'
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const timestamp = /^\d{4}-\d{2}-\d{2}T[\d:.]+(?:Z|[+-]\d{2}:\d{2})$/
@@ -22,7 +23,12 @@ function config(service: Service) {
 
 export function integrationStatus(): KnowledgeIntegrations {
   const configured = (service: Service) => { const value = config(service); return { configured: !!(value.url && value.key) } }
-  return { version: '1', rag: configured('rag'), graph: configured('graph'), assistant: configured('assistant') }
+  return {
+    version: '1',
+    rag: configured('rag'),
+    graph: configured('graph'),
+    assistant: { ...configured('assistant'), ...(process.env.KNOWLEDGE_ASSISTANT_MODEL?.trim() ? { directModel: true } : {}) },
+  }
 }
 
 async function authenticate(request: Request) {
@@ -82,7 +88,13 @@ async function provider(service: Service, operation: string, body: unknown): Pro
   } catch { throw new KnowledgeAPIError(503, 'INVALID_CONFIGURATION', '知识服务地址配置有误，请检查服务配置') }
   try {
     const response = await fetch(endpoint, { method: 'POST', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(service === 'assistant' ? 45_000 : 20_000), headers: { Authorization: `Bearer ${configured.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    if (!response.ok) throw new Error()
+    if (!response.ok) {
+      if (operation === 'chat/completions') {
+        if (response.status === 401 || response.status === 403) throw new KnowledgeAPIError(502, 'MODEL_ACCESS_DENIED', '模型网关拒绝访问，请检查 API 密钥和模型权限')
+        if (response.status === 429) throw new KnowledgeAPIError(502, 'MODEL_RATE_LIMIT', '模型网关触发限额，请稍后重试')
+      }
+      throw new Error()
+    }
     // 防止异常上游响应占满函数内存；不向客户端暴露上游错误或密钥。
     const reader = response.body?.getReader()
     if (!reader) throw new Error()
@@ -96,7 +108,10 @@ async function provider(service: Service, operation: string, body: unknown): Pro
       chunks.push(value)
     }
     return JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown
-  } catch { throw new KnowledgeAPIError(502, 'UPSTREAM_UNAVAILABLE', '知识服务暂时不可用，请稍后重试') }
+  } catch (error) {
+    if (error instanceof KnowledgeAPIError) throw error
+    throw new KnowledgeAPIError(502, 'UPSTREAM_UNAVAILABLE', operation === 'chat/completions' ? '模型服务暂时不可用，请稍后重试' : '知识服务暂时不可用，请稍后重试')
+  }
 }
 
 const invalidResponse = () => new KnowledgeAPIError(502, 'INVALID_RESPONSE', '知识服务返回的内容不符合接口约定')
@@ -129,6 +144,11 @@ export async function handleKnowledgeRequest(request: Request, operation: Operat
     const { client, ownerId } = await authenticate(request)
     let result: unknown
     if (operation === 'status') result = integrationStatus()
+    else if (operation === 'plan-reminder') {
+      const { data, error } = await client.from('workspace_storage').select('value').eq('key', PLAN_REMINDER_KEY).maybeSingle()
+      if (error) throw new KnowledgeAPIError(503, 'PLAN_REMINDER_UNAVAILABLE', '暂时无法读取计划提醒')
+      result = { reminder: data?.value ?? null }
+    }
     else if (operation === 'documents') {
       const params = new URL(request.url).searchParams
       const limit = integer(params.has('limit') ? Number(params.get('limit')) : undefined, 50, 100)
@@ -179,6 +199,22 @@ export async function handleKnowledgeRequest(request: Request, operation: Operat
         if (!Array.isArray(input.messages) || !input.messages.length || input.messages.length > 12) throw new KnowledgeAPIError(400, 'INVALID_INPUT', '对话消息数量无效')
         const messages = input.messages.map((value: unknown) => { const message = value as Record<string, unknown> | null; if (!message || !['user', 'assistant'].includes(String(message.role))) throw new KnowledgeAPIError(400, 'INVALID_INPUT', '对话角色无效'); return { role: message.role, content: text(message.content, '对话内容', 8000) } })
         if (messages.reduce((size, message) => size + message.content.length, 0) > 24000 || messages[messages.length - 1].role !== 'user') throw new KnowledgeAPIError(400, 'INVALID_INPUT', '对话过长或最后一条消息不是提问，请开启新对话')
+        const model = process.env.KNOWLEDGE_ASSISTANT_MODEL?.trim()
+        if (model) {
+          const response = object(await provider('assistant', 'chat/completions', {
+            model,
+            messages: [
+              { role: 'system', content: '你是个人工作台的 AI 助手。根据对话内容回答。用户使用中文时，请用中文回答。' },
+              ...messages,
+            ],
+            thinking: { type: 'disabled' },
+            max_tokens: 2048,
+          }))
+          if (!Array.isArray(response.choices) || !response.choices.length) throw invalidResponse()
+          const message = object(object(response.choices[0]).message)
+          const answer: KnowledgeChatResponse = { answer: responseText(message.content, 50000), citations: [] }
+          return Response.json(answer, { headers })
+        }
         const document_id = input.document_id
         if (document_id !== undefined) {
           if (typeof document_id !== 'string' || !uuid.test(document_id)) throw new KnowledgeAPIError(400, 'INVALID_INPUT', '文档 ID 无效')

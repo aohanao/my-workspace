@@ -2,7 +2,7 @@ export interface KnowledgeIntegrations {
   version: '1'
   rag: { configured: boolean }
   graph: { configured: boolean }
-  assistant: { configured: boolean }
+  assistant: { configured: boolean; directModel?: boolean }
 }
 
 export interface KnowledgeCitation {

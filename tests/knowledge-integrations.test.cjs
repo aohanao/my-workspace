@@ -34,6 +34,7 @@ function setup({ allowed = true, valid = true, rows = [], env = {}, upstream = {
     if (name === '@supabase/supabase-js') return { createClient: () => client }
     if (name === '@/lib/supabase') return { getSupabaseCredentials: () => ({ url: 'https://qa.supabase.co', anonKey: 'public-test-key' }) }
     if (name === '@/types/knowledge') return { KNOWLEDGE_TOPICS: ['未分类', '论文研究', '技术学习', '求职面试', '生活随记'] }
+    if (name === '@/lib/plan-reminders') return { PLAN_REMINDER_KEY: 'workspace_assistant_plan_reminder_v1' }
     throw new Error('Unexpected dependency: ' + name)
   }
   const fetchMock = async (url, init) => {
@@ -124,6 +125,25 @@ test('checks context document access and returns a cited answer without leaking 
   const error = await failed.handle(request('search', { query: 'x' }), 'search')
   assert.equal(error.status, 502)
   assert(!(await error.text()).includes('Sensitive upstream'))
+})
+
+test('sends only the conversation to the direct model and keeps the API key on the server', async () => {
+  const env = { ...chat, KNOWLEDGE_ASSISTANT_MODEL: 'deepseek-v4-flash' }
+  const api = setup({ env, upstream: { choices: [{ message: { content: '可以开始了' } }] } })
+  const messages = [{ role: 'user', content: '你好' }]
+  assert.equal((await api.handle(request('chat', { messages }, { token: false }), 'chat')).status, 401)
+  const response = await api.handle(request('chat', { messages, document_id: id, owner_id: owner }), 'chat')
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), { answer: '可以开始了', citations: [] })
+  assert.equal(api.calls.length, 1)
+  const [upstream] = api.calls
+  assert.equal(upstream.url, 'https://chat.example/v1/chat/completions')
+  assert.equal(upstream.headers.Authorization, 'Bearer chat-test-key')
+  assert.equal(upstream.body.model, 'deepseek-v4-flash')
+  assert.deepEqual(upstream.body.messages.slice(1), messages)
+  assert.equal(upstream.body.document_id, undefined)
+  assert.equal(upstream.body.owner_id, undefined)
+  assert(!JSON.stringify(upstream).includes('browser-private-token'))
 })
 
 test('exports summary-only cursored manifests and soft-delete tombstones', async () => {
