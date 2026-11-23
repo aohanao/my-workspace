@@ -82,6 +82,7 @@ export interface ModelExperiment {
   metrics: string // e.g. "待运行"
   status: 'not_started' | 'training' | 'completed' | 'failed' | 'aborted'
   date: string
+  plannedDate?: string
   notes?: string
 }
 

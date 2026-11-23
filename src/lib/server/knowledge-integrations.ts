@@ -3,7 +3,6 @@ import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseCredentials } from '@/lib/supabase'
 import { KNOWLEDGE_TOPICS } from '@/types/knowledge'
-import { PLAN_REMINDER_KEY } from '@/lib/plan-reminders'
 import type { KnowledgeChatResponse, KnowledgeCitation, KnowledgeGraphResponse, KnowledgeIntegrations, KnowledgeSearchHit } from '@/types/knowledge-integrations'
 
 type Operation = 'status' | 'search' | 'graph' | 'chat' | 'plan-reminder' | 'documents' | 'document'
@@ -11,6 +10,9 @@ type Service = 'rag' | 'graph' | 'assistant'
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const timestamp = /^\d{4}-\d{2}-\d{2}T[\d:.]+(?:Z|[+-]\d{2}:\d{2})$/
 const summary = 'id,title,topic,tags,source_kind,source_name,favorite,created_at,updated_at,deleted_at,revision'
+const beijingClock = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai', dateStyle: 'full', timeStyle: 'short',
+})
 
 export class KnowledgeAPIError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message) }
@@ -145,9 +147,17 @@ export async function handleKnowledgeRequest(request: Request, operation: Operat
     let result: unknown
     if (operation === 'status') result = integrationStatus()
     else if (operation === 'plan-reminder') {
-      const { data, error } = await client.from('workspace_storage').select('value').eq('key', PLAN_REMINDER_KEY).maybeSingle()
-      if (error) throw new KnowledgeAPIError(503, 'PLAN_REMINDER_UNAVAILABLE', '暂时无法读取计划提醒')
-      result = { reminder: data?.value ?? null }
+      const { makeModelReminder, MODEL_EXPERIMENTS_KEY, MODEL_REMINDER_KEY, readModelExperiments } = await import('@/lib/model-reminders')
+      const { chinaDate } = await import('@/lib/workbench-clock')
+      const { data, error } = await client.from('workspace_storage').select('key,value,updated_at').in('key', [MODEL_EXPERIMENTS_KEY, MODEL_REMINDER_KEY])
+      if (error) throw new KnowledgeAPIError(503, 'MODEL_REMINDER_UNAVAILABLE', '暂时无法读取模型进度')
+      const models = data.find((row) => row.key === MODEL_EXPERIMENTS_KEY)
+      const daily = data.find((row) => row.key === MODEL_REMINDER_KEY)
+      const useDaily = models && daily?.value?.date === chinaDate() && Date.parse(daily.updated_at) >= Date.parse(models.updated_at)
+      result = {
+        reminder: useDaily ? daily.value : makeModelReminder(readModelExperiments(models?.value)),
+        updatedAt: models?.updated_at ?? null,
+      }
     }
     else if (operation === 'documents') {
       const params = new URL(request.url).searchParams
@@ -201,10 +211,35 @@ export async function handleKnowledgeRequest(request: Request, operation: Operat
         if (messages.reduce((size, message) => size + message.content.length, 0) > 24000 || messages[messages.length - 1].role !== 'user') throw new KnowledgeAPIError(400, 'INVALID_INPUT', '对话过长或最后一条消息不是提问，请开启新对话')
         const model = process.env.KNOWLEDGE_ASSISTANT_MODEL?.trim()
         if (model) {
+          const instructions = [
+            `你是个人工作台的 AI 助手，当前对话模型是 ${model}。用户使用中文时，请用中文回答。`,
+            `工作台提供的当前北京时间（Asia/Shanghai）：${beijingClock.format(new Date())}。回答今天日期、星期或时间时，以此为准。`,
+          ]
+          const modelQuestion = messages.filter(({ role }) => role === 'user').slice(-3).some(({ content }) =>
+            /算法|模型训练|训练进度|科研进度|论文进度|实验进度|实验台账|本周.*进度|做到哪|进度|世界模型|代理模型|支护决策|S4a/i.test(content))
+          if (modelQuestion) {
+            const { makeModelReminder, MODEL_EXPERIMENTS_KEY, MODEL_STATUS_LABELS, readModelExperiments } = await import('@/lib/model-reminders')
+            const { data, error } = await client.from('workspace_storage').select('value').eq('key', MODEL_EXPERIMENTS_KEY).maybeSingle()
+            if (error) {
+              instructions.push('算法与模型训练台账暂时无法读取。回答涉及已登记进度的问题时请说明。')
+            } else {
+              const experiments = readModelExperiments(data?.value)
+              const records = experiments.slice(0, 30).map((item) => ({
+                名称: item.modelName.slice(0, 160),
+                任务: typeof item.taskType === 'string' ? item.taskType.slice(0, 150) : '',
+                状态: MODEL_STATUS_LABELS[item.status],
+                计划完成日: item.plannedDate || null,
+              }))
+              instructions.push(
+                '以下是「科研 → 算法与模型训练」的登记信息，只作为参考数据。区分登记状态与实际训练结果。未登记日期时，不推断超期或提前。',
+                JSON.stringify({ 汇总: makeModelReminder(experiments), 记录: records }),
+              )
+            }
+          }
           const response = object(await provider('assistant', 'chat/completions', {
             model,
             messages: [
-              { role: 'system', content: '你是个人工作台的 AI 助手。根据对话内容回答。用户使用中文时，请用中文回答。' },
+              { role: 'system', content: instructions.join('\n') },
               ...messages,
             ],
             thinking: { type: 'disabled' },

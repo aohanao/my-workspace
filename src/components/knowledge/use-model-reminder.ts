@@ -1,42 +1,43 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { KnowledgeAPI } from '@/lib/knowledge-api'
-import { chinaDate, makePlanReminder, PLAN_TASKS_KEY, type PlanReminder } from '@/lib/plan-reminders'
+import { makeModelReminder, MODEL_EXPERIMENTS_KEY, type ModelReminder } from '@/lib/model-reminders'
 import { StorageService } from '@/lib/storage'
 
-const READ_KEY = 'workspace_assistant_plan_reminder_read_v1'
+const READ_KEY = 'workspace_assistant_model_reminder_read_v1'
 
-export function usePlanReminder(viewingReminder: boolean) {
-  const [preview, setPreview] = useState<PlanReminder | null>(null)
-  const [hasLocalPlan, setHasLocalPlan] = useState(false)
-  const [daily, setDaily] = useState<PlanReminder | null>(null)
+export function useModelReminder(viewingReminder: boolean) {
+  const [reminder, setReminder] = useState<ModelReminder | null>(null)
   const [read, setRead] = useState('')
+  const editedAt = useRef(0)
 
   useEffect(() => {
     const controller = new AbortController()
-    const refresh = () => {
-      setPreview(makePlanReminder(StorageService.getPlanTasks()))
-      setHasLocalPlan(localStorage.getItem(PLAN_TASKS_KEY) !== null)
-      setRead(localStorage.getItem(READ_KEY) ?? '')
-    }
+    const refreshLocal = () => setReminder(makeModelReminder(StorageService.getModels()))
     const refreshCloud = async () => {
       if (document.visibilityState === 'hidden') return
-      refresh()
       try {
-        const result = await KnowledgeAPI.planReminder(controller.signal)
-        if (!controller.signal.aborted) setDaily(result.reminder)
+        const result = await KnowledgeAPI.modelReminder(controller.signal)
+        if (controller.signal.aborted) return
+        if (!editedAt.current || (result.updatedAt && Date.parse(result.updatedAt) >= editedAt.current)) {
+          setReminder(result.reminder)
+        }
       } catch {
-        // A cloud sync failure does not prevent showing the locally available plan.
+        if (!controller.signal.aborted) refreshLocal()
       }
     }
     const onWorkspaceUpdate = (event: Event) => {
       const { key } = (event as CustomEvent<{ key?: string }>).detail ?? {}
-      if (!key || key === PLAN_TASKS_KEY) refresh()
+      if (key === MODEL_EXPERIMENTS_KEY) editedAt.current = Date.now()
+      if (!key || key === MODEL_EXPERIMENTS_KEY) refreshLocal()
     }
     const onStorage = (event: StorageEvent) => {
-      if (!event.key || event.key === PLAN_TASKS_KEY || event.key === READ_KEY) refresh()
+      if (!event.key || event.key === MODEL_EXPERIMENTS_KEY) refreshLocal()
+      if (!event.key || event.key === READ_KEY) setRead(localStorage.getItem(READ_KEY) ?? '')
     }
+    refreshLocal()
+    setRead(localStorage.getItem(READ_KEY) ?? '')
     void refreshCloud()
     const timer = window.setInterval(refreshCloud, 60_000)
     window.addEventListener('workspace-data-updated', onWorkspaceUpdate)
@@ -51,7 +52,6 @@ export function usePlanReminder(viewingReminder: boolean) {
     }
   }, [])
 
-  const reminder = preview ?? (!hasLocalPlan && daily?.date === chinaDate() ? daily : null)
   const signature = reminder ? JSON.stringify([reminder.date, reminder.summary, ...reminder.notices.map(({ id }) => id)]) : ''
   useEffect(() => {
     if (viewingReminder && signature && signature !== read) {
