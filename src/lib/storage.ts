@@ -33,6 +33,7 @@ import { getLocalDateKey } from './utils'
 import { LEGACY_MODELS, LEGACY_PROJECTS } from './legacy-research-plan'
 import { THESIS_TITLE, THESIS_CHAPTER_TITLES, THESIS_CHAPTER_NOTES, THESIS_OUTLINE } from './thesis-outline'
 import { normalizeDashboardVisibility, type DashboardVisibility } from './dashboard'
+import { parseResearchProgress, type ResearchProgress } from './research-progress'
 
 const LEGACY_CHAPTER_NOTES = [
   '明确“少人化、机械化、智能化”需求，综述隧道开挖支护机理与智能决策系统。',
@@ -49,6 +50,7 @@ export const STORAGE_KEYS = {
   MODELS: 'workspace_models_v4',
   PROJECTS: 'workspace_projects_v4',
   MILESTONES: 'workspace_milestones_v4',
+  RESEARCH_PROGRESS: 'workspace_research_progress_v1',
   LEETCODE: 'workspace_leetcode_v4',
   FLASHCARDS: 'workspace_flashcards_v4',
   TOP3: 'workspace_top3_v4',
@@ -240,6 +242,7 @@ export const StorageService = {
         { key: STORAGE_KEYS.MODELS, value: StorageService.getModels() },
         { key: STORAGE_KEYS.PROJECTS, value: StorageService.getProjects() },
         { key: STORAGE_KEYS.MILESTONES, value: StorageService.getMilestones() },
+        { key: STORAGE_KEYS.RESEARCH_PROGRESS, value: StorageService.getResearchProgress() },
         { key: STORAGE_KEYS.LEETCODE, value: StorageService.getLeetCode() },
         { key: STORAGE_KEYS.FLASHCARDS, value: StorageService.getFlashcards() },
         { key: STORAGE_KEYS.TOP3, value: StorageService.getTop3() },
@@ -373,6 +376,8 @@ export const StorageService = {
 
   getMilestones: (): MilestoneItem[] => getItem(STORAGE_KEYS.MILESTONES, INITIAL_MILESTONES),
   saveMilestones: (milestones: MilestoneItem[]) => setItem(STORAGE_KEYS.MILESTONES, milestones),
+  getResearchProgress: (): ResearchProgress | null => parseResearchProgress(getItem<unknown>(STORAGE_KEYS.RESEARCH_PROGRESS, null)),
+  saveResearchProgress: (progress: ResearchProgress) => setItem(STORAGE_KEYS.RESEARCH_PROGRESS, progress),
 
   // 刷题与复习
   getLeetCode: (): LeetCodeItem[] => getItem(STORAGE_KEYS.LEETCODE, INITIAL_LEETCODE),
@@ -484,6 +489,7 @@ export const StorageService = {
       models: StorageService.getModels(),
       projects: StorageService.getProjects(),
       milestones: StorageService.getMilestones(),
+      researchProgress: StorageService.getResearchProgress(),
       leetcode: StorageService.getLeetCode(),
       flashcards: StorageService.getFlashcards(),
       top3: StorageService.getTop3(),
@@ -502,6 +508,8 @@ export const StorageService = {
     if (data.models) StorageService.saveModels(data.models)
     if (data.projects) StorageService.saveProjects(data.projects)
     if (data.milestones) StorageService.saveMilestones(data.milestones)
+    const progress = parseResearchProgress(data.researchProgress)
+    if (progress) StorageService.saveResearchProgress(progress)
     if (data.leetcode) StorageService.saveLeetCode(data.leetcode)
     if (data.flashcards) StorageService.saveFlashcards(data.flashcards)
     if (data.top3) StorageService.saveTop3(data.top3)

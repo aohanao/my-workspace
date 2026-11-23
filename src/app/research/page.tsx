@@ -31,6 +31,7 @@ import {
 import { StorageService } from '@/lib/storage'
 import { getThesisWordProgress } from '@/lib/thesis-progress'
 import { getDaysLeft, getLocalDateKey } from '@/lib/utils'
+import { ResearchProgressPanel } from '@/components/research/progress-panel'
 import '@/styles/workspace-theme.css'
 
 export default function ResearchPage() {
@@ -372,6 +373,8 @@ export default function ResearchPage() {
           </button>
         </div>
       </div>
+
+      <ResearchProgressPanel milestones={milestones} />
 
       {/* ===================== 板块 1: 论文撰写 ===================== */}
       {activeTab === 'thesis' && (

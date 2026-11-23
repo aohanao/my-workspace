@@ -28,6 +28,7 @@ import { DashboardDisplaySettings } from '@/components/dashboard/display-setting
 import { DashboardModule, DashboardModuleLayout } from '@/components/dashboard/module-layout'
 import { DASHBOARD_MODULES, DEFAULT_DASHBOARD_VISIBILITY, type DashboardModuleId, type DashboardVisibility } from '@/lib/dashboard'
 import { getThesisWordProgress } from '@/lib/thesis-progress'
+import { getMilestoneReminders, getNextResearchItem } from '@/lib/research-progress'
 import { getDaysLeft, getLocalDateKey, WORKSPACE_DEADLINES } from '@/lib/utils'
 import {
   JobApplication,
@@ -73,6 +74,8 @@ const PRIORITY_OPTIONS: { key: TaskPriority; label: string; desc: string; badgeC
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [thesis, setThesis] = useState<ThesisInfo | null>(null)
+  const [researchNext, setResearchNext] = useState('')
+  const [researchReminders, setResearchReminders] = useState(0)
   const [dailyTasks, setDailyTasks] = useState<DailyTop3Item[]>([])
   const [leetcode, setLeetcode] = useState<LeetCodeItem[]>([])
   const [habits, setHabits] = useState<HabitItem[]>([])
@@ -110,6 +113,8 @@ export default function DashboardPage() {
   const loadData = () => {
     setJobs(StorageService.getJobs())
     setThesis(StorageService.getThesis())
+    setResearchNext(getNextResearchItem(StorageService.getResearchProgress())?.title ?? '')
+    setResearchReminders(getMilestoneReminders(StorageService.getMilestones(), getLocalDateKey()).length)
     setDailyTasks(StorageService.getTop3())
     setLeetcode(StorageService.getLeetCode())
     setHabits(StorageService.getHabits())
@@ -616,14 +621,18 @@ export default function DashboardPage() {
 
               {/* 硕士论文卡片 (Indigo + Cyan Accent) */}
               <Link
-                href="/research"
+                href="/research#research-progress"
                 className="p-3.5 rounded-2xl bg-black/40 hover:bg-white/[0.04] border border-white/[0.06] flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shadow-sm shrink-0">
                     <GraduationCap className="w-4 h-4" />
                   </div>
-                  <span className="text-xs sm:text-sm text-zinc-200 font-medium">硕士论文进度</span>
+                  <div className="min-w-0">
+                    <span className="text-xs sm:text-sm text-zinc-200 font-medium">硕士论文进度</span>
+                    {researchNext && <p className="mt-1 text-xs text-cyan-200/90">{researchNext}</p>}
+                    {researchReminders > 0 && <p className="mt-1 text-xs text-amber-200">{researchReminders} 个毕业节点需留意</p>}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <div>

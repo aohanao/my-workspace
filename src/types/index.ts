@@ -143,6 +143,7 @@ export interface PlanTask {
   periodStart: string
   createdAt: string
   carriedFromId?: string
+  researchProgressId?: string
 }
 
 export interface DailyTop3Item {
